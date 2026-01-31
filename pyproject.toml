@@ -1,7 +1,7 @@
 [project]
 name = "capstonedev"
 version = "0.1.0"
-description = "Add your description here"
+description = "Website to facilitate interations with labs for online students."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
