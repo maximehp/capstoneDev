@@ -32,13 +32,11 @@
 
         return window.VANTA.TOPOLOGY({
             el: el,
-            mouseControls: true,
-            touchControls: true,
+            mouseControls: false,
+            touchControls: false,
             gyroControls: false,
             color: colorToInt(cssVar("--vanta-color")),
             backgroundColor: colorToInt(cssVar("--vanta-bg")),
-            scale: 1.0,
-            scaleMobile: 1.0
         });
     }
 
@@ -95,6 +93,7 @@
         if (resizeTimer) {
             clearTimeout(resizeTimer);
         }
+
         resizeTimer = setTimeout(function () {
             requestAnimationFrame(function () {
                 reinitVantaAfterResize();
@@ -133,33 +132,11 @@
         }
 
         var url = new URL(link.href, window.location.href);
-
         if (!isSameOrigin(url)) {
             return false;
         }
 
         return true;
-    }
-
-    function setMainHtml(newMain) {
-        var currentMain = document.getElementById("app-content");
-        if (!currentMain) {
-            return false;
-        }
-
-        currentMain.innerHTML = newMain.innerHTML;
-        return true;
-    }
-
-    function updateTitleFromDoc(doc) {
-        if (!doc) {
-            return;
-        }
-
-        var titleEl = doc.querySelector("title");
-        if (titleEl && titleEl.textContent) {
-            document.title = titleEl.textContent;
-        }
     }
 
     function focusMain() {
@@ -174,15 +151,20 @@
         }
     }
 
-    function fetchAndSwap(path, push) {
-        if (navInProgress) {
-            return;
+    function setMainInnerHtml(html) {
+        var currentMain = document.getElementById("app-content");
+        if (!currentMain) {
+            return false;
         }
-        navInProgress = true;
 
-        fetch(path, {
+        currentMain.innerHTML = html;
+        return true;
+    }
+
+    function fetchFragment(path, intent) {
+        return fetch(path, {
             headers: {
-                "X-Requested-With": "fetch"
+                "X-Requested-With": intent
             },
             credentials: "same-origin"
         })
@@ -190,21 +172,28 @@
             if (!res.ok) {
                 throw new Error("HTTP " + res.status);
             }
-            return res.text();
-        })
-        .then(function (html) {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(html, "text/html");
+            return res.json();
+        });
+    }
 
-            var newMain = doc.querySelector("#app-content");
-            if (!newMain) {
+    function fetchAndSwap(path, push) {
+        if (navInProgress) {
+            return;
+        }
+        navInProgress = true;
+
+        fetchFragment(path, "fetch")
+        .then(function (data) {
+            if (!data || typeof data.html !== "string") {
                 window.location.href = path;
                 return;
             }
 
-            updateTitleFromDoc(doc);
+            if (typeof data.title === "string" && data.title.length > 0) {
+                document.title = data.title;
+            }
 
-            var ok = setMainHtml(newMain);
+            var ok = setMainInnerHtml(data.html);
             if (!ok) {
                 window.location.href = path;
                 return;
@@ -240,12 +229,43 @@
         fetchAndSwap(window.location.pathname + window.location.search, false);
     }
 
-    window.addEventListener("load", function () {
-        initVantaOnce();
+    function prefetchLink(link) {
+        if (!link || !link.href) {
+            return;
+        }
+
+        var url = new URL(link.href, window.location.href);
+        if (!isSameOrigin(url)) {
+            return;
+        }
+
+        fetchFragment(url.pathname + url.search, "prefetch")
+        .then(function () {
+            /* intentionally ignore result */
+        })
+        .catch(function () {
+            /* ignore */
+        });
+    }
+
+    function onMouseOver(evt) {
+        var link = evt.target.closest("a[data-nav]");
+        if (!link) {
+            return;
+        }
+
+        prefetchLink(link);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
         window.addEventListener("resize", onWindowResize);
 
         document.addEventListener("click", onDocumentClick);
         window.addEventListener("popstate", onPopState);
+
+        document.addEventListener("mouseover", onMouseOver);
+
+        initVantaOnce();
     });
 
     window.addEventListener("beforeunload", function () {

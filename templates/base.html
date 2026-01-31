@@ -7,6 +7,12 @@
 
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/themes/dark.css' %}" id="theme-stylesheet">
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js" crossorigin>
+    <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.topology.min.js" crossorigin>
+    <meta name="csrf-token" content="{{ csrf_token }}">
 </head>
 
 <body>
@@ -26,9 +32,8 @@
         {% block content %}{% endblock %}
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.180.0/three.core.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.topology.min.js"></script>
-    <script src="{% static 'js/base.js' %}"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.topology.min.js"></script>
+    <script defer src="{% static 'js/base.js' %}"></script>
 </body>
 </html>
