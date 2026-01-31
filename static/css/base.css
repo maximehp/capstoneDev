@@ -1,0 +1,112 @@
+html {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg);
+    font-family: "Open Sans", sans-serif !important;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    color: var(--text);
+}
+
+#vanta-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    z-index: -1;
+}
+
+.app-header {
+    min-height: 4.3em;
+    max-height: 4.3em;
+    background-color: var(--header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 1em;
+    padding-right: 1em;
+
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* ----------------
+   Logo
+   ---------------- */
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    border: none;
+    outline: none;
+    height: 4.3em;
+    width: auto;
+}
+
+.header-logo img {
+    display: block;
+    border: none;
+    max-height: 80%;
+    width: auto;
+}
+
+/* ----------------
+   Settings Icon
+   ---------------- */
+
+.header-settings {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    outline: none;
+    background: transparent;
+    text-decoration: none;
+}
+
+.header-settings img {
+    width: 1.6em;
+    height: 1.6em;
+    display: block;
+
+    border: none;
+    outline: none;
+}
+
+/* ----------------
+   Kill Banner Focus + Hover Artifacts
+   ---------------- */
+
+.app-header a,
+.app-header a:link,
+.app-header a:visited,
+.app-header a:hover,
+.app-header a:focus,
+.app-header a:active {
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Disable global :focus ring inherited from Banner */
+.app-header *:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Prevent Bootstrap / navbar inheritance */
+.app-header .navbar,
+.app-header .navbar-brand,
+.app-header .navbar-inverse {
+    background: transparent;
+    border: none;
+}
