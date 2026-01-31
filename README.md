@@ -56,9 +56,8 @@ py -3.12 -m venv .venv
 ```
 
 ### Install dependencies
-If the project has a `pyproject.toml`:
 ```bash
-pip install .
+pip install -r requirements.txt
 ```
 
 ### Apply database migrations
