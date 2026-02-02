@@ -1,0 +1,10 @@
+# SQLite temporary files
+*.db-journal
+*-journal
+
+# DB Browser for SQLite project files
+*.sqbpro
+
+# Optional: SQLite WAL files (just in case)
+*.db-wal
+*.db-shm
