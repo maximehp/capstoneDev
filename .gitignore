@@ -8,3 +8,5 @@
 # Optional: SQLite WAL files (just in case)
 *.db-wal
 *.db-shm
+git status
+
