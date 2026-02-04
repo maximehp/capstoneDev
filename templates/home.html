@@ -5,4 +5,9 @@
 {% block content %}
 <h2>Home</h2>
 <p>This is the home page.</p>
+
+<meta name="start-vm-url" content="{% url 'start_vm' %}">
+<button id="start-vm-btn" type="button">Start VM</button>
+
+<script src="/static/js/test.js"></script>
 {% endblock %}

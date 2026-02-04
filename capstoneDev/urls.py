@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", views.home, name="home"),
     path("settings/", views.settings, name="settings"),
+    path("api/vm/start/", views.start_vm, name="start_vm"),
 ]
