@@ -1,0 +1,135 @@
+.settings-layout {
+    height: calc(100vh - 4.3em);
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 18px;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.settings-sidebar {
+    border-radius: 16px;
+
+    border: 1px solid rgba(var(--contrast), 0.15);
+    box-shadow: 0 12px 40px rgba(var(--tertiary-color), 0.35);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    overflow: hidden;
+}
+
+.settings-nav {
+    list-style: none;
+    margin: 0;
+    padding: 14px;
+}
+
+.settings-divider {
+    height: 1px;
+    margin: 14px 6px;
+    background: rgba(var(--contrast), 0.12);
+    border-radius: 999px;
+}
+
+.settings-item {
+    position: relative;
+    padding: 12px 14px 12px 18px;
+    border-radius: 12px;
+
+    cursor: pointer;
+    user-select: none;
+
+    font-size: 18px;
+    color: rgba(var(--text), 0.90);
+
+    transition: filter 120ms ease, transform 120ms ease, background 140ms ease;
+}
+
+.settings-item + .settings-item {
+    margin-top: 10px;
+}
+
+.settings-item:hover {
+    filter: brightness(1.05);
+    background: rgba(var(--tertiary-color), 0.25);
+}
+
+.settings-item:active {
+    transform: scale(0.995);
+}
+
+/* left bar only */
+.settings-item::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    bottom: 8px;
+    width: 4px;
+    border-radius: 999px;
+    background: transparent;
+    transition: background 140ms ease;
+}
+
+.settings-item.active::before {
+    background: rgb(var(--primary-color));
+}
+
+.settings-item.active {
+    color: rgba(var(--text), 0.96);
+}
+
+.settings-item.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: none;
+    transform: none;
+}
+
+.settings-item.disabled:hover {
+    background: rgba(var(--tertiary-color), 0.12);
+}
+
+.settings-content {
+    border-radius: 16px;
+
+    border: 1px solid rgba(var(--contrast), 0.15);
+    box-shadow: 0 12px 40px rgba(var(--tertiary-color), 0.35);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    background: rgba(var(--tertiary-color), 0.10);
+    overflow: hidden;
+}
+
+.settings-panel {
+    padding: 24px 26px;
+}
+
+.settings-panel.hidden {
+    display: none;
+}
+
+.settings-panel h2 {
+    margin: 0 0 12px 0;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    color: rgba(var(--text), 0.95);
+}
+
+.settings-panel p {
+    margin: 0;
+    color: rgba(var(--text), 0.82);
+    line-height: 1.55;
+    max-width: 70ch;
+}
+
+@media (max-width: 860px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+}

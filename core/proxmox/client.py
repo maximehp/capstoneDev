@@ -25,11 +25,11 @@ class ProxmoxClient:
             url,
             headers=self._headers(),
             verify=self.tls_verify,
-            timeout=60,
+            timeout=300,
             data={
                 "newid": str(new_vmid),
                 "name": name,
-                "full": "1",
+                "full": "0",
             },
         )
         resp.raise_for_status()

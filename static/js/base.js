@@ -37,6 +37,7 @@
             gyroControls: false,
             color: colorToInt(cssVar("--vanta-color")),
             backgroundColor: colorToInt(cssVar("--vanta-bg")),
+            speed: 50
         });
     }
 
@@ -161,6 +162,92 @@
         return true;
     }
 
+    function setExtraHead(html) {
+        if (!html) {
+            return;
+        }
+
+        // Remove old dynamic head nodes
+        document
+            .querySelectorAll("head [data-dynamic-head]")
+            .forEach(function (el) {
+                el.remove();
+            });
+
+        // Parse fragment properly
+        var temp = document.createElement("template");
+        temp.innerHTML = html;
+
+        temp.content.querySelectorAll("*").forEach(function (node) {
+            var clone = node.cloneNode(true);
+            clone.setAttribute("data-dynamic-head", "true");
+            document.head.appendChild(clone);
+        });
+    }
+
+    function copyScriptAttributes(fromEl, toEl) {
+        Array.prototype.slice.call(fromEl.attributes).forEach(function (attr) {
+            toEl.setAttribute(attr.name, attr.value);
+        });
+    }
+
+    function loadScriptNode(scriptNode) {
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement("script");
+            copyScriptAttributes(scriptNode, s);
+
+            // Force deterministic execution order for dynamic scripts
+            s.async = false;
+
+            if (scriptNode.src) {
+                s.onload = function () {
+                    resolve();
+                };
+                s.onerror = function () {
+                    reject(new Error("Failed to load script: " + scriptNode.src));
+                };
+                document.body.appendChild(s);
+                return;
+            }
+
+            // Inline script
+            s.text = scriptNode.text || scriptNode.textContent || "";
+            document.body.appendChild(s);
+            resolve();
+        });
+    }
+
+    function setExtraScripts(html) {
+        // Remove old dynamic scripts
+        document.querySelectorAll("script[data-dynamic-script]").forEach(function (el) {
+            el.remove();
+        });
+
+        if (!html) {
+            return Promise.resolve();
+        }
+
+        var temp = document.createElement("template");
+        temp.innerHTML = html;
+
+        var scripts = Array.prototype.slice.call(temp.content.querySelectorAll("script"));
+
+        // Mark them so we can clean up on the next navigation
+        scripts.forEach(function (node) {
+            node.setAttribute("data-dynamic-script", "true");
+        });
+
+        // Load sequentially to preserve dependencies
+        var chain = Promise.resolve();
+        scripts.forEach(function (node) {
+            chain = chain.then(function () {
+                return loadScriptNode(node);
+            });
+        });
+
+        return chain;
+    }
+
     function fetchFragment(path, intent) {
         return fetch(path, {
             headers: {
@@ -193,17 +280,37 @@
                 document.title = data.title;
             }
 
+            if (typeof data.head === "string") {
+                setExtraHead(data.head);
+            }
+
             var ok = setMainInnerHtml(data.html);
             if (!ok) {
                 window.location.href = path;
                 return;
             }
 
-            if (push) {
-                history.pushState({}, "", path);
+            var scriptsHtml = "";
+            if (typeof data.scripts === "string") {
+                scriptsHtml = data.scripts;
             }
 
-            focusMain();
+            return setExtraScripts(scriptsHtml).then(function () {
+                if (push) {
+                    history.pushState({}, "", path);
+                }
+
+                focusMain();
+
+                // Optional: give pages a hook after swap
+                if (typeof window.pageInit === "function") {
+                    try {
+                        window.pageInit();
+                    } catch (e) {
+                        /* ignore */
+                    }
+                }
+            });
         })
         .catch(function () {
             window.location.href = path;

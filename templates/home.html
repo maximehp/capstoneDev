@@ -1,13 +1,20 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Capstone Home{% endblock %}
+
+{% block extra_head %}
+<meta name="start-vm-url" content="{% url 'start_vm' %}">
+{% endblock %}
 
 {% block content %}
 <h2>Home</h2>
 <p>This is the home page.</p>
 
-<meta name="start-vm-url" content="{% url 'start_vm' %}">
 <button id="start-vm-btn" type="button">Start VM</button>
 
-<script src="/static/js/test.js"></script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/test.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ChirpLabs - Login{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="auth-shell">
+        <div class="auth-card" role="region" aria-label="Login">
+            <h2 class="auth-title">ChirpLabs</h2>
+
+            <div id="login-error" class="auth-error" style="display: none;"></div>
+
+            <form id="login-form" class="auth-form">
+                {% csrf_token %}
+
+                <label class="auth-label">
+                    Username
+                    <input class="auth-input" type="text" name="username" autocomplete="off" required>
+                </label>
+
+                <label class="auth-label">
+                    Password
+                    <input class="auth-input" type="password" name="password" autocomplete="current-password" required>
+                </label>
+
+                <button type="submit" class="auth-button">Log in</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script defer src="{% static 'js/login.js' %}"></script>
+{% endblock %}

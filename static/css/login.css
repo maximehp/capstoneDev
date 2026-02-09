@@ -1,0 +1,118 @@
+.auth-shell {
+    height: calc(100vh - 4.3em);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    width: min(calc(300px + 12vw), 92vw);
+    padding: 28px 28px 24px 28px;
+    border-radius: 16px;
+
+    border: 1px solid rgba(var(--contrast), 0.15);
+    box-shadow: 0 12px 40px rgba(var(--tertiary-color), 0.35);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.auth-title {
+    margin: 0 0 16px 0;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.auth-error {
+    margin: 0 0 14px 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 90, 90, 0.40);
+    background: rgba(255, 90, 90, 0.12);
+    color: rgba(255, 210, 210, 0.95);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.auth-label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(var(--text), 0.92);
+}
+
+.auth-input {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 12px 12px 12px 12px;
+    border-radius: 12px;
+
+    background: rgba(var(--tertiary-color), 0.20);
+    border: 1px solid rgba(var(--secondary-color), 0.30);
+
+    color: rgba(var(--text), 0.92);
+    outline: none;
+
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+    position: relative;
+}
+
+/* Bottom bar */
+.auth-input {
+    background-image: linear-gradient(to right, rgba(255, 60, 60, 1), rgba(255, 60, 60, 1));
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    background-position: left bottom;
+
+    transition: border-color 140ms ease, box-shadow 140ms ease, background-size 160ms ease;
+}
+
+/* Inactive bottom bar */
+.auth-input:not(:focus) {
+    background-image: linear-gradient(to right, rgba(160, 160, 160, 1), rgba(160, 160, 160, 1));
+    background-size: 100% 2px;
+}
+
+/* Active: red expands quickly */
+.auth-input:focus {
+    border-color: rgb(var(--primary-color));
+    background-image: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--primary-color)));
+    background-size: 100% 2px;
+}
+
+.auth-button {
+    margin-top: 6px;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 12px;
+
+    background: rgb(var(--primary-color));
+    color: white;
+
+    font-weight: 700;
+    font-size: 14px;
+
+    cursor: pointer;
+    transition: transform 120ms ease, filter 120ms ease;
+}
+
+.auth-button:hover {
+    filter: brightness(1.05);
+}
+
+.auth-button:active {
+    transform: scale(0.99);
+}
+
+.auth-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}

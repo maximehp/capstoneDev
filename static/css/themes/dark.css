@@ -1,7 +1,13 @@
 :root {
     --bg: #000000;
     --text: #FFFFFF;
+    --text-alt: 0, 0, 0;
     --header-bg: #ba0c2f;
+
+    --primary-color: 186, 12, 47;
+    --secondary-color: 84, 88, 90;
+    --tertiary-color: 0, 0, 0;
+    --contrast: 255, 255, 255;
 
     --vanta-color: #ba0c2f;
     --vanta-bg: #000000;
