@@ -1,3 +1,5 @@
+import os
+
 from .client import ProxmoxClient
 
 _client = None
@@ -13,7 +15,7 @@ def _client_instance():
 def provision_default_vm(node: str, vmid: int):
     client = _client_instance()
 
-    template_vmid = 1002
+    template_vmid = int(os.environ.get("PROXMOX_TEMPLATE_VMID", "1002"))
     vm_name = f"capstone-{vmid}"
 
     upid = client.clone_from_template(

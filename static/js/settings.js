@@ -63,11 +63,79 @@
         history.replaceState({}, "", window.location.pathname + window.location.search + next);
     }
 
-    function init() {
-        var container = qs(".settings-layout");
-        if (!container) {
+    function setThemeUI(container, pref) {
+        var segmented = qs(".segmented", container);
+        var buttons = qsa(".segmented-btn[data-theme-choice]", container);
+
+        if (!segmented || buttons.length === 0) {
             return;
         }
+
+        var order = ["light", "dark", "system"];
+        var idx = order.indexOf(pref);
+        if (idx === -1) {
+            idx = 2;
+        }
+
+        segmented.style.setProperty("--seg-index", String(idx));
+
+        buttons.forEach(function (btn) {
+            var choice = btn.getAttribute("data-theme-choice");
+            var active = choice === pref;
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+    }
+
+    function bindThemeSelector(container) {
+        var segmented = qs(".segmented", container);
+        if (!segmented) {
+            return;
+        }
+
+        if (!window.CapstoneTheme || typeof window.CapstoneTheme.setPreference !== "function") {
+            return;
+        }
+
+        if (segmented.getAttribute("data-bound") === "1") {
+            setThemeUI(container, window.CapstoneTheme.getPreference());
+            return;
+        }
+        segmented.setAttribute("data-bound", "1");
+
+        setThemeUI(container, window.CapstoneTheme.getPreference());
+
+        segmented.addEventListener("click", function (evt) {
+            var btn = evt.target.closest(".segmented-btn[data-theme-choice]");
+            if (!btn) {
+                return;
+            }
+
+            var choice = btn.getAttribute("data-theme-choice") || "system";
+            window.CapstoneTheme.setPreference(choice);
+            setThemeUI(container, window.CapstoneTheme.getPreference());
+        });
+
+        if (window.matchMedia) {
+            var mq = window.matchMedia("(prefers-color-scheme: dark)");
+            var onChange = function () {
+                setThemeUI(container, window.CapstoneTheme.getPreference());
+            };
+
+            if (mq && typeof mq.addEventListener === "function") {
+                mq.addEventListener("change", onChange);
+            } else if (mq && typeof mq.addListener === "function") {
+                mq.addListener(onChange);
+            }
+        }
+    }
+
+    function initSettingsLayout(container) {
+        if (container.getAttribute("data-settings-init") === "1") {
+            bindThemeSelector(container);
+            return;
+        }
+        container.setAttribute("data-settings-init", "1");
 
         var items = qsa(".settings-item[data-section]", container);
         if (items.length === 0) {
@@ -91,26 +159,28 @@
                 return;
             }
 
-            var key = item.getAttribute("data-section");
-            apply(key);
+            apply(item.getAttribute("data-section"));
         });
 
         window.addEventListener("hashchange", function () {
             apply(readKeyFromHash());
         });
 
+        bindThemeSelector(container);
         apply(readKeyFromHash());
+    }
+
+    function init() {
+        var container = qs(".settings-layout");
+        if (!container) {
+            return;
+        }
+        initSettingsLayout(container);
     }
 
     document.addEventListener("DOMContentLoaded", init);
 
-    // If settings content is injected via fragment navigation, DOMContentLoaded will not fire.
-    // This listens for swaps by polling a lightweight condition once per animation frame until found.
-    (function initAfterSwap() {
-        if (document.querySelector(".settings-layout")) {
-            init();
-            return;
-        }
-        requestAnimationFrame(initAfterSwap);
-    })();
+    window.pageInit = function () {
+        init();
+    };
 })();

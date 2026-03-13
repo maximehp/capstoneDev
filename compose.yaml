@@ -1,0 +1,83 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: capstone
+      POSTGRES_USER: capstone
+      POSTGRES_PASSWORD: capstone
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  migrate:
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DEBUG: ${DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
+      DATABASE_URL: postgresql://capstone:capstone@db:5432/capstone
+      TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
+      PACKER_BIN: packer
+      PACKER_ISO_TOOL: xorriso
+      RUN_MIGRATIONS: "1"
+    volumes:
+      - .:/app
+      - template_jobs:/var/lib/capstone/jobs
+    command: python manage.py check
+
+  web:
+    build:
+      context: .
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    environment:
+      DEBUG: ${DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
+      DATABASE_URL: postgresql://capstone:capstone@db:5432/capstone
+      TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
+      PACKER_BIN: packer
+      PACKER_ISO_TOOL: xorriso
+      RUN_MIGRATIONS: "0"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - template_jobs:/var/lib/capstone/jobs
+    command: python manage.py runserver 0.0.0.0:8000
+
+  worker:
+    build:
+      context: .
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    environment:
+      DEBUG: ${DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
+      DATABASE_URL: postgresql://capstone:capstone@db:5432/capstone
+      TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
+      PACKER_BIN: packer
+      PACKER_ISO_TOOL: xorriso
+      RUN_MIGRATIONS: "0"
+    volumes:
+      - .:/app
+      - template_jobs:/var/lib/capstone/jobs
+    command: python manage.py run_template_build_worker
+
+volumes:
+  postgres_data:
+  template_jobs:

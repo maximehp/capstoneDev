@@ -1,0 +1,11 @@
+.git
+.gitignore
+.idea
+.venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+database/packer_templates/*
+!database/packer_templates/.gitignore

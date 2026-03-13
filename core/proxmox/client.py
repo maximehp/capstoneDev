@@ -1,5 +1,6 @@
 import os
 import time
+
 import requests
 import urllib3
 
@@ -8,7 +9,7 @@ class ProxmoxClient:
     def __init__(self):
         self.base_url = os.environ["PROXMOX_BASE_URL"].rstrip("/")
         self.api_id = os.environ["PROXMOX_TOKEN_ID"]
-        self.api_secret = os.environ["ProxMOX_TOKEN_SECRET"]
+        self.api_secret = os.environ["PROXMOX_TOKEN_SECRET"]
         self.tls_verify = os.environ.get("PROXMOX_TLS_VERIFY", "1") == "1"
 
         if not self.tls_verify:

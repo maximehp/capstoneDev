@@ -37,48 +37,6 @@ async function parseJsonOrThrow(resp) {
     return JSON.parse(text);
 }
 
-function setMainInnerHtml(html) {
-    const main = document.getElementById("app-content");
-    if (!main) {
-        return false;
-    }
-    main.innerHTML = html;
-    return true;
-}
-
-async function fetchFragment(path) {
-    const resp = await fetch(path, {
-        method: "GET",
-        credentials: "same-origin",
-        headers: {
-            "X-Requested-With": "fetch",
-        },
-    });
-
-    const data = await parseJsonOrThrow(resp);
-
-    if (!resp.ok) {
-        throw new Error(data.error || `HTTP ${resp.status}`);
-    }
-
-    return data;
-}
-
-async function navigateWithoutReload(path) {
-    const data = await fetchFragment(path);
-
-    if (typeof data.title === "string" && data.title.length > 0) {
-        document.title = data.title;
-    }
-
-    const ok = setMainInnerHtml(data.html);
-    if (!ok) {
-        throw new Error("Missing #app-content");
-    }
-
-    history.pushState({}, "", path);
-}
-
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("login-form");
     const submitBtn = document.getElementById("login-submit");
@@ -121,12 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const target = data.redirect || "/";
-
-            try {
-                await navigateWithoutReload(target);
-            } catch (e) {
-                // window.location.href = target;
-            }
+            window.location.assign(target);
         } catch (e) {
             showError(e.message);
         } finally {

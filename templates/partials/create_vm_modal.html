@@ -1,0 +1,56 @@
+{% load static %}
+
+<div id="vm-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="vm-modal-title">
+    <div class="modal-backdrop" data-close></div>
+
+    <div class="modal-shell" role="document">
+        <div class="scene-viewport">
+            <div id="scene-track" class="scene-track" data-scene="vm">
+
+                <!-- SCENE: VM -->
+                <section class="scene" aria-label="Create VM">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Create VM</h2>
+
+                        <button type="button" class="modal-close" aria-label="Close" data-close>
+                            <span class="modal-close-x">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="lane-content-viewport">
+                            <div
+                                id="vm-track"
+                                class="content-track"
+                                style="--content-index: 0; --content-count: 1;"
+                            >
+                                <section class="content-page">
+                                    <div class="step-block">
+                                        <div class="step-block-title">Template</div>
+                                    </div>
+
+                                    <button id="select-template" type="button" class="select-box" disabled>
+                                        <span class="select-box-text">Select template</span>
+                                        <span class="select-box-caret">&#9662;</span>
+                                    </button>
+
+                                    <button id="to-tc" type="button" class="btn btn-primary btn-full">
+                                        Create a template
+                                    </button>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+                        <button id="vm-next" type="button" class="btn btn-primary" disabled>Next</button>
+                    </div>
+                </section>
+
+                {% include "partials/create_template_modal.html" %}
+
+            </div>
+        </div>
+    </div>
+</div>

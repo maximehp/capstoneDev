@@ -8,5 +8,7 @@
 # Optional: SQLite WAL files (just in case)
 *.db-wal
 *.db-shm
-git status
+
 .env
+database/packer_templates/*
+!database/packer_templates/.gitignore

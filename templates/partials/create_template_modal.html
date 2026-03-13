@@ -1,0 +1,304 @@
+﻿<!-- SCENE: TEMPLATE CREATION -->
+<section class="scene" aria-label="Create template">
+    <div class="modal-header">
+        <h2 class="modal-title">Create template</h2>
+
+        <button type="button" class="modal-close" aria-label="Close" data-close>
+            <span class="modal-close-x">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div class="lane-content-viewport">
+            <div
+                id="tc-track"
+                class="content-track"
+                style="--content-index: 0; --content-count: 5;"
+                data-content-index="0"
+            >
+                <!-- TC1: OS (ISO source) -->
+                <section class="content-page" aria-label="OS">
+                    <div class="step-block">
+                        <div class="step-block-title">OS</div>
+                    </div>
+
+                    <div class="form-stack">
+                        <div class="field-row-two field-row-two-name-os">
+                            <label class="field">
+                                <span class="field-label">Template name</span>
+                                <input
+                                    id="tc-template-name"
+                                    class="field-control"
+                                    type="text"
+                                    placeholder="ex: ubuntu-24.04-base"
+                                    autocomplete="off"
+                                />
+                            </label>
+
+                            <label class="field">
+                                <span class="field-label">Build profile</span>
+                                <select id="tc-build-profile" class="field-control select-control" required aria-required="true">
+                                    <option value="" selected>Select profile</option>
+                                    <option value="ubuntu_autoinstall">Ubuntu (autoinstall)</option>
+                                    <option value="debian_preseed">Debian (preseed)</option>
+                                    <option value="windows_unattend">Windows (generated unattend)</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <label class="field">
+                            <span class="field-label">Select ISO</span>
+                            <select id="tc-iso-saved" class="field-control select-control">
+                                <option value="" selected>Select saved ISO</option>
+                            </select>
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">Add new ISO by URL</span>
+                            <div class="field-row">
+                                <input
+                                    id="tc-os-iso-url"
+                                    class="field-control"
+                                    type="url"
+                                    placeholder="https://.../ubuntu-24.04-live-server-amd64.iso"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                />
+                                <button id="tc-iso-check" type="button" class="btn btn-ghost btn-compact">
+                                    Check
+                                </button>
+                            </div>
+                        </label>
+
+                        <div id="tc-iso-status" class="hint muted" aria-live="polite"></div>
+
+                        <div id="tc-iso-details" class="details-card hidden">
+                            <div class="details-row">
+                                <div class="details-k">Filename</div>
+                                <div id="tc-iso-filename" class="details-v">-</div>
+                            </div>
+                            <div class="details-row">
+                                <div class="details-k">Size</div>
+                                <div id="tc-iso-size" class="details-v">-</div>
+                            </div>
+                            <div class="details-row">
+                                <div class="details-k">Content-Type</div>
+                                <div id="tc-iso-type" class="details-v">-</div>
+                            </div>
+                            <div class="details-row">
+                                <div class="details-k">Last-Modified</div>
+                                <div id="tc-iso-modified" class="details-v">-</div>
+                            </div>
+                        </div>
+
+                        <div id="tc-windows-options" class="form-stack hidden">
+                            <div class="field-row-two">
+                                <label class="field">
+                                    <span class="field-label">VirtIO ISO URL</span>
+                                    <input
+                                        id="tc-win-virtio-url"
+                                        class="field-control"
+                                        type="url"
+                                        placeholder="https://.../virtio-win.iso"
+                                        autocomplete="off"
+                                        spellcheck="false"
+                                    />
+                                </label>
+                            </div>
+
+                            <div class="field-row-two">
+                                <label class="field">
+                                    <span class="field-label">Windows admin username</span>
+                                    <input
+                                        id="tc-win-admin-username"
+                                        class="field-control"
+                                        type="text"
+                                        placeholder="Administrator"
+                                        autocomplete="off"
+                                    />
+                                </label>
+
+                                <label class="field">
+                                    <span class="field-label">Windows admin password</span>
+                                    <input
+                                        id="tc-win-admin-password"
+                                        class="field-control"
+                                        type="password"
+                                        placeholder="Required for Windows builds"
+                                        autocomplete="off"
+                                    />
+                                </label>
+                            </div>
+
+                            <div class="field-row-two">
+                                <label class="field">
+                                    <span class="field-label">Image selector type</span>
+                                    <select id="tc-win-image-selector-type" class="field-control select-control">
+                                        <option value="image_name" selected>Image name</option>
+                                        <option value="image_index">Image index</option>
+                                    </select>
+                                </label>
+
+                                <label class="field">
+                                    <span class="field-label">Image selector value</span>
+                                    <input
+                                        id="tc-win-image-selector-value"
+                                        class="field-control"
+                                        type="text"
+                                        placeholder="ex: Windows Server 2022 SERVERSTANDARD"
+                                        autocomplete="off"
+                                    />
+                                </label>
+                            </div>
+
+                            <label class="field">
+                                <span class="field-label">Firmware profile</span>
+                                <select id="tc-win-firmware-profile" class="field-control select-control">
+                                    <option value="bios_legacy" selected>Legacy BIOS</option>
+                                    <option value="uefi_tpm">UEFI + TPM (Windows 11)</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TC2: Software -->
+                <section class="content-page" aria-label="Software" data-step="software">
+                    <div class="step-block">
+                        <div class="step-block-title">Software to be installed</div>
+                    </div>
+
+                    <div class="form-stack software-step-stack">
+                        <label class="field">
+                            <span class="field-label">Software URL or package name</span>
+                            <div class="field-row">
+                                <input
+                                    id="tc-sw-url"
+                                    class="field-control"
+                                    type="text"
+                                    placeholder="https://.../installer-or-archive or nginx"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                />
+                                <button id="tc-sw-check" type="button" class="btn btn-ghost btn-compact">
+                                    Check
+                                </button>
+                            </div>
+                        </label>
+
+                        <div id="tc-sw-status" class="hint muted" aria-live="polite"></div>
+
+                        <div class="field software-list-field">
+                            <span class="field-label">Saved and added software</span>
+                            <div id="tc-sw-saved-box" class="saved-software-box"></div>
+                        </div>
+
+                        <div id="tc-validate-status" class="hint muted" aria-live="polite"></div>
+                    </div>
+                </section>
+
+                <!-- TC3: Hardware -->
+                <section class="content-page" aria-label="Hardware config">
+                    <div class="step-block">
+                        <div class="step-block-title">Hardware config</div>
+                    </div>
+
+                    <div class="form-stack">
+                        <label class="field">
+                            <span class="field-label">vCPU</span>
+                            <input id="tc-hw-cpu" class="field-control" type="number" min="1" max="64" value="2" />
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">Memory (GB)</span>
+                            <input id="tc-hw-ram" class="field-control" type="number" min="1" max="512" value="4" />
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">Disk size (GB)</span>
+                            <input id="tc-hw-disk" class="field-control" type="number" min="8" max="4096" value="32" />
+                        </label>
+
+                    </div>
+                </section>
+
+                <!-- TC4: Network -->
+                <section class="content-page" aria-label="Network settings">
+                    <div class="step-block">
+                        <div class="step-block-title">Network settings</div>
+                    </div>
+
+                    <div class="form-stack">
+                        <label class="field">
+                            <span class="field-label">Bridge</span>
+                            <select id="tc-net-bridge" class="field-control select-control">
+                                <option value="" selected disabled>Select bridge</option>
+                                <option value="vmbr0">vmbr0</option>
+                                <option value="vmbr1">vmbr1</option>
+                            </select>
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">VLAN (optional)</span>
+                            <input id="tc-net-vlan" class="field-control" type="number" min="1" max="4094" placeholder="ex: 20" />
+                        </label>
+
+                        <label class="field">
+                            <span class="field-label">IPv4</span>
+                            <select id="tc-net-ipv4" class="field-control select-control">
+                                <option value="dhcp" selected>DHCP-ready template</option>
+                            </select>
+                        </label>
+
+                        <div class="hint muted">
+                            Template builds stay DHCP-ready. Static IP configuration belongs to VM provisioning after cloning.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TC5: Overview -->
+                <section class="content-page" aria-label="Overview">
+                    <div class="step-block">
+                        <div class="step-block-title">Overview</div>
+                    </div>
+
+                    <div class="placeholder-card">
+                        <div class="placeholder-title">Review</div>
+                        <div class="placeholder-desc">
+                            Confirm the build inputs before creating the template.
+                        </div>
+
+                        <div id="tc-overview" class="overview-list"></div>
+                        <div id="tc-create-status" class="hint muted" aria-live="polite"></div>
+                        <div id="tc-build-status" class="details-card hidden">
+                            <div class="details-row">
+                                <div class="details-k">Build status</div>
+                                <div id="tc-build-status-text" class="details-v">queued</div>
+                            </div>
+                            <div class="details-row">
+                                <div class="details-k">Build stage</div>
+                                <div id="tc-build-stage-text" class="details-v">queued</div>
+                            </div>
+                            <div class="details-row">
+                                <div class="details-k">Last error</div>
+                                <div id="tc-build-error-text" class="details-v">-</div>
+                            </div>
+                        </div>
+                        <div class="field software-list-field">
+                            <span class="field-label">Software install results</span>
+                            <div id="tc-build-results" class="saved-software-box"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button id="tc-back" type="button" class="btn btn-ghost">Back</button>
+        <button id="tc-next" type="button" class="btn btn-primary" disabled>Next</button>
+    </div>
+</section>
+
+
+

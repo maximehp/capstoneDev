@@ -1,32 +1,30 @@
-# Use the official Python runtime image
-FROM python:3.13
+FROM python:3.12-slim
 
-# Create the app directory
-RUN mkdir /app
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Set environment variables
-# Prevents Python from writing pyc files to disk
 ENV PYTHONDONTWRITEBYTECODE=1
-#Prevents Python from buffering stdout and stderr
 ENV PYTHONUNBUFFERED=1
 
-# Upgrade pip
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates gnupg wget xorriso \
+    && wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    && . /etc/os-release \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/hashicorp.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends packer \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --upgrade pip
 
-# Copy the Django project  and install dependencies
-COPY requirements.txt  /app/
-
-# run this command to install all dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the Django project to the container
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 COPY . /app/
 
-# Expose the Django port
 EXPOSE 8000
 
-# Run Django’s development server
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

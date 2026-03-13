@@ -24,4 +24,25 @@ urlpatterns = [
     path("settings/", views.settings, name="settings"),
     path("login/", views.login_view, name="login"),
     path("api/vm/start/", views.start_vm, name="start_vm"),
+    path("api/iso/inspect", views.iso_inspect, name="iso_inspect_no_slash"),
+    path("api/iso/inspect/", views.iso_inspect, name="iso_inspect"),
+    path("api/software/inspect", views.software_inspect, name="software_inspect_no_slash"),
+    path("api/software/inspect/", views.software_inspect, name="software_inspect"),
+    path("api/iso/saved/", views.iso_saved, name="iso_saved"),
+    path("api/software/saved/", views.software_saved, name="software_saved"),
+    path(
+        "api/template/validate-software/",
+        views.validate_template_software,
+        name="validate_template_software",
+    ),
+    path(
+        "api/template/create/",
+        views.create_template_definition,
+        name="create_template_definition",
+    ),
+    path(
+        "api/template/builds/<uuid:job_uuid>/status/",
+        views.template_build_status,
+        name="template_build_status",
+    ),
 ]

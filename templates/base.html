@@ -7,8 +7,8 @@
     <title>{% block title %}Capstone{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/themes/light.css' %}" media="(prefers-color-scheme: light)">
-    <link rel="stylesheet" href="{% static 'css/themes/dark.css' %}" media="(prefers-color-scheme: dark)">
+    <link id="theme-light" rel="stylesheet" href="{% static 'css/themes/light.css' %}">
+    <link id="theme-dark" rel="stylesheet" href="{% static 'css/themes/dark.css' %}">
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
@@ -40,6 +40,7 @@
 
     <script defer src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.topology.min.js"></script>
+    <script defer src="{% static 'js/helpers/vanta.js' %}"></script>
     <script defer src="{% static 'js/base.js' %}"></script>
 
     <div id="extra-scripts">

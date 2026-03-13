@@ -1,6 +1,6 @@
 :root {
     --bg: #FFFFFF;
-    --text: #222;
+    --text: 0, 0, 0;
     --header-bg: #ba0c2f;
 
     --primary-color: 186, 12, 47;

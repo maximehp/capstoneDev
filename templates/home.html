@@ -4,17 +4,26 @@
 {% block title %}Capstone Home{% endblock %}
 
 {% block extra_head %}
-<meta name="start-vm-url" content="{% url 'start_vm' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/modals.css' %}">
 {% endblock %}
 
 {% block content %}
-<h2>Home</h2>
-<p>This is the home page.</p>
+<div class="home-grid">
+    <button id="new-vm-btn" type="button" class="tile tile-primary" aria-haspopup="dialog">
+        <div class="tile-plus">+</div>
+        <div class="tile-title">New VM</div>
+    </button>
+    <button type="button" class="tile vm-button" aria-haspopup="dialog">
+        <img class="tile-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo-ubuntu_cof-orange-hex.svg" alt="Ubuntu">
+        <div class="tile-title">Ubuntu</div>
+    </button>
+</div>
 
-<button id="start-vm-btn" type="button">Start VM</button>
-
+{% include "partials/create_vm_modal.html" %}
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'js/test.js' %}"></script>
+<script defer src="{% static 'js/home.js' %}"></script>
+<script defer src="{% static 'js/modals.js' %}"></script>
 {% endblock %}

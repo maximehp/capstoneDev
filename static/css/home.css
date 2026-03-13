@@ -1,0 +1,107 @@
+/* =========================
+   HOME GRID
+   ========================= */
+
+.home-grid {
+    height: calc(100vh - 4.3em);
+    padding: 26px;
+    box-sizing: border-box;
+
+    display: grid;
+    gap: 18px;
+
+    align-content: start;
+    justify-content: center;
+
+    --tile-size: clamp(190px, 18vw, 320px);
+
+    grid-template-columns: repeat(auto-fit, var(--tile-size));
+    grid-auto-rows: var(--tile-size);
+}
+
+@media (min-width: 520px) {
+    .home-grid {
+        grid-template-columns: repeat(2, var(--tile-size));
+    }
+}
+
+@media (min-width: 760px) {
+    .home-grid {
+        grid-template-columns: repeat(auto-fit, var(--tile-size));
+    }
+}
+
+/* =========================
+   TILE
+   ========================= */
+
+.tile {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    border-radius: 18px;
+    border: 1px solid rgba(var(--contrast), 0.15);
+    box-shadow: 0 12px 40px rgba(var(--tertiary-color), 0.30);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    background: rgba(var(--tertiary-color), 0.10);
+
+    padding: 18px 18px 16px 18px;
+    box-sizing: border-box;
+
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    row-gap: 12px;
+
+    cursor: pointer;
+    user-select: none;
+
+    transition: transform 120ms ease, filter 120ms ease, background 140ms ease;
+}
+
+.tile:hover {
+    filter: brightness(1.06);
+    background: rgba(var(--tertiary-color), 0.16);
+}
+
+.tile:active {
+    transform: scale(0.992);
+}
+
+.tile-primary {
+    border-color: rgba(var(--contrast), 0.16);
+}
+
+.tile-primary:hover {
+    border-color: rgba(var(--contrast), 0.22);
+}
+
+.tile-plus {
+    font-size: clamp(72px, 7.5vw, 110px);
+    line-height: 1;
+    font-weight: 650;
+    color: rgba(var(--text), 0.92);
+
+    display: grid;
+    place-items: center;
+
+    transform: translateY(-2px);
+}
+
+.tile-icon {
+    width: clamp(54px, 5vw, 76px);
+    height: clamp(54px, 5vw, 76px);
+    object-fit: contain;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.18));
+}
+
+.tile-title {
+    font-size: clamp(18px, 1.5vw, 22px);
+    font-weight: 750;
+    color: rgba(var(--text), 0.94);
+    letter-spacing: 0.2px;
+    text-align: center;
+}

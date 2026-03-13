@@ -1,3 +1,27 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import IsoSource, SoftwareSource, TemplateBuildJob, TemplateDefinition
+
+
+@admin.register(IsoSource)
+class IsoSourceAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "filename", "url", "last_seen_at")
+    search_fields = ("url", "filename", "label", "user__username")
+
+
+@admin.register(SoftwareSource)
+class SoftwareSourceAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "filename", "url", "last_seen_at")
+    search_fields = ("url", "filename", "label", "user__username")
+
+
+@admin.register(TemplateDefinition)
+class TemplateDefinitionAdmin(admin.ModelAdmin):
+    list_display = ("id", "template_name", "build_profile", "template_vmid", "target_os", "owner", "updated_at")
+    search_fields = ("template_name", "template_vmid", "build_profile", "owner__username")
+
+
+@admin.register(TemplateBuildJob)
+class TemplateBuildJobAdmin(admin.ModelAdmin):
+    list_display = ("id", "uuid", "template_definition", "status", "stage", "created_at")
+    search_fields = ("uuid", "template_definition__template_name", "owner__username")

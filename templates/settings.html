@@ -30,7 +30,25 @@
 
         <div class="settings-panel hidden" id="settings-appearance">
             <h2>Appearance</h2>
-            <p>Theme, contrast, and visual preferences will live here.</p>
+
+            <div class="setting-row">
+                <div class="setting-text">
+                    <div class="setting-title">Theme</div>
+                    <div class="setting-desc">Light, dark, or follow device settings. Saved on this device.</div>
+                </div>
+
+                <div class="segmented" role="group" aria-label="Theme selection">
+                    <button type="button" class="segmented-btn" data-theme-choice="light" aria-pressed="false">
+                        Light
+                    </button>
+                    <button type="button" class="segmented-btn" data-theme-choice="dark" aria-pressed="false">
+                        Dark
+                    </button>
+                    <button type="button" class="segmented-btn" data-theme-choice="system" aria-pressed="false">
+                        Device
+                    </button>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -38,5 +56,5 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <script src="{% static 'js/settings.js' %}"></script>
+    <script defer src="{% static 'js/settings.js' %}"></script>
 {% endblock %}
