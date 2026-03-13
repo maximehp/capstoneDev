@@ -22,6 +22,7 @@ Build and harden the Capstone Django app for lab VM lifecycle management with AD
 - Keep JS framework-free unless the user asks to adopt a framework.
 - Avoid breaking partial-navigation behavior (`X-Requested-With: fetch|prefetch`).
 - Prefer small, reviewable PR-sized changes.
+- After each major feature is completed, commit the new work before moving on.
 
 ## Environment Contract
 Ensure code and `.env` agree on naming. Current expected keys in code:
