@@ -1,16 +1,20 @@
 import json
 import os
+import queue
 import re
 import shlex
 import shutil
 import subprocess
+import threading
 import time
+from datetime import timedelta
 from pathlib import Path
 from typing import Callable
 from xml.sax.saxutils import escape as xml_escape
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import TemplateBuildJob, TemplateDefinition
@@ -25,6 +29,7 @@ from .packer_profiles import (
 
 _RESULT_MARKER_RE = re.compile(r"CAPSTONE_ITEM_RESULT\|([^|]+)\|([^|]+)\|([^|]+)\|(.*)")
 _STAGE_MARKER_RE = re.compile(r"CAPSTONE_STAGE\|([^|]+)")
+_SENSITIVE_KEY_RE = re.compile(r"(password|secret|token)", re.IGNORECASE)
 _FIXED_LINUX_USERNAME = "capstonebuild"
 _FIXED_LINUX_PASSWORD = "CapstoneBuild123!"
 _FIXED_LINUX_PASSWORD_HASH = "$6$rounds=4096$capstone$0ylvD6QBGzb62LF8A3BnQUwpsOSJyYwcmBHQYaWV7kngakdUSHh3D1ynjUTduVdJN9WewtG/XAIN5e8wZsMIf0"
@@ -45,6 +50,13 @@ def enqueue_template_build(template_definition: TemplateDefinition, payload_snap
         status=TemplateBuildJob.STATUS_QUEUED,
         stage=TemplateBuildJob.STAGE_QUEUED,
     )
+    workspace = _job_workspace(job.uuid)
+    paths = _ensure_job_workspace(workspace)
+    job.workspace_path = str(workspace)
+    job.log_path = str(paths["packer_log"])
+    job.save(update_fields=["workspace_path", "log_path", "updated_at"])
+    _write_job_request_manifest(job, payload_snapshot)
+    _write_job_status_manifest(job)
     template_definition.last_job = job
     template_definition.save(update_fields=["last_job", "updated_at"])
     return job
@@ -65,9 +77,21 @@ def claim_next_queued_job() -> TemplateBuildJob | None:
         job.status = TemplateBuildJob.STATUS_RUNNING
         job.stage = TemplateBuildJob.STAGE_PREFLIGHT
         job.started_at = timezone.now()
+        job.last_heartbeat_at = job.started_at
         job.error_summary = ""
         job.exit_code = None
-        job.save(update_fields=["status", "stage", "started_at", "error_summary", "exit_code", "updated_at"])
+        job.save(
+            update_fields=[
+                "status",
+                "stage",
+                "started_at",
+                "last_heartbeat_at",
+                "error_summary",
+                "exit_code",
+                "updated_at",
+            ]
+        )
+        _write_job_status_manifest(job)
         return job
 
 
@@ -96,23 +120,169 @@ def build_job_api_payload(job: TemplateBuildJob) -> dict:
             "build_profile": job.template_definition.build_profile,
         },
         "result": {
-            **result_payload,
+            "software_results": result_payload.get("software_results", []),
+            "preflight": result_payload.get("preflight", []),
+            "generated_artifacts": result_payload.get("generated_artifacts", []),
+            "machine_readable_events": result_payload.get("machine_readable_events", []),
+            "log_available": bool(result_payload.get("log_available")),
+            "archive_available": bool(result_payload.get("archive_available")),
             "build_profile": payload_snapshot.get("build_profile") or job.template_definition.build_profile,
             "firmware_profile": windows.get("firmware_profile"),
             "image_selector": image_selector,
             "guest_networking": payload_snapshot.get("guest_networking") or "dhcp",
-            "preflight": result_payload.get("preflight", []),
-            "generated_artifacts": result_payload.get("generated_artifacts", []),
         },
     }
+
+
+def _job_workspace(job_uuid) -> Path:
+    return Path(settings.TEMPLATE_BUILD_WORKDIR) / f"job-{job_uuid}"
+
+
+def _ensure_job_workspace(workspace: Path) -> dict[str, Path]:
+    generated_dir = workspace / "generated"
+    logs_dir = workspace / "logs"
+    results_dir = workspace / "results"
+    for path in [workspace, generated_dir, logs_dir, results_dir]:
+        path.mkdir(parents=True, exist_ok=True)
+    return {
+        "workspace": workspace,
+        "generated": generated_dir,
+        "logs": logs_dir,
+        "results": results_dir,
+        "request": workspace / "request.json",
+        "status": workspace / "status.json",
+        "packer_log": logs_dir / "packer.log",
+        "result": results_dir / "result.json",
+        "software_results": results_dir / "software-results.json",
+        "preflight": results_dir / "preflight.json",
+        "error_summary": results_dir / "error-summary.txt",
+    }
+
+
+def _write_json(path: Path, payload: dict | list):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _redact_value(value: str) -> str:
+    return "[REDACTED]" if value else value
+
+
+def _redact_payload(payload):
+    if isinstance(payload, dict):
+        out = {}
+        for key, value in payload.items():
+            if _SENSITIVE_KEY_RE.search(str(key)):
+                out[key] = _redact_value(str(value)) if value not in {None, ""} else value
+            else:
+                out[key] = _redact_payload(value)
+        return out
+    if isinstance(payload, list):
+        return [_redact_payload(item) for item in payload]
+    return payload
+
+
+def _artifact_record(kind: str, path: Path, workspace: Path) -> dict:
+    directory = path.parent.relative_to(workspace).as_posix() if path.parent != workspace else "."
+    return {
+        "kind": kind,
+        "name": path.name,
+        "directory": directory,
+        "available": path.exists(),
+    }
+
+
+def _write_job_request_manifest(job: TemplateBuildJob, payload_snapshot: dict):
+    workspace = _job_workspace(job.uuid)
+    paths = _ensure_job_workspace(workspace)
+    payload = {
+        "job_id": str(job.uuid),
+        "template_id": job.template_definition_id,
+        "owner_id": job.owner_id,
+        "build_profile": job.template_definition.build_profile,
+        "target_os": job.template_definition.target_os,
+        "queued_at": job.queued_at.isoformat() if job.queued_at else None,
+        "request": _redact_payload(payload_snapshot),
+    }
+    _write_json(paths["request"], payload)
+
+
+def _write_job_status_manifest(job: TemplateBuildJob):
+    workspace = _job_workspace(job.uuid)
+    paths = _ensure_job_workspace(workspace)
+    payload = build_job_api_payload(job)
+    _write_json(paths["status"], {"job": payload, "updated_at": timezone.now().isoformat()})
+
+
+def _touch_job_heartbeat(job: TemplateBuildJob):
+    job.last_heartbeat_at = timezone.now()
+    job.save(update_fields=["last_heartbeat_at", "updated_at"])
+
+
+def recover_stale_running_jobs() -> int:
+    cutoff = timezone.now() - timedelta(seconds=max(1, settings.TEMPLATE_BUILD_STALE_AFTER_SECONDS))
+    stale_jobs = (
+        TemplateBuildJob.objects
+        .select_related("template_definition")
+        .filter(status=TemplateBuildJob.STATUS_RUNNING)
+        .filter(
+            Q(last_heartbeat_at__lt=cutoff) |
+            Q(last_heartbeat_at__isnull=True, started_at__lt=cutoff)
+        )
+    )
+    recovered = 0
+    for job in stale_jobs:
+        job.status = TemplateBuildJob.STATUS_FAILED
+        job.stage = TemplateBuildJob.STAGE_DONE
+        job.finished_at = timezone.now()
+        job.exit_code = 1 if job.exit_code is None else job.exit_code
+        job.error_summary = "worker_restart_or_stale_claim"
+        result_payload = job.result_payload if isinstance(job.result_payload, dict) else {}
+        result_payload["stale_recovered"] = True
+        job.result_payload = result_payload
+        job.save(
+            update_fields=[
+                "status",
+                "stage",
+                "finished_at",
+                "exit_code",
+                "error_summary",
+                "result_payload",
+                "updated_at",
+            ]
+        )
+        workspace = _job_workspace(job.uuid)
+        paths = _ensure_job_workspace(workspace)
+        paths["error_summary"].write_text(job.error_summary, encoding="utf-8")
+        _write_json(paths["result"], {"job": build_job_api_payload(job)})
+        _write_job_status_manifest(job)
+        recovered += 1
+    return recovered
+
+
+def ensure_worker_runtime_ready() -> list[dict]:
+    Path(settings.TEMPLATE_BUILD_WORKDIR).mkdir(parents=True, exist_ok=True)
+    Path(settings.PACKER_CACHE_DIR).mkdir(parents=True, exist_ok=True)
+    checks = []
+    packer_bin = str(getattr(settings, "PACKER_BIN", "packer") or "packer")
+    resolved_packer = shutil.which(packer_bin) if Path(packer_bin).name == packer_bin else str(Path(packer_bin))
+    if not resolved_packer or (Path(packer_bin).name != packer_bin and not Path(resolved_packer).exists()):
+        raise RuntimeError(f"Packer binary not found: {packer_bin}")
+    checks.append({"check": "packer_bin", "ok": True, "value": resolved_packer})
+
+    iso_tool = _detect_iso_tool()
+    if not iso_tool:
+        raise RuntimeError("No ISO authoring tool found. Configure PACKER_ISO_TOOL or install oscdimg/xorriso/mkisofs.")
+    checks.append({"check": "iso_tool", "ok": True, "value": iso_tool})
+    return checks
 
 
 def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
     job = TemplateBuildJob.objects.select_related("template_definition", "owner").get(pk=job.pk)
 
-    workspace = Path(settings.TEMPLATE_BUILD_WORKDIR) / f"job-{job.uuid}"
-    workspace.mkdir(parents=True, exist_ok=True)
-    log_path = workspace / "packer.log"
+    workspace = _job_workspace(job.uuid)
+    paths = _ensure_job_workspace(workspace)
+    log_path = paths["packer_log"]
 
     payload = job.payload_snapshot if isinstance(job.payload_snapshot, dict) else {}
     build_profile = str(payload.get("build_profile") or job.template_definition.build_profile or "").strip().lower()
@@ -121,6 +291,9 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
     software_results: list[dict] = []
     preflight_results: list[dict] = []
     generated_artifacts: list[dict] = []
+    machine_readable_events: list[dict] = []
+    archive_available = False
+    redaction_values = _build_redaction_values(payload)
 
     def on_output(line: str):
         parsed = _parse_result_marker(line)
@@ -129,61 +302,70 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         stage_name = _parse_stage_marker(line)
         if stage_name == "sealing":
             _set_stage(job, TemplateBuildJob.STAGE_SEALING)
+        machine_event = _parse_machine_readable_event(line)
+        if machine_event:
+            machine_readable_events.append(machine_event)
 
     try:
         template_file = _resolve_template_file(build_profile, payload)
-        generated_template_file = workspace / template_file.name
+        generated_template_file = paths["generated"] / "template.pkr.hcl"
         generated_template_file.write_text(template_file.read_text(encoding="utf-8"), encoding="utf-8")
 
         job.workspace_path = str(workspace)
         job.log_path = str(log_path)
         job.packer_template_path = str(generated_template_file)
         job.save(update_fields=["workspace_path", "log_path", "packer_template_path", "updated_at"])
+        _write_job_status_manifest(job)
 
         with log_path.open("a", encoding="utf-8") as log_fp:
             _set_stage(job, TemplateBuildJob.STAGE_PREFLIGHT)
             preflight_results = _run_preflight(build_profile=build_profile, payload=payload, log_fp=log_fp)
+            _write_json(paths["preflight"], {"checks": preflight_results})
 
             profile_artifacts, profile_context = _write_profile_artifacts(
                 build_profile=build_profile,
                 payload=payload,
-                workspace=workspace,
+                workspace=paths["generated"],
             )
             generated_artifacts = profile_artifacts
             bootstrap_script = _write_bootstrap_script(
                 build_profile=build_profile,
                 target_os=target_os,
                 payload=payload,
-                workspace=workspace,
+                workspace=paths["generated"],
             )
-            generated_artifacts.append({"kind": "bootstrap_script", "path": str(bootstrap_script.resolve())})
+            generated_artifacts.append(_artifact_record("bootstrap_script", bootstrap_script, workspace))
 
             vars_file = _write_packer_vars_file(
                 build_profile=build_profile,
                 target_os=target_os,
                 payload=payload,
-                workspace=workspace,
+                workspace=paths["generated"],
                 bootstrap_script=bootstrap_script,
                 profile_context=profile_context,
             )
-            generated_artifacts.append({"kind": "packer_vars", "path": str(vars_file.resolve())})
+            generated_artifacts.append(_artifact_record("packer_vars", vars_file, workspace))
 
             _set_stage(job, TemplateBuildJob.STAGE_INIT)
             _run_command(
                 [settings.PACKER_BIN, "init", generated_template_file.name],
-                cwd=workspace,
+                cwd=paths["generated"],
                 timeout_sec=settings.TEMPLATE_BUILD_MAX_TIMEOUT_SEC,
                 log_fp=log_fp,
                 on_output=on_output,
+                heartbeat_cb=lambda: _touch_job_heartbeat(job),
+                redaction_values=redaction_values,
             )
 
             _set_stage(job, TemplateBuildJob.STAGE_VALIDATE)
             _run_command(
                 [settings.PACKER_BIN, "validate", "-var-file", vars_file.name, generated_template_file.name],
-                cwd=workspace,
+                cwd=paths["generated"],
                 timeout_sec=settings.TEMPLATE_BUILD_MAX_TIMEOUT_SEC,
                 log_fp=log_fp,
                 on_output=on_output,
+                heartbeat_cb=lambda: _touch_job_heartbeat(job),
+                redaction_values=redaction_values,
             )
 
             _set_stage(job, TemplateBuildJob.STAGE_BUILD)
@@ -197,14 +379,17 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
                     vars_file.name,
                     generated_template_file.name,
                 ],
-                cwd=workspace,
+                cwd=paths["generated"],
                 timeout_sec=settings.TEMPLATE_BUILD_MAX_TIMEOUT_SEC,
                 log_fp=log_fp,
                 on_output=on_output,
+                heartbeat_cb=lambda: _touch_job_heartbeat(job),
+                redaction_values=redaction_values,
             )
 
         _set_stage(job, TemplateBuildJob.STAGE_POSTPROCESS)
 
+        _write_json(paths["software_results"], {"items": software_results})
         job.status = TemplateBuildJob.STATUS_SUCCEEDED
         job.stage = TemplateBuildJob.STAGE_DONE
         job.finished_at = timezone.now()
@@ -212,12 +397,13 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         job.error_summary = ""
         job.result_payload = {
             "software_results": software_results,
-            "workspace": str(workspace),
-            "log_path": str(log_path),
             "preflight": preflight_results,
             "generated_artifacts": generated_artifacts,
+            "machine_readable_events": machine_readable_events,
             "guest_networking": payload.get("guest_networking") or "dhcp",
+            "log_available": log_path.exists(),
         }
+        _write_json(paths["result"], {"job": build_job_api_payload(job)})
         job.save(
             update_fields=[
                 "status",
@@ -226,11 +412,19 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
                 "exit_code",
                 "error_summary",
                 "result_payload",
+                "last_heartbeat_at",
                 "updated_at",
             ]
         )
+        archive_available = bool(_archive_job_bundle(job, paths, payload))
+        if archive_available:
+            job.result_payload["archive_available"] = True
+            job.save(update_fields=["result_payload", "updated_at"])
+            _write_json(paths["result"], {"job": build_job_api_payload(job)})
+        _write_job_status_manifest(job)
         return job
     except Exception as exc:
+        _write_json(paths["software_results"], {"items": software_results})
         job.status = TemplateBuildJob.STATUS_FAILED
         job.stage = TemplateBuildJob.STAGE_DONE
         job.finished_at = timezone.now()
@@ -238,11 +432,11 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         job.error_summary = str(exc)
         job.result_payload = {
             "software_results": software_results,
-            "workspace": str(workspace),
-            "log_path": str(log_path),
             "preflight": preflight_results,
             "generated_artifacts": generated_artifacts,
+            "machine_readable_events": machine_readable_events,
             "guest_networking": payload.get("guest_networking") or "dhcp",
+            "log_available": log_path.exists(),
         }
         job.save(
             update_fields=[
@@ -252,15 +446,25 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
                 "exit_code",
                 "error_summary",
                 "result_payload",
+                "last_heartbeat_at",
                 "updated_at",
             ]
         )
+        paths["error_summary"].write_text(job.error_summary, encoding="utf-8")
+        _write_json(paths["result"], {"job": build_job_api_payload(job)})
+        archive_available = bool(_archive_job_bundle(job, paths, payload))
+        if archive_available:
+            job.result_payload["archive_available"] = True
+            job.save(update_fields=["result_payload", "updated_at"])
+            _write_json(paths["result"], {"job": build_job_api_payload(job)})
+        _write_job_status_manifest(job)
         return job
 
 
 def _set_stage(job: TemplateBuildJob, stage: str):
     job.stage = stage
     job.save(update_fields=["stage", "updated_at"])
+    _write_job_status_manifest(job)
 
 
 def _resolve_template_file(build_profile: str, payload: dict) -> Path:
@@ -335,8 +539,8 @@ def _write_profile_artifacts(build_profile: str, payload: dict, workspace: Path)
         meta_data.write_text(_render_meta_data(payload), encoding="utf-8")
         artifacts.extend(
             [
-                {"kind": "user_data", "path": str(user_data.resolve())},
-                {"kind": "meta_data", "path": str(meta_data.resolve())},
+                _artifact_record("user_data", user_data, workspace.parent),
+                _artifact_record("meta_data", meta_data, workspace.parent),
             ]
         )
         context.update(
@@ -353,7 +557,7 @@ def _write_profile_artifacts(build_profile: str, payload: dict, workspace: Path)
     if build_profile == BUILD_PROFILE_DEBIAN_PRESEED:
         preseed = workspace / "preseed.cfg"
         preseed.write_text(_render_debian_preseed(payload), encoding="utf-8")
-        artifacts.append({"kind": "preseed", "path": str(preseed.resolve())})
+        artifacts.append(_artifact_record("preseed", preseed, workspace.parent))
         context.update(
             {
                 "preseed_path": str(preseed.resolve()),
@@ -367,7 +571,7 @@ def _write_profile_artifacts(build_profile: str, payload: dict, workspace: Path)
     if build_profile == BUILD_PROFILE_WINDOWS_UNATTEND:
         unattend = workspace / "Autounattend.xml"
         unattend.write_text(_render_windows_unattend(payload), encoding="utf-8")
-        artifacts.append({"kind": "autounattend", "path": str(unattend.resolve())})
+        artifacts.append(_artifact_record("autounattend", unattend, workspace.parent))
         windows = payload.get("windows") if isinstance(payload.get("windows"), dict) else {}
         context.update(
             {
@@ -448,6 +652,60 @@ def _write_packer_vars_file(
     return vars_path
 
 
+def _build_redaction_values(payload: dict) -> list[str]:
+    values = [
+        str(os.environ.get("PROXMOX_TOKEN_SECRET") or "").strip(),
+    ]
+    windows = payload.get("windows") if isinstance(payload.get("windows"), dict) else {}
+    values.extend(
+        [
+            str(windows.get("admin_password") or "").strip(),
+            str(windows.get("winrm_password") or "").strip(),
+        ]
+    )
+    return [value for value in values if value]
+
+
+def _redact_text(text: str, redaction_values: list[str]) -> str:
+    redacted = text
+    for value in redaction_values:
+        redacted = redacted.replace(value, "[REDACTED]")
+    return redacted
+
+
+def _parse_machine_readable_event(line: str) -> dict | None:
+    parts = [part.strip() for part in str(line or "").split(",")]
+    if len(parts) < 3:
+        return None
+    if not parts[0].isdigit():
+        return None
+    return {
+        "timestamp": parts[0],
+        "target": parts[1] or None,
+        "type": parts[2],
+        "data": parts[3:],
+    }
+
+
+def _archive_job_bundle(job: TemplateBuildJob, paths: dict[str, Path], payload: dict) -> Path | None:
+    archive_root = Path(settings.PACKER_NAS_ARCHIVE_DIR)
+    nas_root = Path(settings.PACKER_NAS_ROOT)
+    if not nas_root.exists():
+        return None
+
+    archive_dir = archive_root / f"job-{job.uuid}"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    for name in ["request", "status", "result", "software_results", "preflight"]:
+        source = paths[name]
+        if source.exists():
+            shutil.copy2(source, archive_dir / source.name)
+    if paths["packer_log"].exists():
+        shutil.copy2(paths["packer_log"], archive_dir / paths["packer_log"].name)
+    if paths["error_summary"].exists():
+        shutil.copy2(paths["error_summary"], archive_dir / paths["error_summary"].name)
+    return archive_dir
+
+
 def _parse_result_marker(line: str) -> dict | None:
     m = _RESULT_MARKER_RE.search(line)
     if not m:
@@ -478,6 +736,8 @@ def _run_command(
     timeout_sec: int,
     log_fp,
     on_output: Callable[[str], None],
+    heartbeat_cb: Callable[[], None] | None = None,
+    redaction_values: list[str] | None = None,
 ):
     started = time.monotonic()
     try:
@@ -493,16 +753,48 @@ def _run_command(
         raise RuntimeError(f"Command not found: {cmd[0]}") from exc
 
     assert process.stdout is not None
-    for line in process.stdout:
-        log_fp.write(line)
-        log_fp.flush()
-        on_output(line.rstrip("\n"))
+    output_queue: queue.Queue[str | None] = queue.Queue()
 
+    def _reader():
+        try:
+            assert process.stdout is not None
+            for line in process.stdout:
+                output_queue.put(line)
+        finally:
+            output_queue.put(None)
+
+    thread = threading.Thread(target=_reader, daemon=True)
+    thread.start()
+    last_heartbeat = time.monotonic()
+    redaction_values = redaction_values or []
+
+    while True:
         if time.monotonic() - started > timeout_sec:
             process.kill()
             raise RuntimeError(f"Command timed out after {timeout_sec}s: {' '.join(cmd)}")
 
+        try:
+            line = output_queue.get(timeout=1)
+        except queue.Empty:
+            line = None
+
+        if heartbeat_cb and time.monotonic() - last_heartbeat >= max(1, settings.TEMPLATE_BUILD_HEARTBEAT_SECONDS):
+            heartbeat_cb()
+            last_heartbeat = time.monotonic()
+
+        if line is None:
+            if process.poll() is not None and not thread.is_alive():
+                break
+            continue
+
+        redacted_line = _redact_text(line, redaction_values)
+        log_fp.write(redacted_line)
+        log_fp.flush()
+        on_output(redacted_line.rstrip("\n"))
+
     code = process.wait()
+    if heartbeat_cb:
+        heartbeat_cb()
     if code != 0:
         raise RuntimeError(f"Command failed ({code}): {' '.join(cmd)}")
 

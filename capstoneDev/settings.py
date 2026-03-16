@@ -3,6 +3,7 @@ Django settings for capstoneDev project.
 """
 
 import os
+import sys
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -41,6 +42,14 @@ def _database_settings(base_dir: Path) -> dict:
 
     parsed = urlparse(database_url)
     scheme = (parsed.scheme or "").lower()
+    running_tests = "test" in sys.argv[1:]
+    in_container = Path("/.dockerenv").exists()
+
+    if running_tests and not in_container and (parsed.hostname or "").strip().lower() == "db":
+        return {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": str(base_dir / "db.sqlite3"),
+        }
 
     if scheme in {"postgres", "postgresql"}:
         db_name = unquote((parsed.path or "").lstrip("/"))
@@ -174,6 +183,9 @@ TEMPLATE_BUILD_WORKDIR = Path(
 )
 TEMPLATE_BUILD_POLL_SECONDS = int(_env_str("TEMPLATE_BUILD_POLL_SECONDS", default="5"))
 TEMPLATE_BUILD_MAX_TIMEOUT_SEC = int(_env_str("TEMPLATE_BUILD_MAX_TIMEOUT_SEC", default="10800"))
+TEMPLATE_BUILD_HEARTBEAT_SECONDS = int(_env_str("TEMPLATE_BUILD_HEARTBEAT_SECONDS", default="15"))
+TEMPLATE_BUILD_STALE_AFTER_SECONDS = int(_env_str("TEMPLATE_BUILD_STALE_AFTER_SECONDS", default="900"))
+TEMPLATE_BUILD_CONCURRENCY = int(_env_str("TEMPLATE_BUILD_CONCURRENCY", default="1"))
 PACKER_BIN = _env_str("PACKER_BIN", default="packer")
 PACKER_PROXMOX_PLUGIN_SOURCE = _env_str(
     "PACKER_PROXMOX_PLUGIN_SOURCE",
@@ -181,6 +193,12 @@ PACKER_PROXMOX_PLUGIN_SOURCE = _env_str(
 )
 PACKER_PROXMOX_PLUGIN_VERSION = _env_str("PACKER_PROXMOX_PLUGIN_VERSION", default=">= 1.1.0")
 PACKER_ISO_TOOL = _env_str("PACKER_ISO_TOOL", default="")
+PACKER_CACHE_DIR = Path(_env_str("PACKER_CACHE_DIR", default=str(BASE_DIR / "database" / "packer_templates" / "cache")))
+PACKER_NAS_ROOT = Path(_env_str("PACKER_NAS_ROOT", default="/mnt/capstone-nas"))
+PACKER_NAS_ISO_DIR = Path(_env_str("PACKER_NAS_ISO_DIR", default=str(PACKER_NAS_ROOT / "isos")))
+PACKER_NAS_ARCHIVE_DIR = Path(
+    _env_str("PACKER_NAS_ARCHIVE_DIR", default=str(PACKER_NAS_ROOT / "archive"))
+)
 ALLOW_PRIVATE_TEMPLATE_ASSET_URLS = _env_bool("ALLOW_PRIVATE_TEMPLATE_ASSET_URLS", default=True)
 
 PROXMOX_NODE = _env_str("PROXMOX_NODE", default="")

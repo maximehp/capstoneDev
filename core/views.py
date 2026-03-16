@@ -973,7 +973,17 @@ def create_template_definition(request):
         ansible_options=ansible_options,
     )
 
-    job = enqueue_template_build(template_definition=template_definition, payload_snapshot=build_payload)
+    try:
+        job = enqueue_template_build(template_definition=template_definition, payload_snapshot=build_payload)
+    except Exception as exc:
+        template_definition.delete()
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": f"Failed to queue template build job: {exc}",
+            },
+            status=500,
+        )
 
     return JsonResponse(
         {

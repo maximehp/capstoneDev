@@ -1,11 +1,13 @@
 import json
 import os
 import shutil
+from datetime import timedelta
 from pathlib import Path
 from unittest.mock import patch, Mock
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
+from django.utils import timezone
 
 from .models import TemplateBuildJob, TemplateDefinition
 from .packer_profiles import (
@@ -14,7 +16,14 @@ from .packer_profiles import (
     WINDOWS_FIRMWARE_BIOS_LEGACY,
     WINDOWS_FIRMWARE_UEFI_TPM,
 )
-from .template_builds import _render_windows_script, _render_windows_unattend, run_build_job
+from .template_builds import (
+    _redact_text,
+    _render_windows_script,
+    _render_windows_unattend,
+    enqueue_template_build,
+    recover_stale_running_jobs,
+    run_build_job,
+)
 from .auth_backends import _candidate_endpoints
 from capstoneDev.settings import _database_settings
 
@@ -71,12 +80,18 @@ def _windows_create_payload() -> dict:
     return payload
 
 
+@override_settings(TEMPLATE_BUILD_WORKDIR=Path("database") / "test-api-jobs")
 class TemplateCreateApiTests(TestCase):
     def setUp(self):
         self.client = Client()
+        self.workdir = Path("database") / "test-api-jobs"
+        self.workdir.mkdir(parents=True, exist_ok=True)
         user_model = get_user_model()
         self.user = user_model.objects.create_user(username="builder", password="pass12345")
         self.client.force_login(self.user)
+
+    def tearDown(self):
+        shutil.rmtree(self.workdir, ignore_errors=True)
 
     @patch("core.views._inspect_url")
     def test_create_template_queues_job(self, inspect_mock):
@@ -97,6 +112,26 @@ class TemplateCreateApiTests(TestCase):
         job = TemplateBuildJob.objects.first()
         self.assertEqual(job.status, TemplateBuildJob.STATUS_QUEUED)
         self.assertEqual(str(job.uuid), body["job"]["id"])
+        request_manifest = self.workdir / f"job-{job.uuid}" / "request.json"
+        status_manifest = self.workdir / f"job-{job.uuid}" / "status.json"
+        self.assertTrue(request_manifest.exists())
+        self.assertTrue(status_manifest.exists())
+
+    @patch("core.views._inspect_url")
+    def test_create_template_request_manifest_redacts_windows_password(self, inspect_mock):
+        inspect_mock.return_value = _iso_info("https://example.com/windows.iso", "windows.iso")
+
+        response = self.client.post(
+            "/api/template/create/",
+            data=json.dumps(_windows_create_payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 202)
+        job_id = response.json()["job"]["id"]
+        request_manifest = self.workdir / f"job-{job_id}" / "request.json"
+        payload = json.loads(request_manifest.read_text(encoding="utf-8"))
+        self.assertEqual(payload["request"]["windows"]["admin_password"], "[REDACTED]")
 
     @patch("core.views._inspect_url")
     def test_create_template_vmid_collision_returns_409(self, inspect_mock):
@@ -187,6 +222,8 @@ class TemplateStatusApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["ok"])
         self.assertEqual(response.json()["job"]["template"]["build_profile"], BUILD_PROFILE_UBUNTU_AUTOINSTALL)
+        self.assertNotIn("workspace", response.json()["job"]["result"])
+        self.assertNotIn("log_path", response.json()["job"]["result"])
 
     def test_status_hidden_from_other_users(self):
         self.client.force_login(self.other)
@@ -348,7 +385,7 @@ class DatabaseSettingsTests(TestCase):
     def test_parses_postgres_database_url(self):
         with patch.dict(
             os.environ,
-            {"DATABASE_URL": "postgresql://capstone:secret@db:5432/capstone"},
+            {"DATABASE_URL": "postgresql://capstone:secret@postgres.internal:5432/capstone"},
             clear=False,
         ):
             config = _database_settings(Path("project-root"))
@@ -357,7 +394,7 @@ class DatabaseSettingsTests(TestCase):
         self.assertEqual(config["NAME"], "capstone")
         self.assertEqual(config["USER"], "capstone")
         self.assertEqual(config["PASSWORD"], "secret")
-        self.assertEqual(config["HOST"], "db")
+        self.assertEqual(config["HOST"], "postgres.internal")
         self.assertEqual(config["PORT"], "5432")
 
 
@@ -414,7 +451,7 @@ class WorkerExecutionTests(TestCase):
     def test_worker_marks_success_and_collects_software_results(self, run_command_mock, preflight_mock):
         preflight_mock.return_value = [{"check": "packer_bin", "ok": True, "value": "packer"}]
 
-        def fake_run_command(cmd, cwd, timeout_sec, log_fp, on_output):
+        def fake_run_command(cmd, cwd, timeout_sec, log_fp, on_output, **kwargs):
             on_output("CAPSTONE_ITEM_RESULT|software-1|installed|0|Tool installed")
             return None
 
@@ -437,6 +474,9 @@ class WorkerExecutionTests(TestCase):
         self.assertEqual(result.result_payload["software_results"][0]["status"], "installed")
         self.assertEqual(result.result_payload["preflight"][0]["check"], "packer_bin")
         self.assertTrue(any(item["kind"] == "user_data" for item in result.result_payload["generated_artifacts"]))
+        self.assertTrue((self.workdir / f"job-{job.uuid}" / "status.json").exists())
+        self.assertTrue((self.workdir / f"job-{job.uuid}" / "results" / "result.json").exists())
+        self.assertTrue(result.result_payload["log_available"])
 
     @patch("core.template_builds._run_preflight")
     @patch("core.template_builds._run_command")
@@ -458,6 +498,39 @@ class WorkerExecutionTests(TestCase):
         self.assertEqual(result.status, TemplateBuildJob.STATUS_FAILED)
         self.assertEqual(result.stage, TemplateBuildJob.STAGE_DONE)
         self.assertIn("packer failed", result.error_summary)
+        self.assertTrue((self.workdir / f"job-{job.uuid}" / "results" / "error-summary.txt").exists())
+
+    def test_enqueue_template_build_writes_request_and_status_manifests(self):
+        payload = self._job_payload()
+        payload["windows"] = {"admin_password": "Capstone123!"}
+
+        job = enqueue_template_build(self.template, payload)
+
+        workspace = self.workdir / f"job-{job.uuid}"
+        request_manifest = json.loads((workspace / "request.json").read_text(encoding="utf-8"))
+        status_manifest = json.loads((workspace / "status.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(request_manifest["request"]["windows"]["admin_password"], "[REDACTED]")
+        self.assertEqual(status_manifest["job"]["status"], TemplateBuildJob.STATUS_QUEUED)
+
+    def test_recover_stale_running_jobs_marks_job_failed(self):
+        stale_time = timezone.now() - timedelta(seconds=3600)
+        job = TemplateBuildJob.objects.create(
+            owner=self.user,
+            template_definition=self.template,
+            payload_snapshot=self._job_payload(),
+            status=TemplateBuildJob.STATUS_RUNNING,
+            stage=TemplateBuildJob.STAGE_BUILD,
+            started_at=stale_time,
+            last_heartbeat_at=stale_time,
+        )
+
+        recovered = recover_stale_running_jobs()
+        job.refresh_from_db()
+
+        self.assertEqual(recovered, 1)
+        self.assertEqual(job.status, TemplateBuildJob.STATUS_FAILED)
+        self.assertEqual(job.error_summary, "worker_restart_or_stale_claim")
 
 
 class ArtifactGenerationTests(TestCase):
@@ -510,3 +583,9 @@ class ArtifactGenerationTests(TestCase):
 
         self.assertIn("efi_type = \"4m\"", hcl)
         self.assertNotIn("\n    type = \"4m\"\n", hcl)
+
+    def test_log_redaction_masks_secret_values(self):
+        redacted = _redact_text("token=secret-value password=abc123", ["secret-value", "abc123"])
+
+        self.assertNotIn("secret-value", redacted)
+        self.assertNotIn("abc123", redacted)
