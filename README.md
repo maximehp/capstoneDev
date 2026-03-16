@@ -12,15 +12,20 @@ Capstone is a Django app for lab VM lifecycle management with AD-backed login an
 
 ## Docker Compose
 
-The repository now includes a Compose-based development runtime that matches the documented app shape:
+The repository now includes a Compose-based runtime with a dedicated Packer worker container:
 - `db`: PostgreSQL
 - `migrate`: one-shot schema/bootstrap step
-- `web`: Django development server
-- `worker`: `manage.py run_template_build_worker`
+- `web`: Django web app image
+- `packer-worker`: `manage.py run_template_build_worker` in its own image with `packer` and ISO tooling
 
-Start it from the repo root:
+Server/deploy shape:
 ```bash
 docker compose up --build
+```
+
+Optional local development override with source bind mounts:
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml up --build
 ```
 
 The app will be available at:
@@ -45,8 +50,12 @@ You can start from:
 cp .env.example .env
 ```
 
-Compose pins `DATABASE_URL` to the bundled PostgreSQL service (`db`) and uses the default development credentials `capstone/capstone/capstone`.
-The container image includes `packer` and `xorriso` so the worker can execute template jobs inside Compose without depending on host-installed binaries.
+Compose expects these host paths in the deploy/server shape:
+- `PACKER_JOBS_HOST_PATH` default `/srv/capstone/packer-jobs`
+- `PACKER_CACHE_HOST_PATH` default `/srv/capstone/packer-cache`
+- `PACKER_NAS_HOST_PATH` default `/mnt/capstone-nas`
+
+The `packer-worker` image includes `packer`, `xorriso`, `curl`, and `jq`. The `web` image does not include Packer.
 
 ## Development Quickstart
 
@@ -157,6 +166,16 @@ The app expects these keys to be set in `.env` or the environment.
 - `PACKER_ISO_TOOL` (optional override for ISO authoring tool)
 - `PACKER_PROXMOX_PLUGIN_SOURCE`
 - `PACKER_PROXMOX_PLUGIN_VERSION`
+- `PACKER_CACHE_DIR`
+- `PACKER_NAS_ROOT`
+- `PACKER_NAS_ISO_DIR`
+- `PACKER_NAS_ARCHIVE_DIR`
+- `PACKER_JOBS_HOST_PATH`
+- `PACKER_CACHE_HOST_PATH`
+- `PACKER_NAS_HOST_PATH`
+- `TEMPLATE_BUILD_HEARTBEAT_SECONDS`
+- `TEMPLATE_BUILD_STALE_AFTER_SECONDS`
+- `TEMPLATE_BUILD_CONCURRENCY`
 - `ALLOW_PRIVATE_TEMPLATE_ASSET_URLS` (`1` by default)
 
 ## Notes
@@ -179,21 +198,28 @@ The app expects these keys to be set in `.env` or the environment.
 - Template builds are DHCP-ready only. Static IP configuration is intentionally rejected during template creation.
 - `POST /api/template/create/` creates a `TemplateDefinition`, enqueues a `TemplateBuildJob`, and returns `202`.
 - Hitting `Create template` does not run Packer inline in the request.
-- The worker process is what creates the per-job workspace and generated files:
-  - copied `.pkr.hcl`
-  - `user-data` / `meta-data`
-  - `preseed.cfg`
-  - `Autounattend.xml`
-  - bootstrap script
-  - `template.auto.pkrvars.json`
-  - `packer.log`
+- Django writes an initial `request.json` and `status.json` into the per-job workspace when the job is queued.
+- The `packer-worker` process is what creates the remaining per-job files and runs Packer:
+  - `generated/template.pkr.hcl`
+  - `generated/user-data` / `generated/meta-data`
+  - `generated/preseed.cfg`
+  - `generated/Autounattend.xml`
+  - `generated/bootstrap.sh` or `generated/bootstrap.ps1`
+  - `generated/template.auto.pkrvars.json`
+  - `logs/packer.log`
+  - `results/result.json`
+  - `results/software-results.json`
+  - `results/preflight.json`
+  - `results/error-summary.txt`
 - Job workspaces are created under `TEMPLATE_BUILD_WORKDIR/job-<uuid>/`.
-- Packer builds are executed by the background worker:
-  - `.\.venv\Scripts\python.exe manage.py run_template_build_worker`
+- The worker updates job heartbeat and marks stale running jobs as failed on restart.
+- The status API does not expose raw container filesystem paths.
+- For Ubuntu server deployment, mount the NAS on the host and bind-mount it into `packer-worker`; the final template artifact still lives in Proxmox storage.
 - For local development, run both processes:
   - `.\.venv\Scripts\python.exe manage.py runserver`
   - `.\.venv\Scripts\python.exe manage.py run_template_build_worker`
-- For Compose development, the one-shot `migrate` service applies migrations before `web` and `worker` start.
+- For Compose deployment, the one-shot `migrate` service applies migrations before `web` and `packer-worker` start.
+- A deploy helper is provided at `scripts/deploy.sh`.
 
 ## Docs
 See `wiki/README.md` for architecture, API notes, and the roadmap.

@@ -7,6 +7,7 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
 - Django views render full pages and optional fragments for partial navigation.
 - AD authentication via `ldap3` in a custom auth backend.
 - Proxmox REST API integration for VM cloning and start operations.
+- Docker Compose runs separate `web` and `packer-worker` containers against the same PostgreSQL database.
 - Frontend is vanilla JS/CSS and depends on consistent `X-Requested-With` headers for fragment requests.
 - Template wizard is profile-driven and currently supports:
   - `ubuntu_autoinstall`
@@ -17,6 +18,7 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
 - `POST /api/template/create/` persists a `TemplateDefinition`, creates a queued `TemplateBuildJob`, and returns async job metadata.
 - `GET /api/template/builds/<job_uuid>/status/` exposes lifecycle state plus structured result data.
 - `manage.py run_template_build_worker` claims queued jobs and runs the Packer workflow in the background.
+- The worker container uses Postgres as the job queue source of truth and a shared filesystem only for workspaces, logs, and generated artifacts.
 
 ## External Dependencies
 - Active Directory for authentication.
@@ -32,16 +34,17 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
    - `TemplateDefinition`
    - `TemplateBuildJob`
 4. Worker creates a per-job workspace under `TEMPLATE_BUILD_WORKDIR/job-<uuid>/`.
-5. Worker writes generated artifacts:
+5. Django writes `request.json` and initial `status.json`.
+6. Worker writes generated artifacts:
    - Ubuntu: `user-data`, `meta-data`
    - Debian: `preseed.cfg`
    - Windows: `Autounattend.xml`
-   - all profiles: bootstrap script, `template.auto.pkrvars.json`, `packer.log`
-6. Worker runs:
+   - all profiles: bootstrap script, `template.auto.pkrvars.json`, `packer.log`, and result manifests
+7. Worker runs:
    - `packer init`
    - `packer validate`
    - `packer build -machine-readable`
-7. Status API reports `queued`, `preflight`, `init`, `validate`, `build`, `sealing`, `postprocess`, `done`.
+8. Status API reports `queued`, `preflight`, `init`, `validate`, `build`, `sealing`, `postprocess`, `done`.
 
 ## Data Model
 - `TemplateDefinition`
@@ -53,4 +56,5 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
 - Template networking is DHCP-only.
 - VMID policy remains `"100" + user.id`.
 - Template creation policy defaults to `allow_all` and can be switched to `faculty_only`.
+- The `web` container does not include `packer`; only the `packer-worker` image does.
 - Unsupported OSes are not part of the automated Packer path in the current implementation.
