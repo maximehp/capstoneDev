@@ -10,74 +10,81 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+    restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   migrate:
     build:
       context: .
+      target: web-runtime
     depends_on:
       db:
         condition: service_healthy
     env_file:
       - .env
     environment:
-      DEBUG: ${DEBUG:-1}
+      DEBUG: ${DEBUG:-0}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
-      DATABASE_URL: postgresql://capstone:capstone@db:5432/capstone
-      TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
-      PACKER_BIN: packer
-      PACKER_ISO_TOOL: xorriso
+      DATABASE_URL: ${DATABASE_URL:-postgresql://capstone:capstone@db:5432/capstone}
       RUN_MIGRATIONS: "1"
-    volumes:
-      - .:/app
-      - template_jobs:/var/lib/capstone/jobs
     command: python manage.py check
 
   web:
     build:
       context: .
+      target: web-runtime
     depends_on:
       migrate:
         condition: service_completed_successfully
     env_file:
       - .env
     environment:
-      DEBUG: ${DEBUG:-1}
+      DEBUG: ${DEBUG:-0}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
-      DATABASE_URL: postgresql://capstone:capstone@db:5432/capstone
+      DATABASE_URL: ${DATABASE_URL:-postgresql://capstone:capstone@db:5432/capstone}
       TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
-      PACKER_BIN: packer
-      PACKER_ISO_TOOL: xorriso
       RUN_MIGRATIONS: "0"
     ports:
       - "8000:8000"
+    restart: unless-stopped
     volumes:
-      - .:/app
-      - template_jobs:/var/lib/capstone/jobs
-    command: python manage.py runserver 0.0.0.0:8000
+      - type: bind
+        source: ${PACKER_JOBS_HOST_PATH:-/srv/capstone/packer-jobs}
+        target: /var/lib/capstone/jobs
 
-  worker:
+  packer-worker:
     build:
       context: .
+      target: packer-runtime
     depends_on:
       migrate:
         condition: service_completed_successfully
     env_file:
       - .env
     environment:
-      DEBUG: ${DEBUG:-1}
+      DEBUG: ${DEBUG:-0}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
-      DATABASE_URL: postgresql://capstone:capstone@db:5432/capstone
+      DATABASE_URL: ${DATABASE_URL:-postgresql://capstone:capstone@db:5432/capstone}
       TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
-      PACKER_BIN: packer
-      PACKER_ISO_TOOL: xorriso
+      PACKER_CACHE_DIR: ${PACKER_CACHE_DIR:-/var/lib/capstone/packer-cache}
+      PACKER_NAS_ROOT: ${PACKER_NAS_ROOT:-/mnt/capstone-nas}
+      PACKER_NAS_ISO_DIR: ${PACKER_NAS_ISO_DIR:-/mnt/capstone-nas/isos}
+      PACKER_NAS_ARCHIVE_DIR: ${PACKER_NAS_ARCHIVE_DIR:-/mnt/capstone-nas/archive}
+      PACKER_BIN: ${PACKER_BIN:-/usr/bin/packer}
+      PACKER_ISO_TOOL: ${PACKER_ISO_TOOL:-xorriso}
       RUN_MIGRATIONS: "0"
+    restart: unless-stopped
     volumes:
-      - .:/app
-      - template_jobs:/var/lib/capstone/jobs
-    command: python manage.py run_template_build_worker
+      - type: bind
+        source: ${PACKER_JOBS_HOST_PATH:-/srv/capstone/packer-jobs}
+        target: /var/lib/capstone/jobs
+      - type: bind
+        source: ${PACKER_CACHE_HOST_PATH:-/srv/capstone/packer-cache}
+        target: /var/lib/capstone/packer-cache
+      - type: bind
+        source: ${PACKER_NAS_HOST_PATH:-/mnt/capstone-nas}
+        target: /mnt/capstone-nas
 
 volumes:
   postgres_data:
-  template_jobs:
