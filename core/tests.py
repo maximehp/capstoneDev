@@ -21,6 +21,7 @@ from .template_builds import (
     _render_windows_script,
     _render_windows_unattend,
     enqueue_template_build,
+    ensure_worker_runtime_ready,
     recover_stale_running_jobs,
     run_build_job,
 )
@@ -398,11 +399,16 @@ class DatabaseSettingsTests(TestCase):
         self.assertEqual(config["PORT"], "5432")
 
 
-@override_settings(TEMPLATE_BUILD_WORKDIR=Path("database") / "test-worker-jobs")
+@override_settings(
+    TEMPLATE_BUILD_WORKDIR=Path("database") / "test-worker-jobs",
+    PACKER_CACHE_DIR=Path("database") / "test-worker-cache",
+)
 class WorkerExecutionTests(TestCase):
     def setUp(self):
         self.workdir = Path("database") / "test-worker-jobs"
+        self.cache_dir = Path("database") / "test-worker-cache"
         self.workdir.mkdir(parents=True, exist_ok=True)
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         user_model = get_user_model()
         self.user = user_model.objects.create_user(username="worker", password="pass12345")
         self.template = TemplateDefinition.objects.create(
@@ -419,6 +425,7 @@ class WorkerExecutionTests(TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.workdir, ignore_errors=True)
+        shutil.rmtree(self.cache_dir, ignore_errors=True)
 
     def _job_payload(self):
         return {
@@ -531,6 +538,52 @@ class WorkerExecutionTests(TestCase):
         self.assertEqual(recovered, 1)
         self.assertEqual(job.status, TemplateBuildJob.STATUS_FAILED)
         self.assertEqual(job.error_summary, "worker_restart_or_stale_claim")
+
+    @override_settings(TEMPLATE_BUILD_DEV_BYPASS=True, PACKER_BIN="missing-packer", PACKER_ISO_TOOL="missing-tool")
+    def test_worker_runtime_ready_skips_prereqs_in_dev_bypass(self):
+        checks = ensure_worker_runtime_ready()
+
+        self.assertEqual(len(checks), 2)
+        self.assertTrue(all(check.get("skipped") for check in checks))
+        self.assertEqual(checks[0]["reason"], "dev_bypass")
+
+    @override_settings(TEMPLATE_BUILD_DEV_BYPASS=False, PACKER_BIN="missing-packer")
+    def test_worker_runtime_ready_requires_packer_when_bypass_disabled(self):
+        with self.assertRaises(RuntimeError):
+            ensure_worker_runtime_ready()
+
+    @override_settings(TEMPLATE_BUILD_DEV_BYPASS=True, PACKER_BIN="missing-packer", PACKER_ISO_TOOL="missing-tool")
+    def test_run_build_job_completes_in_dev_bypass_mode(self):
+        job = TemplateBuildJob.objects.create(
+            owner=self.user,
+            template_definition=self.template,
+            payload_snapshot=self._job_payload(),
+            status=TemplateBuildJob.STATUS_RUNNING,
+            stage=TemplateBuildJob.STAGE_PREFLIGHT,
+            started_at=timezone.now(),
+        )
+
+        result = run_build_job(job)
+        result.refresh_from_db()
+
+        workspace = self.workdir / f"job-{job.uuid}"
+        self.assertEqual(result.status, TemplateBuildJob.STATUS_SUCCEEDED)
+        self.assertEqual(result.stage, TemplateBuildJob.STAGE_DONE)
+        self.assertEqual(result.exit_code, 0)
+        self.assertIsNotNone(result.started_at)
+        self.assertIsNotNone(result.finished_at)
+        self.assertIsNotNone(result.last_heartbeat_at)
+        self.assertTrue(result.result_payload["dev_bypass"])
+        self.assertEqual(result.result_payload["execution_mode"], "dev_bypass")
+        self.assertIn("Dev mode execution", result.result_payload["summary"])
+        self.assertTrue((workspace / "logs" / "packer.log").exists())
+        self.assertTrue((workspace / "results" / "result.json").exists())
+        self.assertTrue((workspace / "results" / "preflight.json").exists())
+        self.assertTrue((workspace / "results" / "software-results.json").exists())
+
+        preflight_payload = json.loads((workspace / "results" / "preflight.json").read_text(encoding="utf-8"))
+        self.assertTrue(preflight_payload["checks"][0]["skipped"])
+        self.assertEqual(preflight_payload["checks"][0]["reason"], "dev_bypass")
 
 
 class ArtifactGenerationTests(TestCase):

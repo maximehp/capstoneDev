@@ -126,6 +126,9 @@ def build_job_api_payload(job: TemplateBuildJob) -> dict:
             "machine_readable_events": result_payload.get("machine_readable_events", []),
             "log_available": bool(result_payload.get("log_available")),
             "archive_available": bool(result_payload.get("archive_available")),
+            "dev_bypass": bool(result_payload.get("dev_bypass")),
+            "execution_mode": result_payload.get("execution_mode"),
+            "summary": result_payload.get("summary"),
             "build_profile": payload_snapshot.get("build_profile") or job.template_definition.build_profile,
             "firmware_profile": windows.get("firmware_profile"),
             "image_selector": image_selector,
@@ -264,6 +267,27 @@ def ensure_worker_runtime_ready() -> list[dict]:
     Path(settings.TEMPLATE_BUILD_WORKDIR).mkdir(parents=True, exist_ok=True)
     Path(settings.PACKER_CACHE_DIR).mkdir(parents=True, exist_ok=True)
     checks = []
+    if getattr(settings, "TEMPLATE_BUILD_DEV_BYPASS", False):
+        checks.append(
+            {
+                "check": "packer_bin",
+                "ok": True,
+                "skipped": True,
+                "reason": "dev_bypass",
+                "value": str(getattr(settings, "PACKER_BIN", "packer") or "packer"),
+            }
+        )
+        checks.append(
+            {
+                "check": "iso_tool",
+                "ok": True,
+                "skipped": True,
+                "reason": "dev_bypass",
+                "value": str(getattr(settings, "PACKER_ISO_TOOL", "") or ""),
+            }
+        )
+        return checks
+
     packer_bin = str(getattr(settings, "PACKER_BIN", "packer") or "packer")
     resolved_packer = shutil.which(packer_bin) if Path(packer_bin).name == packer_bin else str(Path(packer_bin))
     if not resolved_packer or (Path(packer_bin).name != packer_bin and not Path(resolved_packer).exists()):
@@ -305,6 +329,15 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         machine_event = _parse_machine_readable_event(line)
         if machine_event:
             machine_readable_events.append(machine_event)
+
+    if getattr(settings, "TEMPLATE_BUILD_DEV_BYPASS", False):
+        return _run_dev_bypass_job(
+            job=job,
+            paths=paths,
+            payload=payload,
+            software_results=software_results,
+            machine_readable_events=machine_readable_events,
+        )
 
     try:
         template_file = _resolve_template_file(build_profile, payload)
@@ -704,6 +737,64 @@ def _archive_job_bundle(job: TemplateBuildJob, paths: dict[str, Path], payload: 
     if paths["error_summary"].exists():
         shutil.copy2(paths["error_summary"], archive_dir / paths["error_summary"].name)
     return archive_dir
+
+
+def _run_dev_bypass_job(
+    job: TemplateBuildJob,
+    paths: dict[str, Path],
+    payload: dict,
+    software_results: list[dict],
+    machine_readable_events: list[dict],
+) -> TemplateBuildJob:
+    _set_stage(job, TemplateBuildJob.STAGE_PREFLIGHT)
+    _touch_job_heartbeat(job)
+
+    preflight_results = [
+        {"check": "packer_bin", "ok": True, "skipped": True, "reason": "dev_bypass"},
+        {"check": "iso_tool", "ok": True, "skipped": True, "reason": "dev_bypass"},
+    ]
+    _write_json(paths["preflight"], {"checks": preflight_results})
+    _write_json(paths["software_results"], {"items": []})
+    paths["packer_log"].write_text(
+        "dev mode execution\n"
+        "skipped real packer init/validate/build because TEMPLATE_BUILD_DEV_BYPASS=1\n",
+        encoding="utf-8",
+    )
+
+    summary = "Dev mode execution: queue consumed without real Packer build."
+    job.status = TemplateBuildJob.STATUS_SUCCEEDED
+    job.stage = TemplateBuildJob.STAGE_DONE
+    job.finished_at = timezone.now()
+    job.last_heartbeat_at = timezone.now()
+    job.exit_code = 0
+    job.error_summary = ""
+    job.result_payload = {
+        "software_results": software_results,
+        "preflight": preflight_results,
+        "generated_artifacts": [],
+        "machine_readable_events": machine_readable_events,
+        "guest_networking": payload.get("guest_networking") or "dhcp",
+        "log_available": True,
+        "dev_bypass": True,
+        "execution_mode": "dev_bypass",
+        "summary": summary,
+        "archive_available": False,
+    }
+    job.save(
+        update_fields=[
+            "status",
+            "stage",
+            "finished_at",
+            "last_heartbeat_at",
+            "exit_code",
+            "error_summary",
+            "result_payload",
+            "updated_at",
+        ]
+    )
+    _write_json(paths["result"], {"job": build_job_api_payload(job)})
+    _write_job_status_manifest(job)
+    return job
 
 
 def _parse_result_marker(line: str) -> dict | None:

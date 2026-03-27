@@ -36,6 +36,8 @@ class Command(BaseCommand):
         checks = ensure_worker_runtime_ready()
         recovered = recover_stale_running_jobs()
         self.stdout.write(self.style.NOTICE("Template build worker started"))
+        if getattr(settings, "TEMPLATE_BUILD_DEV_BYPASS", False):
+            self.stdout.write(self.style.WARNING("Template build worker dev bypass is enabled; real Packer execution is skipped"))
         for check in checks:
             self.stdout.write(self.style.NOTICE(f"worker check ok: {check['check']}={check['value']}"))
         if recovered:
