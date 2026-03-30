@@ -232,6 +232,45 @@ class TemplateStatusApiTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+class LoginRedirectTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(username="redirect-user", password="pass12345")
+
+    def test_anonymous_home_redirects_to_login_with_next(self):
+        response = self.client.get("/", follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/?next=/", response["Location"])
+
+    def test_authenticated_login_json_returns_next_target(self):
+        response = self.client.post(
+            "/login/?next=/settings/",
+            data=json.dumps(
+                {
+                    "username": "redirect-user",
+                    "password": "pass12345",
+                    "next": "/settings/",
+                }
+            ),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="fetch",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertEqual(response.json()["redirect"], "/settings/")
+
+    def test_authenticated_get_login_redirects_to_next_target(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get("/login/?next=/settings/", follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/settings/")
+
+
 class VmStartApiTests(TestCase):
     def setUp(self):
         self.client = Client()

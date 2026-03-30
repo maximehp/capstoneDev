@@ -16,6 +16,7 @@
 
             <form id="login-form" class="auth-form">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next_url|default:'/' }}">
 
                 <label class="auth-label">
                     Username

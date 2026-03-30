@@ -11,7 +11,8 @@ from django.contrib.admin.utils import unquote
 from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_GET, require_POST
@@ -87,6 +88,20 @@ def extract_region(full_html: str, key: str) -> str:
     return full_html[idx + 1:end]
 
 
+def _safe_login_redirect_target(request, value: str | None) -> str:
+    candidate = (value or "").strip()
+    if not candidate:
+        return str(getattr(settings, "LOGIN_REDIRECT_URL", "/") or "/")
+    if url_has_allowed_host_and_scheme(
+        candidate,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return candidate
+    return str(getattr(settings, "LOGIN_REDIRECT_URL", "/") or "/")
+
+
+@login_required
 def home(request):
     context = {}
 
@@ -105,6 +120,7 @@ def home(request):
     return render(request, "home.html", context=context)
 
 
+@login_required
 def settings(request):
     context = {}
 
@@ -129,6 +145,9 @@ def _wants_json(request) -> bool:
 
 @csrf_protect
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect(_safe_login_redirect_target(request, request.GET.get("next")))
+
     if request.method == "POST" and _wants_json(request):
         try:
             payload = json.loads(request.body.decode("utf-8"))
@@ -146,10 +165,18 @@ def login_view(request):
             )
 
         django_login(request, user)
+        redirect_target = _safe_login_redirect_target(
+            request,
+            payload.get("next") or request.GET.get("next"),
+        )
 
-        return JsonResponse({"ok": True, "redirect": "/"}, status=200)
+        return JsonResponse({"ok": True, "redirect": redirect_target}, status=200)
 
-    return render(request, "login.html")
+    return render(
+        request,
+        "login.html",
+        context={"next_url": _safe_login_redirect_target(request, request.GET.get("next"))},
+    )
 
 
 @require_POST

@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const payload = {
             username: formData.get("username"),
             password: formData.get("password"),
+            next: formData.get("next") || new URLSearchParams(window.location.search).get("next") || "/",
         };
 
         if (submitBtn) {

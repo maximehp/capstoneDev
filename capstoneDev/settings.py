@@ -165,6 +165,8 @@ AUTHENTICATION_BACKENDS = [
     "core.auth_backends.ActiveDirectoryBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
