@@ -154,7 +154,7 @@ class TemplateCreateApiTests(TestCase):
         self.assertEqual(payload["request"]["windows"]["admin_password"], "[REDACTED]")
 
     @patch("core.views._inspect_url")
-    def test_create_template_vmid_collision_returns_409(self, inspect_mock):
+    def test_create_template_uses_next_sequential_vmid_for_same_user(self, inspect_mock):
         inspect_mock.return_value = _iso_info("https://example.com/ubuntu.iso")
         TemplateDefinition.objects.create(
             owner=self.user,
@@ -174,8 +174,8 @@ class TemplateCreateApiTests(TestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(response.status_code, 409)
-        self.assertIn("collision", response.json()["error"].lower())
+        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.json()["template"]["vmid"], "1536002")
 
     @patch("core.views._inspect_url")
     def test_missing_directory_profile_requires_relogin(self, inspect_mock):

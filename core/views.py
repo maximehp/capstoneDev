@@ -73,7 +73,20 @@ def _template_vmid_for_user(user) -> str:
     ad_rid = getattr(profile, "ad_rid", None)
     if ad_rid is None:
         raise ValueError("Directory profile is missing an AD-backed unique identifier. Sign out and sign back in.")
-    return f"{ad_rid}001"
+    prefix = str(ad_rid)
+    existing_vmids = (
+        TemplateDefinition.objects
+        .filter(owner=user, template_vmid__startswith=prefix)
+        .values_list("template_vmid", flat=True)
+    )
+    max_sequence = 0
+    for existing_vmid in existing_vmids:
+        existing_text = str(existing_vmid or "").strip()
+        suffix = existing_text[len(prefix):]
+        if len(suffix) != 3 or not suffix.isdigit():
+            continue
+        max_sequence = max(max_sequence, int(suffix))
+    return f"{prefix}{max_sequence + 1:03d}"
 
 
 def extract_region(full_html: str, key: str) -> str:
@@ -963,15 +976,6 @@ def create_template_definition(request):
         template_vmid = _template_vmid_for_user(request.user)
     except ValueError as exc:
         return JsonResponse({"ok": False, "error": str(exc)}, status=400)
-    if TemplateDefinition.objects.filter(owner=request.user, template_vmid=template_vmid).exists():
-        return JsonResponse(
-            {
-                "ok": False,
-                "error": f"Template VMID collision: {template_vmid} already exists for this account.",
-            },
-            status=409,
-        )
-
     ansible_options = payload.get("ansible") if isinstance(payload.get("ansible"), dict) else {}
 
     build_payload = {
