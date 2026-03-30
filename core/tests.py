@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
-from .models import TemplateBuildJob, TemplateDefinition
+from .models import DirectoryProfile, TemplateBuildJob, TemplateDefinition
 from .packer_profiles import (
     BUILD_PROFILE_UBUNTU_AUTOINSTALL,
     BUILD_PROFILE_WINDOWS_UNATTEND,
@@ -81,6 +81,23 @@ def _windows_create_payload() -> dict:
     return payload
 
 
+def _directory_profile_for(user, ad_rid: int = 1536, role: str = DirectoryProfile.ROLE_FACULTY):
+    return DirectoryProfile.objects.create(
+        user=user,
+        ad_object_sid=f"S-1-5-21-2396734983-2603881837-2963403330-{ad_rid}",
+        ad_rid=ad_rid,
+        display_name=user.username,
+        distinguished_name=(
+            "CN=User,OU=Faculty,DC=comptech,DC=local"
+            if role == DirectoryProfile.ROLE_FACULTY
+            else "CN=User,OU=Students,DC=comptech,DC=local"
+        ),
+        user_principal_name=f"{user.username}@comptech.local",
+        directory_role=role,
+        raw_attributes={"objectSid": [f"S-1-5-21-2396734983-2603881837-2963403330-{ad_rid}"]},
+    )
+
+
 @override_settings(TEMPLATE_BUILD_WORKDIR=Path("database") / "test-api-jobs")
 class TemplateCreateApiTests(TestCase):
     def setUp(self):
@@ -89,6 +106,7 @@ class TemplateCreateApiTests(TestCase):
         self.workdir.mkdir(parents=True, exist_ok=True)
         user_model = get_user_model()
         self.user = user_model.objects.create_user(username="builder", password="pass12345")
+        _directory_profile_for(self.user, ad_rid=1536, role=DirectoryProfile.ROLE_FACULTY)
         self.client.force_login(self.user)
 
     def tearDown(self):
@@ -113,6 +131,7 @@ class TemplateCreateApiTests(TestCase):
         job = TemplateBuildJob.objects.first()
         self.assertEqual(job.status, TemplateBuildJob.STATUS_QUEUED)
         self.assertEqual(str(job.uuid), body["job"]["id"])
+        self.assertEqual(body["template"]["vmid"], "1536001")
         request_manifest = self.workdir / f"job-{job.uuid}" / "request.json"
         status_manifest = self.workdir / f"job-{job.uuid}" / "status.json"
         self.assertTrue(request_manifest.exists())
@@ -140,7 +159,7 @@ class TemplateCreateApiTests(TestCase):
         TemplateDefinition.objects.create(
             owner=self.user,
             template_name="existing-template",
-            template_vmid=f"100{self.user.id}",
+            template_vmid="1536001",
             build_profile=BUILD_PROFILE_UBUNTU_AUTOINSTALL,
             target_os=TemplateDefinition.TARGET_OS_LINUX,
             iso_url="https://example.com/existing.iso",
@@ -157,6 +176,20 @@ class TemplateCreateApiTests(TestCase):
 
         self.assertEqual(response.status_code, 409)
         self.assertIn("collision", response.json()["error"].lower())
+
+    @patch("core.views._inspect_url")
+    def test_missing_directory_profile_requires_relogin(self, inspect_mock):
+        inspect_mock.return_value = _iso_info("https://example.com/ubuntu.iso")
+        DirectoryProfile.objects.filter(user=self.user).delete()
+
+        response = self.client.post(
+            "/api/template/create/",
+            data=json.dumps(_linux_create_payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("sign out and sign back in", response.json()["error"].lower())
 
     @patch("core.views._inspect_url")
     def test_windows_payload_requires_windows_fields(self, inspect_mock):
@@ -412,6 +445,46 @@ class ActiveDirectoryEndpointTests(TestCase):
         self.assertEqual(user.username, "maxime")
         self.assertEqual(connection_mock.call_count, 2)
         good_conn.unbind.assert_called_once()
+
+    @patch("core.auth_backends.Connection")
+    @patch("core.auth_backends._candidate_endpoints")
+    def test_authenticate_syncs_directory_profile_and_faculty_role(self, endpoints_mock, connection_mock):
+        from .auth_backends import ActiveDirectoryBackend
+
+        endpoints_mock.return_value = [("dc1.local", 389, False)]
+        conn = Mock()
+        conn.bind.return_value = True
+        conn.entries = [Mock(entry_attributes_as_dict={
+            "objectSid": ["S-1-5-21-2396734983-2603881837-2963403330-1693"],
+            "displayName": ["Joel Wiredu"],
+            "givenName": ["Joel"],
+            "sn": ["Wiredu"],
+            "distinguishedName": ["CN=Joel Wiredu,OU=Faculty,DC=comptech,DC=local"],
+            "memberOf": ["CN=Domain Admins,CN=Users,DC=comptech,DC=local"],
+            "userPrincipalName": ["joel.wiredu@comptech.local"],
+            "department": ["Computer Technology"],
+            "company": ["Ball State University"],
+        })]
+        connection_mock.return_value = conn
+
+        with patch.dict(
+            os.environ,
+            {
+                "AD_LDAP_HOST": "dc1.local",
+                "AD_UPN_SUFFIX": "comptech.local",
+                "AD_BASE_DN": "DC=comptech,DC=local",
+            },
+            clear=False,
+        ):
+            user = ActiveDirectoryBackend().authenticate(None, username="joel.wiredu", password="correct-pass")
+
+        self.assertIsNotNone(user)
+        user.refresh_from_db()
+        self.assertTrue(user.is_staff)
+        self.assertEqual(user.first_name, "Joel")
+        profile = user.directory_profile
+        self.assertEqual(profile.ad_rid, 1693)
+        self.assertEqual(profile.directory_role, DirectoryProfile.ROLE_FACULTY)
 
 
 class DatabaseSettingsTests(TestCase):

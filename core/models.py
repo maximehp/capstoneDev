@@ -45,6 +45,42 @@ class SoftwareSource(models.Model):
         return self.label or self.filename or self.url
 
 
+class DirectoryProfile(models.Model):
+    ROLE_UNKNOWN = "unknown"
+    ROLE_STUDENT = "student"
+    ROLE_FACULTY = "faculty"
+    ROLE_CHOICES = [
+        (ROLE_UNKNOWN, "Unknown"),
+        (ROLE_STUDENT, "Student"),
+        (ROLE_FACULTY, "Faculty"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="directory_profile",
+    )
+    ad_object_sid = models.CharField(max_length=128, unique=True)
+    ad_rid = models.PositiveIntegerField(unique=True)
+    display_name = models.CharField(max_length=255, blank=True)
+    distinguished_name = models.CharField(max_length=512, blank=True)
+    user_principal_name = models.CharField(max_length=255, blank=True)
+    department = models.CharField(max_length=255, blank=True)
+    company = models.CharField(max_length=255, blank=True)
+    directory_role = models.CharField(max_length=16, choices=ROLE_CHOICES, default=ROLE_UNKNOWN)
+    raw_attributes = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["directory_role", "updated_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user.username} ({self.ad_rid})"
+
+
 class TemplateDefinition(models.Model):
     TARGET_OS_LINUX = "linux"
     TARGET_OS_WINDOWS = "windows"

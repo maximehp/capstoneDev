@@ -68,6 +68,14 @@ _WINDOWS_FIRMWARE_VALUES = {choice[0] for choice in WINDOWS_FIRMWARE_CHOICES}
 _WINDOWS_IMAGE_SELECTOR_VALUES = {choice[0] for choice in WINDOWS_IMAGE_SELECTOR_CHOICES}
 
 
+def _template_vmid_for_user(user) -> str:
+    profile = getattr(user, "directory_profile", None)
+    ad_rid = getattr(profile, "ad_rid", None)
+    if ad_rid is None:
+        raise ValueError("Directory profile is missing an AD-backed unique identifier. Sign out and sign back in.")
+    return f"{ad_rid}001"
+
+
 def extract_region(full_html: str, key: str) -> str:
     cfg = EXTRACTORS[key]
 
@@ -951,7 +959,10 @@ def create_template_definition(request):
                 status=400,
             )
 
-    template_vmid = f"100{request.user.id}"
+    try:
+        template_vmid = _template_vmid_for_user(request.user)
+    except ValueError as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=400)
     if TemplateDefinition.objects.filter(owner=request.user, template_vmid=template_vmid).exists():
         return JsonResponse(
             {

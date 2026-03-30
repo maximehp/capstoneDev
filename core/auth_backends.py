@@ -5,6 +5,7 @@ import socket
 from ldap3 import Server, Connection, SIMPLE
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
+from .models import DirectoryProfile
 
 logger = logging.getLogger(__name__)
 _LAST_SUCCESS_ENDPOINT: tuple[str, int, bool] | None = None
@@ -139,6 +140,112 @@ def _prioritize_last_success(endpoints: list[tuple[str, int, bool]]) -> list[tup
     return prioritized
 
 
+def _normalize_ad_attributes(entry_attributes: dict) -> dict:
+    normalized = {}
+    for key, value in (entry_attributes or {}).items():
+        if isinstance(value, list):
+            normalized[key] = [str(v) for v in value]
+        elif value in {None, ""}:
+            normalized[key] = []
+        else:
+            normalized[key] = [str(value)]
+    return normalized
+
+
+def _first_attr(attributes: dict, key: str) -> str:
+    values = attributes.get(key) or []
+    return str(values[0]).strip() if values else ""
+
+
+def _extract_sid_rid(sid: str) -> int | None:
+    parts = [part for part in str(sid or "").split("-") if part]
+    if not parts:
+        return None
+    try:
+        return int(parts[-1])
+    except ValueError:
+        return None
+
+
+def _directory_role(attributes: dict) -> str:
+    distinguished_name = _first_attr(attributes, "distinguishedName").lower()
+    member_of = [str(item).lower() for item in (attributes.get("memberOf") or [])]
+
+    if "ou=faculty" in distinguished_name:
+        return DirectoryProfile.ROLE_FACULTY
+    if "ou=students" in distinguished_name:
+        return DirectoryProfile.ROLE_STUDENT
+
+    faculty_markers = ["cn=domain admins", "cn=enterprise admins", "cn=schema admins", "cn=administrators"]
+    if any(marker in group for marker in faculty_markers for group in member_of):
+        return DirectoryProfile.ROLE_FACULTY
+    if any("cn=students" in group for group in member_of):
+        return DirectoryProfile.ROLE_STUDENT
+    return DirectoryProfile.ROLE_UNKNOWN
+
+
+def _sync_user_from_ad(username: str, attributes: dict):
+    object_sid = _first_attr(attributes, "objectSid")
+    ad_rid = _extract_sid_rid(object_sid)
+
+    User = get_user_model()
+    user, _ = User.objects.get_or_create(username=username)
+    user.first_name = _first_attr(attributes, "givenName")
+    user.last_name = _first_attr(attributes, "sn")
+    user.email = _first_attr(attributes, "userPrincipalName")
+    user.is_staff = _directory_role(attributes) == DirectoryProfile.ROLE_FACULTY
+    user.save(update_fields=["first_name", "last_name", "email", "is_staff"])
+
+    if object_sid and ad_rid is not None:
+        DirectoryProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                "ad_object_sid": object_sid,
+                "ad_rid": ad_rid,
+                "display_name": _first_attr(attributes, "displayName"),
+                "distinguished_name": _first_attr(attributes, "distinguishedName"),
+                "user_principal_name": _first_attr(attributes, "userPrincipalName"),
+                "department": _first_attr(attributes, "department"),
+                "company": _first_attr(attributes, "company"),
+                "directory_role": _directory_role(attributes),
+                "raw_attributes": attributes,
+            },
+        )
+
+    return user
+
+
+def _fetch_ad_attributes(conn, base_dn: str, username: str) -> dict:
+    if not base_dn:
+        return {}
+
+    try:
+        conn.search(
+            search_base=base_dn,
+            search_filter=f"(sAMAccountName={username})",
+            attributes=[
+                "objectSid",
+                "displayName",
+                "givenName",
+                "sn",
+                "distinguishedName",
+                "memberOf",
+                "userPrincipalName",
+                "department",
+                "company",
+            ],
+            size_limit=1,
+        )
+        entries = getattr(conn, "entries", None)
+        if not entries:
+            return {}
+        first_entry = entries[0]
+        return _normalize_ad_attributes(first_entry.entry_attributes_as_dict)
+    except Exception as exc:
+        logger.warning("AD attribute sync skipped for %s: %s", username, exc)
+        return {}
+
+
 class ActiveDirectoryBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None):
         global _LAST_SUCCESS_ENDPOINT
@@ -148,6 +255,7 @@ class ActiveDirectoryBackend(BaseBackend):
 
         dc_host = os.environ.get("AD_LDAP_HOST", "").strip() or os.environ.get("AD_HOST", "").strip()
         upn_suffix = os.environ.get("AD_UPN_SUFFIX", "").strip()
+        base_dn = os.environ.get("AD_BASE_DN", "").strip()
         timeout_raw = os.environ.get("AD_LDAP_CONNECT_TIMEOUT", "1").strip()
         try:
             connect_timeout = float(timeout_raw)
@@ -162,6 +270,7 @@ class ActiveDirectoryBackend(BaseBackend):
         errors = []
         connected = False
         credential_rejected = False
+        directory_attributes = {}
         endpoints = _prioritize_last_success(_candidate_endpoints(dc_host, upn_suffix))
         for host, port, use_ssl in endpoints:
             server = Server(host, port=port, use_ssl=use_ssl, connect_timeout=connect_timeout)
@@ -174,6 +283,7 @@ class ActiveDirectoryBackend(BaseBackend):
                     auto_bind=False,
                 )
                 if conn.bind():
+                    directory_attributes = _fetch_ad_attributes(conn, base_dn=base_dn, username=username)
                     conn.unbind()
                     connected = True
                     _LAST_SUCCESS_ENDPOINT = (host, port, use_ssl)
@@ -195,9 +305,7 @@ class ActiveDirectoryBackend(BaseBackend):
                 logger.info("AD credential rejection for %s occurred on first reachable controller.", bind_user)
             return None
 
-        User = get_user_model()
-        user, _ = User.objects.get_or_create(username=username)
-        return user
+        return _sync_user_from_ad(username=username, attributes=directory_attributes)
 
     def get_user(self, user_id):
         User = get_user_model()
