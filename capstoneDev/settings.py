@@ -200,6 +200,7 @@ PACKER_NAS_ISO_DIR = Path(_env_str("PACKER_NAS_ISO_DIR", default=str(PACKER_NAS_
 PACKER_NAS_ARCHIVE_DIR = Path(
     _env_str("PACKER_NAS_ARCHIVE_DIR", default=str(PACKER_NAS_ROOT / "archive"))
 )
+APP_USERDATA_DIR = Path(_env_str("APP_USERDATA_DIR", default=str(PACKER_NAS_ROOT / "UserData")))
 ALLOW_PRIVATE_TEMPLATE_ASSET_URLS = _env_bool("ALLOW_PRIVATE_TEMPLATE_ASSET_URLS", default=True)
 
 PROXMOX_NODE = _env_str("PROXMOX_NODE", default="")

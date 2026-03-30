@@ -13,10 +13,14 @@ Capstone is a Django app for lab VM lifecycle management with AD-backed login an
 ## Docker Compose
 
 The repository now includes a Compose-based runtime with a dedicated Packer worker container:
-- `db`: PostgreSQL
 - `migrate`: one-shot schema/bootstrap step
 - `web`: Django web app image
 - `packer-worker`: `manage.py run_template_build_worker` in its own image with `packer` and ISO tooling
+
+Production/deploy shape assumptions:
+- PostgreSQL is external and must be reachable via `DATABASE_URL`
+- active build workspaces stay local on the Ubuntu host
+- persistent files live on the mounted TrueNAS path
 
 Server/deploy shape:
 ```bash
@@ -37,6 +41,7 @@ Compose expects a local `.env` file. At minimum, set:
 - `SECRET_KEY`
 - `DEBUG=1`
 - `DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost`
+- `DATABASE_URL`
 - `AD_LDAP_HOST`
 - `AD_UPN_SUFFIX`
 - `AD_BASE_DN`
@@ -52,8 +57,12 @@ cp .env.example .env
 
 Compose expects these host paths in the deploy/server shape:
 - `PACKER_JOBS_HOST_PATH` default `/srv/capstone/packer-jobs`
-- `PACKER_CACHE_HOST_PATH` default `/srv/capstone/packer-cache`
 - `PACKER_NAS_HOST_PATH` default `/mnt/capstone-nas`
+
+Recommended TrueNAS-backed runtime paths:
+- `/mnt/capstone-nas/Templates/archives`
+- `/mnt/capstone-nas/Templates/packer-cache`
+- `/mnt/capstone-nas/UserData`
 
 The `packer-worker` image includes `packer`, `xorriso`, `curl`, and `jq`. The `web` image does not include Packer.
 
@@ -150,7 +159,7 @@ The app expects these keys to be set in `.env` or the environment.
 - `SECRET_KEY`
 - `DEBUG`
 - `DJANGO_ALLOWED_HOSTS`
-- `DATABASE_URL` (optional; defaults to SQLite locally, PostgreSQL in Compose)
+- `DATABASE_URL` (optional locally; required for Compose deployment)
 - `PROXMOX_BASE_URL`
 - `PROXMOX_TOKEN_ID`
 - `PROXMOX_TOKEN_SECRET`
@@ -168,10 +177,9 @@ The app expects these keys to be set in `.env` or the environment.
 - `PACKER_PROXMOX_PLUGIN_VERSION`
 - `PACKER_CACHE_DIR`
 - `PACKER_NAS_ROOT`
-- `PACKER_NAS_ISO_DIR`
 - `PACKER_NAS_ARCHIVE_DIR`
+- `APP_USERDATA_DIR`
 - `PACKER_JOBS_HOST_PATH`
-- `PACKER_CACHE_HOST_PATH`
 - `PACKER_NAS_HOST_PATH`
 - `TEMPLATE_BUILD_HEARTBEAT_SECONDS`
 - `TEMPLATE_BUILD_STALE_AFTER_SECONDS`
@@ -214,7 +222,7 @@ The app expects these keys to be set in `.env` or the environment.
 - Job workspaces are created under `TEMPLATE_BUILD_WORKDIR/job-<uuid>/`.
 - The worker updates job heartbeat and marks stale running jobs as failed on restart.
 - The status API does not expose raw container filesystem paths.
-- For Ubuntu server deployment, mount the NAS on the host and bind-mount it into `packer-worker`; the final template artifact still lives in Proxmox storage.
+- For Ubuntu server deployment, mount the NAS on the host and bind-mount it into `web` and `packer-worker`; the final template artifact still lives in Proxmox storage.
 - For local development, run both processes:
   - `.\.venv\Scripts\python.exe manage.py runserver`
   - `.\.venv\Scripts\python.exe manage.py run_template_build_worker`

@@ -7,23 +7,27 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     environment:
       DEBUG: ${DEBUG:-1}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://capstone:capstone@db:5432/capstone}
+      DATABASE_URL: ${DATABASE_URL:-}
     volumes:
       - .:/app
-      - template_jobs:/var/lib/capstone/jobs
+      - type: bind
+        source: ${PACKER_JOBS_HOST_PATH:-./database/packer_templates/jobs}
+        target: /var/lib/capstone/jobs
+      - type: bind
+        source: ${PACKER_NAS_HOST_PATH:-./database/nas}
+        target: /mnt/capstone-nas
 
   packer-worker:
     environment:
       DEBUG: ${DEBUG:-1}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://capstone:capstone@db:5432/capstone}
+      DATABASE_URL: ${DATABASE_URL:-}
       PACKER_BIN: ${PACKER_BIN:-/usr/bin/packer}
       PACKER_ISO_TOOL: ${PACKER_ISO_TOOL:-xorriso}
     volumes:
       - .:/app
-      - template_jobs:/var/lib/capstone/jobs
-      - template_cache:/var/lib/capstone/packer-cache
-      - ./database/nas:/mnt/capstone-nas
-
-volumes:
-  template_jobs:
-  template_cache:
+      - type: bind
+        source: ${PACKER_JOBS_HOST_PATH:-./database/packer_templates/jobs}
+        target: /var/lib/capstone/jobs
+      - type: bind
+        source: ${PACKER_NAS_HOST_PATH:-./database/nas}
+        target: /mnt/capstone-nas
