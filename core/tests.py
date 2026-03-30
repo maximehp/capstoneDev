@@ -399,6 +399,19 @@ class DatabaseSettingsTests(TestCase):
         self.assertEqual(config["PORT"], "5432")
 
 
+class StaticSettingsTests(TestCase):
+    @override_settings(DEBUG=False)
+    def test_static_root_and_manifest_storage_configured(self):
+        from django.conf import settings
+
+        self.assertTrue(str(settings.STATIC_ROOT).endswith("staticfiles"))
+        self.assertIn("whitenoise.middleware.WhiteNoiseMiddleware", settings.MIDDLEWARE)
+        self.assertEqual(
+            settings.STORAGES["staticfiles"]["BACKEND"],
+            "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        )
+
+
 @override_settings(
     TEMPLATE_BUILD_WORKDIR=Path("database") / "test-worker-jobs",
     PACKER_CACHE_DIR=Path("database") / "test-worker-cache",

@@ -8,6 +8,7 @@ services:
     environment:
       DEBUG: ${DEBUG:-1}
       DATABASE_URL: ${DATABASE_URL:-}
+      RUN_COLLECTSTATIC: "0"
     volumes:
       - .:/app
       - type: bind
@@ -23,6 +24,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-}
       PACKER_BIN: ${PACKER_BIN:-/usr/bin/packer}
       PACKER_ISO_TOOL: ${PACKER_ISO_TOOL:-xorriso}
+      RUN_COLLECTSTATIC: "0"
     volumes:
       - .:/app
       - type: bind

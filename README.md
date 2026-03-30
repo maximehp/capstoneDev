@@ -65,6 +65,7 @@ Recommended TrueNAS-backed runtime paths:
 - `/mnt/capstone-nas/UserData`
 
 The `packer-worker` image includes `packer`, `xorriso`, `curl`, and `jq`. The `web` image does not include Packer.
+When `DEBUG=0`, the `web` container now runs `collectstatic` on startup and serves collected assets with WhiteNoise.
 
 ## Development Quickstart
 
