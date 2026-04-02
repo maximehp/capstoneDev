@@ -149,6 +149,14 @@
     var lastBuildPollAt = null;
     var BUILD_STAGE_ORDER = ["queued", "preflight", "init", "validate", "build", "postprocess", "sealing", "done"];
 
+    function getTcReviewIndex() {
+        return tcCount > 1 ? (tcCount - 2) : 0;
+    }
+
+    function getTcBuildIndex() {
+        return tcCount > 0 ? (tcCount - 1) : 0;
+    }
+
     function setScene(scene) {
         if (sceneTrack) {
             sceneTrack.setAttribute("data-scene", scene);
@@ -169,7 +177,7 @@
         tcIndex = i;
         tcTrack.style.setProperty("--content-index", String(i));
 
-        if (tcCount > 0 && i === (tcCount - 1)) {
+        if (tcCount > 0 && i === getTcReviewIndex()) {
             renderOverview(null);
         }
 
@@ -1404,7 +1412,13 @@
             tcCount = tcTrack ? tcTrack.querySelectorAll(".content-page").length : 0;
         }
 
-        if (tcIndex >= (tcCount - 1)) {
+        if (tcIndex === getTcBuildIndex()) {
+            tcNextBtn.textContent = "Close";
+            tcNextBtn.disabled = false;
+            return;
+        }
+
+        if (tcIndex === getTcReviewIndex()) {
             tcNextBtn.textContent = isCreatingTemplate ? "Creating..." : "Create template";
             tcNextBtn.disabled = isCreatingTemplate;
             return;
@@ -1581,6 +1595,7 @@
         activeBuildJobId = null;
         resetBuildHistory();
         setBuildStatus(null);
+        setTcPage(getTcBuildIndex());
         if (tcNextBtn) {
             tcNextBtn.disabled = true;
             tcNextBtn.textContent = "Creating...";
@@ -2092,16 +2107,23 @@
         });
     }
 
-    if (tcNextBtn) {
-        tcNextBtn.addEventListener("click", function () {
+        if (tcNextBtn) {
+            tcNextBtn.addEventListener("click", function () {
             if (tcCount === 0 && tcTrack) {
                 tcCount = tcTrack.querySelectorAll(".content-page").length;
             }
-            if (tcIndex < (tcCount - 1)) {
+            if (tcIndex === getTcBuildIndex()) {
+                closeModal();
+                return;
+            }
+            if (tcIndex === getTcReviewIndex()) {
+                createTemplateDefinition();
+                return;
+            }
+            if (tcIndex < getTcBuildIndex()) {
                 setTcPage(tcIndex + 1);
                 return;
             }
-            createTemplateDefinition();
         });
     }
 

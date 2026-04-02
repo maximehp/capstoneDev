@@ -24,33 +24,19 @@
                                 class="content-track"
                                 style="--content-index: 0; --content-count: 1;"
                             >
-                                <section class="content-page content-page-vm-home">
+                                <section class="content-page">
                                     <div class="step-block">
-                                        <div class="step-block-title">Templates</div>
+                                        <div class="step-block-title">Template</div>
                                     </div>
 
-                                    <div class="vm-choice-grid">
-                                        <section class="vm-choice-panel">
-                                            <div class="vm-choice-kicker">Existing template</div>
-                                            <h3 class="vm-choice-title">Use a saved template</h3>
-                                            <p class="vm-choice-desc">Select an existing template once template inventory is connected to this flow.</p>
+                                    <button id="select-template" type="button" class="select-box" disabled>
+                                        <span class="select-box-text">Select template</span>
+                                        <span class="select-box-caret">&#9662;</span>
+                                    </button>
 
-                                            <button id="select-template" type="button" class="select-box" disabled>
-                                                <span class="select-box-text">Select template</span>
-                                                <span class="select-box-caret">&#9662;</span>
-                                            </button>
-                                        </section>
-
-                                        <section class="vm-choice-panel vm-choice-panel-accent">
-                                            <div class="vm-choice-kicker">Template builder</div>
-                                            <h3 class="vm-choice-title">Create a new template</h3>
-                                            <p class="vm-choice-desc">Open the template builder in its own panel and walk through ISO, software, hardware, networking, and live build progress.</p>
-
-                                            <button id="to-tc" type="button" class="btn btn-primary btn-full">
-                                                Open template builder
-                                            </button>
-                                        </section>
-                                    </div>
+                                    <button id="to-tc" type="button" class="btn btn-primary btn-full">
+                                        Create a template
+                                    </button>
                                 </section>
                             </div>
                         </div>

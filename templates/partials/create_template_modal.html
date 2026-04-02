@@ -10,10 +10,10 @@
 
     <div class="modal-body">
         <div class="lane-content-viewport">
-            <div
+                <div
                 id="tc-track"
                 class="content-track"
-                style="--content-index: 0; --content-count: 5;"
+                style="--content-index: 0; --content-count: 6;"
                 data-content-index="0"
             >
                 <!-- TC1: OS (ISO source) -->
@@ -269,7 +269,18 @@
                         </div>
 
                         <div id="tc-overview" class="overview-list"></div>
+                    </div>
+                </section>
+
+                <!-- TC6: Build progress -->
+                <section class="content-page" aria-label="Build progress">
+                    <div class="step-block">
+                        <div class="step-block-title">Build progress</div>
+                    </div>
+
+                    <div class="form-stack">
                         <div id="tc-create-status" class="hint muted" aria-live="polite"></div>
+
                         <div id="tc-build-status" class="build-status-shell hidden">
                             <div class="build-status-hero">
                                 <div class="build-status-copy">
