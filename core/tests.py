@@ -225,6 +225,23 @@ class TemplateCreateApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("DHCP-ready", response.json()["error"])
 
+    @override_settings(TEMPLATE_CREATION_POLICY="faculty_only")
+    @patch("core.views._inspect_url")
+    def test_student_cannot_create_template_when_policy_is_faculty_only(self, inspect_mock):
+        inspect_mock.return_value = _iso_info("https://example.com/ubuntu.iso")
+        student = get_user_model().objects.create_user(username="student-builder", password="pass12345")
+        _directory_profile_for(student, ad_rid=1801, role=DirectoryProfile.ROLE_STUDENT)
+        self.client.force_login(student)
+
+        response = self.client.post(
+            "/api/template/create/",
+            data=json.dumps(_linux_create_payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "Only faculty can create templates.")
+
 
 class TemplateStatusApiTests(TestCase):
     def setUp(self):
@@ -302,6 +319,76 @@ class LoginRedirectTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], "/settings/")
+
+    def test_logout_clears_session_and_redirects_to_login(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post("/logout/", follow=False)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/login/")
+        response = self.client.get("/", follow=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/?next=/", response["Location"])
+
+
+@override_settings(
+    STORAGES={
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+)
+class SettingsViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(
+            username="settings-user",
+            password="pass12345",
+            first_name="Ada",
+            last_name="Lovelace",
+            email="ada@comptech.local",
+        )
+        DirectoryProfile.objects.create(
+            user=self.user,
+            ad_object_sid="S-1-5-21-2396734983-2603881837-2963403330-1542",
+            ad_rid=1542,
+            display_name="Ada Lovelace",
+            distinguished_name="CN=Ada Lovelace,OU=Faculty,DC=comptech,DC=local",
+            user_principal_name="ada@comptech.local",
+            department="Computer Science",
+            directory_role=DirectoryProfile.ROLE_FACULTY,
+            raw_attributes={},
+        )
+
+    def test_settings_page_shows_read_only_account_and_logout(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get("/settings/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Account")
+        self.assertContains(response, "Read only")
+        self.assertContains(response, "Ada Lovelace")
+        self.assertContains(response, "ada@comptech.local")
+        self.assertContains(response, "Computer Science")
+        self.assertContains(response, "Allowed")
+        self.assertContains(response, "Log out")
+
+    def test_settings_fragment_includes_general_account_data(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get("/settings/", HTTP_X_REQUESTED_WITH="fetch")
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["title"], "Capstone Settings")
+        self.assertIn("Ada Lovelace", body["html"])
+        self.assertIn("Log out", body["html"])
 
 
 class VmStartApiTests(TestCase):

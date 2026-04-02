@@ -36,7 +36,7 @@ _FIXED_LINUX_PASSWORD_HASH = "$6$rounds=4096$capstone$0ylvD6QBGzb62LF8A3BnQUwpsO
 
 
 def template_creation_allowed(user) -> bool:
-    policy = getattr(settings, "TEMPLATE_CREATION_POLICY", "allow_all")
+    policy = getattr(settings, "TEMPLATE_CREATION_POLICY", "faculty_only")
     if policy == "faculty_only":
         return bool(getattr(user, "is_staff", False))
     return True

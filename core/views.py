@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 import requests
 from django.conf import settings
 from django.contrib.admin.utils import unquote
-from django.contrib.auth import authenticate, login as django_login
+from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -143,7 +143,12 @@ def home(request):
 
 @login_required
 def settings(request):
-    context = {}
+    directory_profile = getattr(request.user, "directory_profile", None)
+    can_create_templates = template_creation_allowed(request.user)
+    context = {
+        "directory_profile": directory_profile,
+        "can_create_templates": can_create_templates,
+    }
 
     if _wants_fragment(request):
         html = render(request, "settings.html", context=context).content.decode("utf-8")
@@ -158,6 +163,14 @@ def settings(request):
         )
 
     return render(request, "settings.html", context=context)
+
+
+@require_POST
+@login_required
+@csrf_protect
+def logout_view(request):
+    django_logout(request)
+    return redirect("login")
 
 
 def _wants_json(request) -> bool:

@@ -25,7 +25,78 @@
     <section class="settings-content">
         <div class="settings-panel" id="settings-general">
             <h2>General</h2>
-            <p>General account and system preferences will live here.</p>
+            <p>Your account is managed through Active Directory. Identity and access details shown here are read-only and update when you sign in again.</p>
+
+            <div class="setting-card">
+                <div class="setting-card-header">
+                    <h3>Account</h3>
+                    <span class="setting-badge">Read only</span>
+                </div>
+
+                <div class="setting-grid">
+                    <div class="setting-field">
+                        <span class="setting-label">Display name</span>
+                        <span class="setting-value">{{ directory_profile.display_name|default:user.get_full_name|default:user.username }}</span>
+                    </div>
+                    <div class="setting-field">
+                        <span class="setting-label">Username</span>
+                        <span class="setting-value">{{ user.username }}</span>
+                    </div>
+                    <div class="setting-field">
+                        <span class="setting-label">Email / UPN</span>
+                        <span class="setting-value">{{ directory_profile.user_principal_name|default:user.email|default:"Not available" }}</span>
+                    </div>
+                    <div class="setting-field">
+                        <span class="setting-label">Department</span>
+                        <span class="setting-value">{{ directory_profile.department|default:"Not available" }}</span>
+                    </div>
+                </div>
+
+                <p class="setting-note">To change account details, update them in Active Directory and then sign out and back in.</p>
+            </div>
+
+            <div class="setting-card">
+                <div class="setting-card-header">
+                    <h3>Access</h3>
+                </div>
+
+                <div class="setting-grid">
+                    <div class="setting-field">
+                        <span class="setting-label">Directory role</span>
+                        <span class="setting-value">{{ directory_profile.get_directory_role_display|default:"Unknown" }}</span>
+                    </div>
+                    <div class="setting-field">
+                        <span class="setting-label">Template creation</span>
+                        <span class="setting-value">
+                            {% if can_create_templates %}
+                                Allowed
+                            {% else %}
+                                Faculty only
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <p class="setting-note">
+                    {% if can_create_templates %}
+                        Your account currently has faculty-level template creation access.
+                    {% else %}
+                        All authenticated users can manage VMs, but only faculty can create templates.
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="setting-row setting-row-stack">
+                <div class="setting-text">
+                    <div class="setting-title">Session</div>
+                    <div class="setting-desc">Sign out of this browser session. You will need to authenticate with Active Directory again.</div>
+                </div>
+
+                <form method="post" action="{% url 'logout' %}" class="settings-action-group">
+                    {% csrf_token %}
+                    <button type="submit" class="settings-button settings-button-danger">Log out</button>
+                </form>
+            </div>
         </div>
 
         <div class="settings-panel hidden" id="settings-appearance">

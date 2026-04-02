@@ -190,9 +190,9 @@ STORAGES = {
 }
 
 # Template/Packer runtime settings
-TEMPLATE_CREATION_POLICY = _env_str("TEMPLATE_CREATION_POLICY", default="allow_all").lower()
+TEMPLATE_CREATION_POLICY = _env_str("TEMPLATE_CREATION_POLICY", default="faculty_only").lower()
 if TEMPLATE_CREATION_POLICY not in {"allow_all", "faculty_only"}:
-    TEMPLATE_CREATION_POLICY = "allow_all"
+    TEMPLATE_CREATION_POLICY = "faculty_only"
 
 TEMPLATE_BUILD_WORKDIR = Path(
     _env_str("TEMPLATE_BUILD_WORKDIR", default=str(BASE_DIR / "database" / "packer_templates" / "jobs"))

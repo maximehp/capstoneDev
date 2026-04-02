@@ -168,7 +168,7 @@ The app expects these keys to be set in `.env` or the environment.
 - `AD_LDAP_HOST`
 - `AD_UPN_SUFFIX`
 - `AD_BASE_DN`
-- `TEMPLATE_CREATION_POLICY` (`allow_all` default, `faculty_only` optional)
+- `TEMPLATE_CREATION_POLICY` (`faculty_only` default, `allow_all` optional)
 - `TEMPLATE_BUILD_WORKDIR`
 - `TEMPLATE_BUILD_POLL_SECONDS`
 - `TEMPLATE_BUILD_MAX_TIMEOUT_SEC`
@@ -192,7 +192,7 @@ The app expects these keys to be set in `.env` or the environment.
 - ISO source URLs are unrestricted.
 - `DATABASE_URL` supports `sqlite:///...` and `postgresql://...`.
 - Template VMID policy: `"100" + user.id` as a string.
-- Template creation policy is configurable with `TEMPLATE_CREATION_POLICY` (`allow_all` default, `faculty_only` optional).
+- Template creation policy is configurable with `TEMPLATE_CREATION_POLICY` (`faculty_only` default, `allow_all` optional).
 - Template wizard currently uses explicit build profiles:
   - `ubuntu_autoinstall`
   - `debian_preseed`

@@ -136,6 +136,78 @@
     border-top: 1px solid rgba(var(--contrast), 0.12);
 }
 
+.setting-row-stack {
+    align-items: flex-start;
+}
+
+.setting-card {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(var(--contrast), 0.12);
+    background: rgba(var(--tertiary-color), 0.12);
+}
+
+.setting-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.setting-card-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: rgba(var(--text), 0.94);
+}
+
+.setting-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(var(--contrast), 0.12);
+    background: rgba(var(--primary-color), 0.18);
+    color: rgba(var(--text), 0.88);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.setting-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.setting-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.setting-label {
+    font-size: 0.83rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(var(--text), 0.62);
+}
+
+.setting-value {
+    color: rgba(var(--text), 0.94);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.setting-note {
+    margin-top: 14px;
+    font-size: 0.95rem;
+    color: rgba(var(--text), 0.78);
+}
+
 .setting-text {
     display: flex;
     flex-direction: column;
@@ -149,6 +221,37 @@
 .setting-desc {
     opacity: 0.8;
     font-size: 0.95rem;
+}
+
+.settings-action-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-button {
+    border: 1px solid rgba(var(--contrast), 0.12);
+    border-radius: 12px;
+    padding: 10px 16px;
+    background: rgba(var(--primary-color), 0.22);
+    color: rgba(var(--text), 0.96);
+    font-size: 0.95rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: transform 120ms ease, filter 120ms ease, background 140ms ease;
+}
+
+.settings-button:hover {
+    filter: brightness(1.05);
+}
+
+.settings-button:active {
+    transform: scale(0.99);
+}
+
+.settings-button-danger {
+    background: rgba(180, 48, 48, 0.22);
+    border-color: rgba(180, 48, 48, 0.35);
 }
 
 /* Segmented theme selector with sliding thumb */
@@ -229,5 +332,19 @@
     .settings-layout {
         grid-template-columns: 1fr;
         height: auto;
+    }
+
+    .setting-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .setting-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .segmented {
+        min-width: 0;
+        width: 100%;
     }
 }

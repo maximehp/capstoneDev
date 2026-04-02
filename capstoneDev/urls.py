@@ -23,6 +23,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("settings/", views.settings, name="settings"),
     path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
     path("api/vm/start/", views.start_vm, name="start_vm"),
     path("api/iso/inspect", views.iso_inspect, name="iso_inspect_no_slash"),
     path("api/iso/inspect/", views.iso_inspect, name="iso_inspect"),
