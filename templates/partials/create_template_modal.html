@@ -270,23 +270,63 @@
 
                         <div id="tc-overview" class="overview-list"></div>
                         <div id="tc-create-status" class="hint muted" aria-live="polite"></div>
-                        <div id="tc-build-status" class="details-card hidden">
-                            <div class="details-row">
-                                <div class="details-k">Build status</div>
-                                <div id="tc-build-status-text" class="details-v">queued</div>
+                        <div id="tc-build-status" class="build-status-shell hidden">
+                            <div class="build-status-hero">
+                                <div class="build-status-copy">
+                                    <div class="build-status-kicker">Build progress</div>
+                                    <div id="tc-build-stage-heading" class="build-status-heading">Waiting to start</div>
+                                    <div id="tc-build-stage-desc" class="build-status-desc">Queueing the build job and waiting for the worker to pick it up.</div>
+                                </div>
+                                <div class="build-status-badges">
+                                    <span id="tc-build-status-text" class="build-status-badge">queued</span>
+                                    <span id="tc-build-eta-text" class="build-status-badge build-status-badge-muted">ETA unknown</span>
+                                </div>
                             </div>
-                            <div class="details-row">
-                                <div class="details-k">Build stage</div>
-                                <div id="tc-build-stage-text" class="details-v">queued</div>
+
+                            <div class="build-status-metrics">
+                                <div class="build-metric">
+                                    <div class="build-metric-label">Current action</div>
+                                    <div id="tc-build-action-text" class="build-metric-value">Preparing build request</div>
+                                </div>
+                                <div class="build-metric">
+                                    <div class="build-metric-label">Elapsed</div>
+                                    <div id="tc-build-elapsed-text" class="build-metric-value">0s</div>
+                                </div>
+                                <div class="build-metric">
+                                    <div class="build-metric-label">Last checked</div>
+                                    <div id="tc-build-updated-text" class="build-metric-value">Pending</div>
+                                </div>
                             </div>
-                            <div class="details-row">
-                                <div class="details-k">Last error</div>
-                                <div id="tc-build-error-text" class="details-v">-</div>
+
+                            <div class="build-section">
+                                <div class="build-section-title">Stage timeline</div>
+                                <div id="tc-build-progress" class="build-progress-list"></div>
+                            </div>
+
+                            <div class="build-section">
+                                <div class="build-section-title">Recent activity</div>
+                                <div id="tc-build-activity" class="build-activity-list"></div>
+                            </div>
+
+                            <div class="build-section">
+                                <div class="build-section-title">Worker events</div>
+                                <div id="tc-build-events" class="build-activity-list"></div>
+                            </div>
+
+                            <div class="build-section">
+                                <div class="build-section-title">Preflight checks</div>
+                                <div id="tc-build-preflight" class="build-preflight-list"></div>
+                            </div>
+
+                            <div class="build-section">
+                                <div class="build-section-title">Last error</div>
+                                <div id="tc-build-error-text" class="build-error-box">No errors reported.</div>
                             </div>
                         </div>
-                        <div class="field software-list-field">
+
+                        <div class="field build-results-field">
                             <span class="field-label">Software install results</span>
-                            <div id="tc-build-results" class="saved-software-box"></div>
+                            <div id="tc-build-results" class="build-results-box"></div>
                         </div>
                     </div>
                 </section>
