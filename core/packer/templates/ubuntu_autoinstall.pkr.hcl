@@ -53,10 +53,11 @@ source "proxmox-iso" "ubuntu" {
   }
 
   additional_iso_files {
-    type     = "ide"
-    cd_files = [var.user_data_path, var.meta_data_path]
-    cd_label = "cidata"
-    unmount  = true
+    type             = "ide"
+    cd_files         = [var.user_data_path, var.meta_data_path]
+    cd_label         = "cidata"
+    iso_storage_pool = var.iso_storage_pool
+    unmount          = true
   }
 
   network_adapters {

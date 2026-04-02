@@ -67,10 +67,11 @@ source "proxmox-iso" "windows" {
   }
 
   additional_iso_files {
-    type     = "ide"
-    cd_files = [var.autounattend_path]
-    cd_label = "AUTOUNATTEND"
-    unmount  = true
+    type             = "ide"
+    cd_files         = [var.autounattend_path]
+    cd_label         = "AUTOUNATTEND"
+    iso_storage_pool = var.iso_storage_pool
+    unmount          = true
   }
 
   network_adapters {

@@ -849,6 +849,21 @@ class ArtifactGenerationTests(TestCase):
         self.assertIn("efi_type = \"4m\"", hcl)
         self.assertNotIn("\n    type = \"4m\"\n", hcl)
 
+    def test_ubuntu_cloud_init_cd_uses_iso_storage_pool(self):
+        hcl = (Path("core") / "packer" / "templates" / "ubuntu_autoinstall.pkr.hcl").read_text(encoding="utf-8")
+
+        self.assertIn("cd_label         = \"cidata\"", hcl)
+        self.assertIn("iso_storage_pool = var.iso_storage_pool", hcl)
+
+    def test_windows_autounattend_cd_uses_iso_storage_pool(self):
+        bios_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_bios.pkr.hcl").read_text(encoding="utf-8")
+        uefi_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_uefi.pkr.hcl").read_text(encoding="utf-8")
+
+        self.assertIn("cd_label         = \"AUTOUNATTEND\"", bios_hcl)
+        self.assertIn("iso_storage_pool = var.iso_storage_pool", bios_hcl)
+        self.assertIn("cd_label         = \"AUTOUNATTEND\"", uefi_hcl)
+        self.assertIn("iso_storage_pool = var.iso_storage_pool", uefi_hcl)
+
     def test_log_redaction_masks_secret_values(self):
         redacted = _redact_text("token=secret-value password=abc123", ["secret-value", "abc123"])
 

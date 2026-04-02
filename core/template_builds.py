@@ -656,14 +656,12 @@ def _write_packer_vars_file(
         "template_vmid": int(payload.get("template_vmid") or 0),
         "iso_url": str(payload.get("iso_url") or "").strip(),
         "iso_checksum": str(payload.get("iso_checksum") or "none"),
-        "target_os": target_os,
         "cpu": int(hardware.get("cpu") or 2),
         "ram_mb": int(hardware.get("ram_gb") or 4) * 1024,
         "disk_gb": int(hardware.get("disk_gb") or 32),
         "bridge": str(network.get("bridge") or "vmbr0"),
         "vlan": int(network.get("vlan") or 0),
         "bootstrap_script": str(bootstrap_script.resolve()),
-        "software_result_marker": "CAPSTONE_ITEM_RESULT",
     }
     vars_payload.update(profile_context)
 
