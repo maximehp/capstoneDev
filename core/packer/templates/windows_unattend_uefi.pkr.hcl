@@ -64,6 +64,7 @@ source "proxmox-iso" "windows" {
     iso_url          = var.iso_url
     iso_checksum     = var.iso_checksum
     iso_storage_pool = var.iso_storage_pool
+    iso_download_pve = true
     unmount          = true
   }
 
@@ -72,6 +73,7 @@ source "proxmox-iso" "windows" {
     iso_url          = var.windows_virtio_iso_url
     iso_checksum     = "none"
     iso_storage_pool = var.iso_storage_pool
+    iso_download_pve = true
     unmount          = true
   }
 

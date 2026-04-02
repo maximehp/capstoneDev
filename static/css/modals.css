@@ -337,6 +337,58 @@ Each slide:
     font-size: 14px;
 }
 
+.content-page-vm-home {
+    align-content: stretch;
+}
+
+.vm-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.vm-choice-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(var(--contrast), 0.14);
+    background:
+        linear-gradient(180deg, rgba(var(--tertiary-color), 0.14), rgba(var(--tertiary-color), 0.08)),
+        rgba(var(--tertiary-color), 0.08);
+    padding: 18px;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    min-width: 0;
+}
+
+.vm-choice-panel-accent {
+    border-color: rgba(var(--primary-color), 0.28);
+    background:
+        linear-gradient(180deg, rgba(var(--primary-color), 0.16), rgba(var(--tertiary-color), 0.08)),
+        rgba(var(--tertiary-color), 0.08);
+    box-shadow: 0 14px 32px rgba(var(--tertiary-color), 0.18);
+}
+
+.vm-choice-kicker {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(var(--text), 0.56);
+}
+
+.vm-choice-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: rgba(var(--text), 0.95);
+}
+
+.vm-choice-desc {
+    margin: 0 0 8px 0;
+    color: rgba(var(--text), 0.76);
+    line-height: 1.5;
+}
+
 /* =========================
    PLACEHOLDER PANEL
    ========================= */
@@ -1250,6 +1302,10 @@ select.field-control::-ms-expand {
 }
 
 @media (max-width: 760px) {
+    .vm-choice-grid {
+        grid-template-columns: 1fr;
+    }
+
     .build-status-hero,
     .build-activity-top,
     .build-result-top {

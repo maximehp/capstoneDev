@@ -855,6 +855,7 @@ class ArtifactGenerationTests(TestCase):
 
         self.assertIn("cd_label         = \"cidata\"", hcl)
         self.assertIn("iso_storage_pool = var.iso_storage_pool", hcl)
+        self.assertIn("iso_download_pve = true", hcl)
 
     def test_windows_autounattend_cd_uses_iso_storage_pool(self):
         bios_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_bios.pkr.hcl").read_text(encoding="utf-8")
@@ -864,6 +865,17 @@ class ArtifactGenerationTests(TestCase):
         self.assertIn("iso_storage_pool = var.iso_storage_pool", bios_hcl)
         self.assertIn("cd_label         = \"AUTOUNATTEND\"", uefi_hcl)
         self.assertIn("iso_storage_pool = var.iso_storage_pool", uefi_hcl)
+
+    def test_boot_and_windows_driver_isos_download_on_pve_node(self):
+        ubuntu_hcl = (Path("core") / "packer" / "templates" / "ubuntu_autoinstall.pkr.hcl").read_text(encoding="utf-8")
+        debian_hcl = (Path("core") / "packer" / "templates" / "debian_preseed.pkr.hcl").read_text(encoding="utf-8")
+        bios_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_bios.pkr.hcl").read_text(encoding="utf-8")
+        uefi_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_uefi.pkr.hcl").read_text(encoding="utf-8")
+
+        self.assertIn("iso_download_pve = true", ubuntu_hcl)
+        self.assertIn("iso_download_pve = true", debian_hcl)
+        self.assertGreaterEqual(bios_hcl.count("iso_download_pve = true"), 2)
+        self.assertGreaterEqual(uefi_hcl.count("iso_download_pve = true"), 2)
 
     def test_log_redaction_masks_secret_values(self):
         redacted = _redact_text("token=secret-value password=abc123", ["secret-value", "abc123"])
