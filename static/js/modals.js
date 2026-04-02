@@ -414,6 +414,20 @@
         return formatDuration((finishedAt || new Date()).getTime() - startedAt.getTime());
     }
 
+    function getFailurePhaseLabel() {
+        for (var i = 0; i < buildHistory.length; i++) {
+            var entry = buildHistory[i];
+            var status = String(entry && entry.status || "").toLowerCase();
+            if (status === "failed" || status === "canceled") {
+                continue;
+            }
+            if (entry && entry.title) {
+                return String(entry.title).toLowerCase();
+            }
+        }
+        return "the build";
+    }
+
     function getBuildSnapshotKey(payload) {
         return [
             String(payload && payload.status || ""),
@@ -533,11 +547,19 @@
         }
 
         buildEventsBox.innerHTML = items.map(function (event) {
-            var detail = Array.isArray(event.data) ? event.data.join(" | ") : "";
+            var data = Array.isArray(event.data) ? event.data : [];
+            var title = titleCaseWords(event.type || "event");
+            var detail = data.join(" | ");
+
+            if (String(event.type || "").toLowerCase() === "ui" && data.length > 0) {
+                title = titleCaseWords(data[0] || "console");
+                detail = data.slice(1).join(" | ");
+            }
+
             return '' +
                 '<div class="build-activity-item">' +
                     '<div class="build-activity-top">' +
-                        '<div class="build-activity-title">' + escapeHtml(titleCaseWords(event.type || "event")) + '</div>' +
+                        '<div class="build-activity-title">' + escapeHtml(title) + '</div>' +
                         '<div class="build-activity-time">' + escapeHtml(event.timestamp || "-") + '</div>' +
                     '</div>' +
                     '<div class="build-activity-detail">' + escapeHtml(detail || "No additional event data") + '</div>' +
@@ -1645,7 +1667,7 @@
                     return;
                 }
                 if (job.status === "failed" || job.status === "canceled") {
-                    setCreateStatus("Build " + job.status + " during " + meta.label.toLowerCase() + ".", "error");
+                    setCreateStatus("Build " + job.status + " during " + getFailurePhaseLabel() + ".", "error");
                     stopBuildPolling();
                     return;
                 }

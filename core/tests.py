@@ -18,6 +18,7 @@ from .packer_profiles import (
 )
 from .template_builds import (
     _redact_text,
+    _derive_machine_readable_error_summary,
     _render_windows_script,
     _render_windows_unattend,
     enqueue_template_build,
@@ -869,3 +870,24 @@ class ArtifactGenerationTests(TestCase):
 
         self.assertNotIn("secret-value", redacted)
         self.assertNotIn("abc123", redacted)
+
+    def test_machine_readable_error_summary_prefers_specific_error_event(self):
+        summary = _derive_machine_readable_error_summary(
+            "Command failed (1): /usr/bin/packer build",
+            [
+                {"type": "ui", "data": ["say", "\\n==> Wait completed after 1 minute 37 seconds"]},
+                {"type": "error", "data": ["501 for data too large"]},
+            ],
+        )
+
+        self.assertEqual(summary, "501 for data too large")
+
+    def test_machine_readable_error_summary_falls_back_when_no_error_event_exists(self):
+        summary = _derive_machine_readable_error_summary(
+            "Command failed (1): /usr/bin/packer build",
+            [
+                {"type": "ui", "data": ["say", "\\n==> Build starting"]},
+            ],
+        )
+
+        self.assertEqual(summary, "Command failed (1): /usr/bin/packer build")

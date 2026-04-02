@@ -462,7 +462,7 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         job.stage = TemplateBuildJob.STAGE_DONE
         job.finished_at = timezone.now()
         job.exit_code = 1 if job.exit_code is None else job.exit_code
-        job.error_summary = str(exc)
+        job.error_summary = _derive_machine_readable_error_summary(str(exc), machine_readable_events)
         job.result_payload = {
             "software_results": software_results,
             "preflight": preflight_results,
@@ -716,6 +716,36 @@ def _parse_machine_readable_event(line: str) -> dict | None:
         "type": parts[2],
         "data": parts[3:],
     }
+
+
+def _clean_machine_event_text(value: str) -> str:
+    text = str(value or "").replace("\\n", " ").replace("\\r", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _derive_machine_readable_error_summary(
+    fallback: str,
+    machine_readable_events: list[dict],
+) -> str:
+    for event in reversed(machine_readable_events or []):
+        event_type = str(event.get("type") or "").strip().lower()
+        data = event.get("data") if isinstance(event.get("data"), list) else []
+
+        if event_type == "error":
+            detail = _clean_machine_event_text(" | ".join(str(item) for item in data))
+            if detail:
+                return detail
+
+        if event_type == "ui" and data:
+            ui_kind = str(data[0] or "").strip().lower()
+            if ui_kind != "error":
+                continue
+            detail = _clean_machine_event_text(" | ".join(str(item) for item in data[1:]))
+            if detail:
+                return detail
+
+    return fallback
 
 
 def _archive_job_bundle(job: TemplateBuildJob, paths: dict[str, Path], payload: dict) -> Path | None:
