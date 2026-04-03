@@ -131,6 +131,7 @@
     var buildEventsBox = qs("#tc-build-events");
     var buildPreflightBox = qs("#tc-build-preflight");
     var buildAssetsBox = qs("#tc-build-assets");
+    var buildTransferBox = qs("#tc-build-transfer");
     var buildErrorText = qs("#tc-build-error-text");
     var buildResultsBox = qs("#tc-build-results");
 
@@ -290,6 +291,13 @@
         } catch (err) {
             return dateValue.toLocaleTimeString();
         }
+    }
+
+    function formatRate(bytesPerSecond) {
+        if (typeof bytesPerSecond !== "number" || !isFinite(bytesPerSecond) || bytesPerSecond <= 0) {
+            return "-";
+        }
+        return bytesToHuman(bytesPerSecond) + "/s";
     }
 
     function titleCaseWords(value) {
@@ -642,6 +650,53 @@
         }).join("");
     }
 
+    function renderBuildTransfer(progress) {
+        if (!buildTransferBox) {
+            return;
+        }
+
+        if (!progress) {
+            buildTransferBox.innerHTML = '<div class="build-empty">Live ISO transfer progress will appear here once staging begins.</div>';
+            return;
+        }
+
+        var percent = (typeof progress.percent === "number" && isFinite(progress.percent)) ? Math.max(0, Math.min(100, progress.percent)) : null;
+        var downloaded = bytesToHuman(progress.downloaded_bytes);
+        var expected = bytesToHuman(progress.expected_bytes);
+        var amount = expected !== "-" ? (downloaded + " / " + expected) : downloaded;
+        var sub = [
+            progress.iso_file || "",
+            progress.local_path || "",
+            progress.final_url || progress.source_url || ""
+        ].filter(function (value) { return !!value; }).join(" | ");
+
+        buildTransferBox.innerHTML = '' +
+            '<div class="build-transfer-card">' +
+                '<div class="build-transfer-meta">' +
+                    '<div class="build-transfer-title">' + escapeHtml(titleCaseWords(progress.role || "iso")) + ': ' + escapeHtml(progress.filename || "Preparing file") + '</div>' +
+                    '<div class="build-status-chip is-' + escapeHtml(progress.status === "failed" ? "error" : (progress.status === "downloading" ? "running" : "ok")) + '">' + escapeHtml(progress.status || "pending") + '</div>' +
+                '</div>' +
+                '<div class="build-transfer-sub">' + escapeHtml(sub || "Waiting for transfer details.") + '</div>' +
+                '<div class="build-transfer-progress">' +
+                    '<div class="build-transfer-progress-bar" style="width:' + escapeHtml(percent === null ? 0 : percent) + '%"></div>' +
+                '</div>' +
+                '<div class="build-transfer-stats">' +
+                    '<div class="build-transfer-stat">' +
+                        '<div class="build-transfer-stat-label">Progress</div>' +
+                        '<div class="build-transfer-stat-value">' + escapeHtml(percent === null ? "Unknown" : (String(percent) + "%")) + '</div>' +
+                    '</div>' +
+                    '<div class="build-transfer-stat">' +
+                        '<div class="build-transfer-stat-label">Transferred</div>' +
+                        '<div class="build-transfer-stat-value">' + escapeHtml(amount) + '</div>' +
+                    '</div>' +
+                    '<div class="build-transfer-stat">' +
+                        '<div class="build-transfer-stat-label">Speed</div>' +
+                        '<div class="build-transfer-stat-value">' + escapeHtml(formatRate(progress.speed_bytes_per_sec)) + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+    }
+
     function setBuildStatus(payload) {
         if (!buildStatusCard) {
             return;
@@ -680,6 +735,7 @@
             renderBuildEvents([]);
             renderBuildPreflight([]);
             renderBuildAssets([]);
+            renderBuildTransfer(null);
             if (buildResultsBox) {
                 buildResultsBox.innerHTML = '<div class="build-empty">Software installation results will appear here once guest provisioning starts.</div>';
             }
@@ -691,6 +747,7 @@
         buildStatusCard.classList.remove("hidden");
         var targetOs = payload.template && payload.template.target_os ? payload.template.target_os : getTargetOs();
         var meta = getBuildStageMeta(payload.stage, targetOs, payload.status);
+        var isoTransfer = payload.result && payload.result.iso_stage_progress ? payload.result.iso_stage_progress : null;
 
         if (buildStatusText) {
             buildStatusText.textContent = payload.status || "-";
@@ -706,7 +763,11 @@
             buildStageDesc.textContent = meta.detail;
         }
         if (buildActionText) {
-            buildActionText.textContent = meta.action;
+            if (String(payload.stage || "").toLowerCase() === "assets" && isoTransfer && isoTransfer.filename) {
+                buildActionText.textContent = "Staging " + isoTransfer.filename + (typeof isoTransfer.percent === "number" ? (" (" + isoTransfer.percent + "%)") : "");
+            } else {
+                buildActionText.textContent = meta.action;
+            }
         }
         if (buildElapsedText) {
             buildElapsedText.textContent = getBuildElapsedText(payload);
@@ -724,6 +785,7 @@
         renderBuildEvents(payload.result && payload.result.machine_readable_events ? payload.result.machine_readable_events : []);
         renderBuildPreflight(payload.result && payload.result.preflight ? payload.result.preflight : []);
         renderBuildAssets(payload.result && payload.result.staged_isos ? payload.result.staged_isos : []);
+        renderBuildTransfer(isoTransfer);
         renderBuildResults(payload.result && payload.result.software_results ? payload.result.software_results : []);
     }
 

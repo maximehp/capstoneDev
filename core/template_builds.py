@@ -127,6 +127,7 @@ def build_job_api_payload(job: TemplateBuildJob) -> dict:
             "software_results": result_payload.get("software_results", []),
             "preflight": result_payload.get("preflight", []),
             "staged_isos": result_payload.get("staged_isos", []),
+            "iso_stage_progress": result_payload.get("iso_stage_progress"),
             "generated_artifacts": result_payload.get("generated_artifacts", []),
             "machine_readable_events": result_payload.get("machine_readable_events", []),
             "log_available": bool(result_payload.get("log_available")),
@@ -226,6 +227,16 @@ def _write_job_status_manifest(job: TemplateBuildJob):
 def _touch_job_heartbeat(job: TemplateBuildJob):
     job.last_heartbeat_at = timezone.now()
     job.save(update_fields=["last_heartbeat_at", "updated_at"])
+
+
+def _publish_job_progress(job: TemplateBuildJob, paths: dict[str, Path], updates: dict):
+    payload = job.result_payload if isinstance(job.result_payload, dict) else {}
+    payload.update(updates)
+    job.result_payload = payload
+    job.last_heartbeat_at = timezone.now()
+    job.save(update_fields=["result_payload", "last_heartbeat_at", "updated_at"])
+    _write_json(paths["result"], {"job": build_job_api_payload(job)})
+    _write_job_status_manifest(job)
 
 
 def recover_stale_running_jobs() -> int:
@@ -645,6 +656,7 @@ def _stage_single_iso(
     preferred_filename: str,
     log_fp,
     heartbeat_cb: Callable[[], None] | None = None,
+    progress_cb: Callable[[dict], None] | None = None,
 ) -> dict:
     requested_url = str(source_url or "").strip()
     if not requested_url:
@@ -657,6 +669,7 @@ def _stage_single_iso(
     manifest_path = _stage_manifest_path_for(destination)
     existing_manifest = _load_stage_manifest(manifest_path)
     if destination.exists() and _manifest_matches_source(existing_manifest, requested_url):
+        reused_size = destination.stat().st_size if destination.exists() else existing_manifest.get("size_bytes")
         log_fp.write(
             f"iso-stage: role={role} reuse existing source={requested_url} path={destination} storage={iso_storage_pool}\n"
         )
@@ -671,8 +684,26 @@ def _stage_single_iso(
                 "storage_pool": iso_storage_pool,
                 "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
                 "reused": True,
+                "size_bytes": reused_size,
             }
         )
+        if progress_cb:
+            progress_cb(
+                {
+                    "status": "reused",
+                    "role": role,
+                    "filename": destination.name,
+                    "storage_pool": iso_storage_pool,
+                    "source_url": requested_url,
+                    "final_url": reused_payload.get("final_url"),
+                    "local_path": str(destination),
+                    "iso_file": reused_payload["iso_file"],
+                    "downloaded_bytes": reused_size,
+                    "expected_bytes": reused_size,
+                    "percent": 100,
+                    "speed_bytes_per_sec": None,
+                }
+            )
         return reused_payload
 
     if destination.exists():
@@ -693,6 +724,24 @@ def _stage_single_iso(
     content_type = ""
     last_modified = ""
     expected_size = None
+    started = time.monotonic()
+    last_progress_publish = started
+    if progress_cb:
+        progress_cb(
+            {
+                "status": "starting",
+                "role": role,
+                "filename": destination.name,
+                "storage_pool": iso_storage_pool,
+                "source_url": requested_url,
+                "local_path": str(destination),
+                "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
+                "downloaded_bytes": 0,
+                "expected_bytes": None,
+                "percent": None,
+                "speed_bytes_per_sec": None,
+            }
+        )
     try:
         with requests.get(requested_url, stream=True, allow_redirects=True, timeout=_ISO_STAGE_TIMEOUT) as response:
             response.raise_for_status()
@@ -700,6 +749,23 @@ def _stage_single_iso(
             content_type = str(response.headers.get("Content-Type") or "")
             last_modified = str(response.headers.get("Last-Modified") or "")
             expected_size = _parse_content_length(response.headers.get("Content-Length"))
+            if progress_cb:
+                progress_cb(
+                    {
+                        "status": "downloading",
+                        "role": role,
+                        "filename": destination.name,
+                        "storage_pool": iso_storage_pool,
+                        "source_url": requested_url,
+                        "final_url": final_url,
+                        "local_path": str(destination),
+                        "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
+                        "downloaded_bytes": 0,
+                        "expected_bytes": expected_size,
+                        "percent": 0 if expected_size else None,
+                        "speed_bytes_per_sec": None,
+                    }
+                )
 
             with temp_path.open("wb") as handle:
                 for chunk in response.iter_content(chunk_size=_ISO_STAGE_CHUNK_SIZE):
@@ -709,10 +775,50 @@ def _stage_single_iso(
                     bytes_written += len(chunk)
                     if heartbeat_cb:
                         heartbeat_cb()
+                    now = time.monotonic()
+                    if progress_cb and (now - last_progress_publish >= 0.75):
+                        elapsed = max(now - started, 0.001)
+                        percent = None
+                        if expected_size and expected_size > 0:
+                            percent = min(100, int((bytes_written / expected_size) * 100))
+                        progress_cb(
+                            {
+                                "status": "downloading",
+                                "role": role,
+                                "filename": destination.name,
+                                "storage_pool": iso_storage_pool,
+                                "source_url": requested_url,
+                                "final_url": final_url,
+                                "local_path": str(destination),
+                                "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
+                                "downloaded_bytes": bytes_written,
+                                "expected_bytes": expected_size,
+                                "percent": percent,
+                                "speed_bytes_per_sec": int(bytes_written / elapsed),
+                            }
+                        )
+                        last_progress_publish = now
         temp_path.replace(destination)
     except Exception as exc:
         if temp_path.exists():
             temp_path.unlink()
+        if progress_cb:
+            progress_cb(
+                {
+                    "status": "failed",
+                    "role": role,
+                    "filename": destination.name,
+                    "storage_pool": iso_storage_pool,
+                    "source_url": requested_url,
+                    "local_path": str(destination),
+                    "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
+                    "downloaded_bytes": bytes_written,
+                    "expected_bytes": expected_size,
+                    "percent": None,
+                    "speed_bytes_per_sec": None,
+                    "error": str(exc),
+                }
+            )
         raise RuntimeError(
             "Failed to stage ISO for "
             f"{role}: source={requested_url} dest={destination} storage={iso_storage_pool} error={exc}"
@@ -741,6 +847,24 @@ def _stage_single_iso(
     log_fp.flush()
     if heartbeat_cb:
         heartbeat_cb()
+    if progress_cb:
+        elapsed = max(time.monotonic() - started, 0.001)
+        progress_cb(
+            {
+                "status": "completed",
+                "role": role,
+                "filename": destination.name,
+                "storage_pool": iso_storage_pool,
+                "source_url": requested_url,
+                "final_url": final_url,
+                "local_path": str(destination),
+                "iso_file": manifest["iso_file"],
+                "downloaded_bytes": size_bytes,
+                "expected_bytes": expected_size or size_bytes,
+                "percent": 100,
+                "speed_bytes_per_sec": int((size_bytes or 0) / elapsed),
+            }
+        )
     return manifest
 
 
@@ -752,6 +876,36 @@ def _stage_required_isos(
     paths: dict[str, Path],
     log_fp,
 ) -> list[dict]:
+    published: list[dict] = []
+
+    def publish(progress_payload: dict):
+        progress = dict(progress_payload or {})
+        role = str(progress.get("role") or "").strip()
+        if role:
+            items = [item for item in published if str(item.get("role") or "").strip() != role]
+            items.append(
+                {
+                    "role": role,
+                    "filename": progress.get("filename"),
+                    "storage_pool": progress.get("storage_pool"),
+                    "source_url": progress.get("source_url"),
+                    "final_url": progress.get("final_url"),
+                    "local_path": progress.get("local_path"),
+                    "iso_file": progress.get("iso_file"),
+                    "reused": progress.get("status") == "reused",
+                    "size_bytes": progress.get("expected_bytes") or progress.get("downloaded_bytes"),
+                }
+            )
+            published[:] = items
+        _publish_job_progress(
+            job,
+            paths,
+            {
+                "staged_isos": published,
+                "iso_stage_progress": progress,
+            },
+        )
+
     staged = [
         _stage_single_iso(
             role="boot_iso",
@@ -759,6 +913,7 @@ def _stage_required_isos(
             preferred_filename=str(payload.get("iso_filename") or "").strip(),
             log_fp=log_fp,
             heartbeat_cb=lambda: _touch_job_heartbeat(job),
+            progress_cb=publish,
         )
     ]
 
@@ -771,6 +926,7 @@ def _stage_required_isos(
                 preferred_filename=_filename_from_url(str(windows.get("virtio_iso_url") or "").strip()),
                 log_fp=log_fp,
                 heartbeat_cb=lambda: _touch_job_heartbeat(job),
+                progress_cb=publish,
             )
         )
 

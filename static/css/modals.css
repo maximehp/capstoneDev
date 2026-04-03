@@ -814,6 +814,7 @@ select.field-control::-ms-expand {
 .build-progress-list,
 .build-activity-list,
 .build-preflight-list,
+.build-transfer-box,
 .build-results-box {
     display: grid;
     gap: 8px;
@@ -972,6 +973,80 @@ select.field-control::-ms-expand {
 .build-status-chip.is-running {
     background: rgba(var(--primary-color), 0.2);
     border-color: rgba(var(--primary-color), 0.28);
+}
+
+.build-transfer-card {
+    border-radius: 14px;
+    border: 1px solid rgba(var(--contrast), 0.12);
+    background: rgba(var(--tertiary-color), 0.08);
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.build-transfer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.build-transfer-title {
+    color: rgba(var(--text), 0.92);
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.build-transfer-sub {
+    color: rgba(var(--text), 0.7);
+    font-size: 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.build-transfer-progress {
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(var(--tertiary-color), 0.22);
+    border: 1px solid rgba(var(--contrast), 0.08);
+}
+
+.build-transfer-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(var(--primary-color), 0.72), rgba(255, 255, 255, 0.85));
+    transition: width 180ms ease;
+}
+
+.build-transfer-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.build-transfer-stat {
+    border-radius: 12px;
+    border: 1px solid rgba(var(--contrast), 0.1);
+    background: rgba(var(--tertiary-color), 0.08);
+    padding: 10px;
+    display: grid;
+    gap: 4px;
+}
+
+.build-transfer-stat-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(var(--text), 0.56);
+}
+
+.build-transfer-stat-value {
+    color: rgba(var(--text), 0.92);
+    font-weight: 700;
+    font-size: 13px;
+    overflow-wrap: anywhere;
 }
 
 .build-error-box {
@@ -1266,6 +1341,10 @@ select.field-control::-ms-expand {
     }
 
     .build-progress-list {
+        grid-template-columns: 1fr;
+    }
+
+    .build-transfer-stats {
         grid-template-columns: 1fr;
     }
 }

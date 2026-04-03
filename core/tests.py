@@ -289,11 +289,24 @@ class TemplateStatusApiTests(TestCase):
         )
 
     def test_status_visible_to_owner(self):
+        self.job.result_payload = {
+            "iso_stage_progress": {
+                "status": "downloading",
+                "role": "boot_iso",
+                "filename": "ubuntu.iso",
+                "percent": 42,
+                "downloaded_bytes": 420,
+                "expected_bytes": 1000,
+                "speed_bytes_per_sec": 50,
+            }
+        }
+        self.job.save(update_fields=["result_payload", "updated_at"])
         self.client.force_login(self.owner)
         response = self.client.get(f"/api/template/builds/{self.job.uuid}/status/")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["ok"])
         self.assertEqual(response.json()["job"]["template"]["build_profile"], BUILD_PROFILE_UBUNTU_AUTOINSTALL)
+        self.assertEqual(response.json()["job"]["result"]["iso_stage_progress"]["percent"], 42)
         self.assertNotIn("workspace", response.json()["job"]["result"])
         self.assertNotIn("log_path", response.json()["job"]["result"])
 
@@ -867,18 +880,22 @@ class IsoStagingTests(TestCase):
         response.iter_content = Mock(return_value=[b"hello ", b"world"])
         response.raise_for_status = Mock()
 
+        progress_updates = []
         with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds.requests.get", return_value=response):
             staged = _stage_single_iso(
                 role="boot_iso",
                 source_url="https://example.com/ubuntu.iso",
                 preferred_filename="ubuntu.iso",
                 log_fp=log_fp,
+                progress_cb=lambda payload: progress_updates.append(payload),
             )
 
         self.assertFalse(staged["reused"])
         self.assertEqual(staged["iso_file"], "ChirpNAS_ISO_Templates:iso/ubuntu.iso")
         self.assertTrue((self.iso_dir / "ubuntu.iso").exists())
         self.assertTrue((self.iso_dir / "ubuntu.iso.json").exists())
+        self.assertEqual(progress_updates[-1]["status"], "completed")
+        self.assertEqual(progress_updates[-1]["percent"], 100)
 
     def test_stage_single_iso_reuses_existing_manifest(self):
         iso_path = self.iso_dir / "ubuntu.iso"
