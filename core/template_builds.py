@@ -147,12 +147,20 @@ def _job_workspace(job_uuid) -> Path:
     return Path(settings.TEMPLATE_BUILD_WORKDIR) / f"job-{job_uuid}"
 
 
+def _set_shared_permissions(path: Path):
+    try:
+        path.chmod(0o777 if path.is_dir() else 0o666)
+    except OSError:
+        return
+
+
 def _ensure_job_workspace(workspace: Path) -> dict[str, Path]:
     generated_dir = workspace / "generated"
     logs_dir = workspace / "logs"
     results_dir = workspace / "results"
     for path in [workspace, generated_dir, logs_dir, results_dir]:
         path.mkdir(parents=True, exist_ok=True)
+        _set_shared_permissions(path)
     return {
         "workspace": workspace,
         "generated": generated_dir,
@@ -171,7 +179,9 @@ def _ensure_job_workspace(workspace: Path) -> dict[str, Path]:
 
 def _write_json(path: Path, payload: dict | list):
     path.parent.mkdir(parents=True, exist_ok=True)
+    _set_shared_permissions(path.parent)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    _set_shared_permissions(path)
 
 
 def _redact_value(value: str) -> str:
