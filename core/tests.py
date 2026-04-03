@@ -951,25 +951,29 @@ class IsoStagingTests(TestCase):
         self.assertTrue((self.iso_dir / "ubuntu-2.iso").exists())
 
     @patch("core.template_builds._fetch_proxmox_storage")
-    def test_run_preflight_requires_distinct_iso_storage_pool(self, fetch_storage_mock):
-        fetch_storage_mock.return_value = {"storage": "local-lvm", "content": "iso,images", "type": "dir"}
-        with override_settings(PROXMOX_STORAGE_POOL="same-pool", PROXMOX_ISO_STORAGE_POOL="same-pool"):
-            with self.log_path.open("a", encoding="utf-8") as log_fp:
-                with self.assertRaises(RuntimeError):
-                    _run_preflight(BUILD_PROFILE_UBUNTU_AUTOINSTALL, _linux_create_payload(), log_fp)
-
-    @patch("core.template_builds._fetch_proxmox_storage")
-    def test_run_preflight_accepts_iso_capable_storage(self, fetch_storage_mock):
-        fetch_storage_mock.return_value = {
-            "storage": "ChirpNAS_ISO_Templates",
-            "content": "iso,images",
-            "type": "dir",
-        }
-        with override_settings(PACKER_BIN="packer"):
+    def test_run_preflight_accepts_shared_storage_with_iso_and_images(self, fetch_storage_mock):
+        fetch_storage_mock.return_value = {"storage": "ChirpNAS_ISO_Templates", "content": "iso,images", "type": "nfs"}
+        with override_settings(PROXMOX_STORAGE_POOL="ChirpNAS_ISO_Templates", PROXMOX_ISO_STORAGE_POOL="ChirpNAS_ISO_Templates", PACKER_BIN="packer"):
             with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds._detect_iso_tool", return_value="xorriso"), patch("core.template_builds.shutil.which", return_value="/usr/bin/packer"):
                 results = _run_preflight(BUILD_PROFILE_UBUNTU_AUTOINSTALL, _linux_create_payload(), log_fp)
 
         self.assertTrue(any(item["check"] == "iso_storage_pool" for item in results))
+        self.assertTrue(any(item["check"] == "vm_disk_storage_pool" for item in results))
+
+    @patch("core.template_builds._fetch_proxmox_storage")
+    def test_run_preflight_accepts_iso_capable_storage(self, fetch_storage_mock):
+        fetch_storage_mock.side_effect = [
+            {"storage": "ChirpNAS_ISO_Templates", "content": "iso,images", "type": "dir"},
+            {"storage": "Templates", "content": "images,rootdir", "type": "lvmthin"},
+        ]
+        payload = _linux_create_payload()
+        with override_settings(PACKER_BIN="packer"):
+            with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds._detect_iso_tool", return_value="xorriso"), patch("core.template_builds.shutil.which", return_value="/usr/bin/packer"):
+                with override_settings(PROXMOX_STORAGE_POOL="Templates", PROXMOX_ISO_STORAGE_POOL="ChirpNAS_ISO_Templates"):
+                    results = _run_preflight(BUILD_PROFILE_UBUNTU_AUTOINSTALL, payload, log_fp)
+
+        self.assertTrue(any(item["check"] == "iso_storage_pool" for item in results))
+        self.assertTrue(any(item["check"] == "vm_disk_storage_pool" for item in results))
 
 
 class ArtifactGenerationTests(TestCase):

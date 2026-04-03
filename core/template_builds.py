@@ -973,25 +973,34 @@ def _run_preflight(build_profile: str, payload: dict, log_fp) -> list[dict]:
 
     storage_pool = str(getattr(settings, "PROXMOX_STORAGE_POOL", "local-lvm") or "").strip()
     iso_storage_pool = str(getattr(settings, "PROXMOX_ISO_STORAGE_POOL", "ChirpNAS_ISO_Templates") or "").strip()
+    if not storage_pool:
+        raise RuntimeError("PROXMOX_STORAGE_POOL is not configured.")
     if not iso_storage_pool:
         raise RuntimeError("PROXMOX_ISO_STORAGE_POOL is not configured.")
-    if iso_storage_pool == storage_pool:
-        raise RuntimeError(
-            f"Configured ISO storage pool matches VM disk storage ({iso_storage_pool}). "
-            "Set PROXMOX_ISO_STORAGE_POOL to the ISO-capable NAS storage, e.g. ChirpNAS_ISO_Templates."
-        )
 
     proxmox_node = str(getattr(settings, "PROXMOX_NODE", "") or "pve").strip()
-    storage_info = _fetch_proxmox_storage(proxmox_node, iso_storage_pool)
-    content = _content_tokens(storage_info.get("content"))
-    if "iso" not in content:
+    iso_storage_info = _fetch_proxmox_storage(proxmox_node, iso_storage_pool)
+    iso_content = _content_tokens(iso_storage_info.get("content"))
+    if "iso" not in iso_content:
         raise RuntimeError(
             f"Configured ISO storage pool does not advertise ISO content on node {proxmox_node}: "
-            f"{iso_storage_pool} (content={storage_info.get('content')})"
+            f"{iso_storage_pool} (content={iso_storage_info.get('content')})"
         )
-    results.append({"check": "iso_storage_pool", "ok": True, "value": f"{iso_storage_pool} ({storage_info.get('type') or 'unknown'})"})
+    results.append({"check": "iso_storage_pool", "ok": True, "value": f"{iso_storage_pool} ({iso_storage_info.get('type') or 'unknown'})"})
     log_fp.write(
-        f"preflight: iso_storage_pool={iso_storage_pool} type={storage_info.get('type')} content={storage_info.get('content')}\n"
+        f"preflight: iso_storage_pool={iso_storage_pool} type={iso_storage_info.get('type')} content={iso_storage_info.get('content')}\n"
+    )
+
+    disk_storage_info = iso_storage_info if storage_pool == iso_storage_pool else _fetch_proxmox_storage(proxmox_node, storage_pool)
+    disk_content = _content_tokens(disk_storage_info.get("content"))
+    if not ({"images", "rootdir"} & disk_content):
+        raise RuntimeError(
+            f"Configured VM disk storage pool does not advertise disk-image content on node {proxmox_node}: "
+            f"{storage_pool} (content={disk_storage_info.get('content')})"
+        )
+    results.append({"check": "vm_disk_storage_pool", "ok": True, "value": f"{storage_pool} ({disk_storage_info.get('type') or 'unknown'})"})
+    log_fp.write(
+        f"preflight: vm_disk_storage_pool={storage_pool} type={disk_storage_info.get('type')} content={disk_storage_info.get('content')}\n"
     )
 
     if build_profile == BUILD_PROFILE_WINDOWS_UNATTEND:
