@@ -45,6 +45,7 @@ services:
     build:
       context: .
       target: packer-runtime
+    user: "1000:1000"
     depends_on:
       migrate:
         condition: service_completed_successfully
