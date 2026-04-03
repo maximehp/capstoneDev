@@ -129,10 +129,45 @@ Important behavior:
 - `job.result`
   - `software_results`
   - `preflight`
+  - `staged_isos`
+  - `iso_stage_progress`
   - `generated_artifacts`
   - `image_selector`
   - `firmware_profile`
   - `guest_networking`
+
+Current build-stage semantics:
+- `queued`: request persisted but not yet claimed by worker
+- `preflight`: runtime/path/storage validation
+- `assets`: NAS ISO staging and transfer progress
+- `init`: `packer init`
+- `validate`: `packer validate`
+- `build`: live Packer build/install stage
+- `sealing`: late guest finalization/signoff
+- `postprocess`: final worker wrap-up
+- `done`: terminal state
+
+`job.result.staged_isos` items currently include:
+- `role`
+- `filename`
+- `storage_pool`
+- `iso_file`
+- `local_path`
+- `final_url`
+- `size_bytes`
+- `reused`
+
+`job.result.iso_stage_progress` currently includes:
+- `status`
+- `role`
+- `filename`
+- `iso_file`
+- `downloaded_bytes`
+- `expected_bytes`
+- `percent`
+- `speed_bytes_per_sec`
+- `local_path`
+- `final_url`
 
 ## Planned Endpoints
 - `GET /api/template/list/` for listing templates.
