@@ -130,6 +130,7 @@
     var buildActivityBox = qs("#tc-build-activity");
     var buildEventsBox = qs("#tc-build-events");
     var buildPreflightBox = qs("#tc-build-preflight");
+    var buildAssetsBox = qs("#tc-build-assets");
     var buildErrorText = qs("#tc-build-error-text");
     var buildResultsBox = qs("#tc-build-results");
 
@@ -147,7 +148,7 @@
     var buildHistory = [];
     var buildLastSnapshotKey = "";
     var lastBuildPollAt = null;
-    var BUILD_STAGE_ORDER = ["queued", "preflight", "init", "validate", "build", "postprocess", "sealing", "done"];
+    var BUILD_STAGE_ORDER = ["queued", "preflight", "assets", "init", "validate", "build", "postprocess", "sealing", "done"];
 
     function getTcReviewIndex() {
         return tcCount > 1 ? (tcCount - 2) : 0;
@@ -339,6 +340,15 @@
                 action: "Checking packer, plugin configuration, ISO tooling, and required build inputs.",
                 detail: "This is where missing tools or bad configuration are usually caught first.",
                 eta: "Usually under 1 minute remaining"
+            };
+        }
+
+        if (normalizedStage === "assets") {
+            return {
+                label: "ISO Staging",
+                action: "Downloading or reusing installer ISOs on the NAS-backed Proxmox ISO storage.",
+                detail: "This stage prepares deterministic ISO assets before Packer init runs.",
+                eta: "Depends on ISO size and NAS throughput"
             };
         }
 
@@ -601,6 +611,37 @@
         }).join("");
     }
 
+    function renderBuildAssets(items) {
+        if (!buildAssetsBox) {
+            return;
+        }
+
+        var assets = Array.isArray(items) ? items : [];
+        if (!assets.length) {
+            buildAssetsBox.innerHTML = '<div class="build-empty">Staged ISO details will appear here once the worker reaches the ISO staging step.</div>';
+            return;
+        }
+
+        buildAssetsBox.innerHTML = assets.map(function (item) {
+            var mode = item.reused ? "reused" : "downloaded";
+            var detail = [
+                item.iso_file || "",
+                item.local_path || "",
+                item.final_url || item.source_url || ""
+            ].filter(function (value) { return !!value; }).join(" | ");
+
+            return '' +
+                '<div class="build-activity-item">' +
+                    '<div class="build-activity-top">' +
+                        '<div class="build-activity-title">' + escapeHtml(titleCaseWords(item.role || "iso")) + '</div>' +
+                        '<div class="build-activity-time">' + escapeHtml(bytesToHuman(item.size_bytes)) + '</div>' +
+                    '</div>' +
+                    '<div class="build-status-chip is-ok">' + escapeHtml(mode) + '</div>' +
+                    '<div class="build-activity-detail">' + escapeHtml(detail || "No staged ISO details recorded.") + '</div>' +
+                '</div>';
+        }).join("");
+    }
+
     function setBuildStatus(payload) {
         if (!buildStatusCard) {
             return;
@@ -638,6 +679,7 @@
             renderBuildActivity();
             renderBuildEvents([]);
             renderBuildPreflight([]);
+            renderBuildAssets([]);
             if (buildResultsBox) {
                 buildResultsBox.innerHTML = '<div class="build-empty">Software installation results will appear here once guest provisioning starts.</div>';
             }
@@ -681,6 +723,7 @@
         renderBuildActivity();
         renderBuildEvents(payload.result && payload.result.machine_readable_events ? payload.result.machine_readable_events : []);
         renderBuildPreflight(payload.result && payload.result.preflight ? payload.result.preflight : []);
+        renderBuildAssets(payload.result && payload.result.staged_isos ? payload.result.staged_isos : []);
         renderBuildResults(payload.result && payload.result.software_results ? payload.result.software_results : []);
     }
 

@@ -10,8 +10,10 @@ import time
 from datetime import timedelta
 from pathlib import Path
 from typing import Callable
+from urllib.parse import unquote, urlparse
 from xml.sax.saxutils import escape as xml_escape
 
+import requests
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
@@ -33,6 +35,8 @@ _SENSITIVE_KEY_RE = re.compile(r"(password|secret|token)", re.IGNORECASE)
 _FIXED_LINUX_USERNAME = "capstonebuild"
 _FIXED_LINUX_PASSWORD = "CapstoneBuild123!"
 _FIXED_LINUX_PASSWORD_HASH = "$6$rounds=4096$capstone$0ylvD6QBGzb62LF8A3BnQUwpsOSJyYwcmBHQYaWV7kngakdUSHh3D1ynjUTduVdJN9WewtG/XAIN5e8wZsMIf0"
+_ISO_STAGE_TIMEOUT = (10, 60)
+_ISO_STAGE_CHUNK_SIZE = 1024 * 1024
 
 
 def template_creation_allowed(user) -> bool:
@@ -122,6 +126,7 @@ def build_job_api_payload(job: TemplateBuildJob) -> dict:
         "result": {
             "software_results": result_payload.get("software_results", []),
             "preflight": result_payload.get("preflight", []),
+            "staged_isos": result_payload.get("staged_isos", []),
             "generated_artifacts": result_payload.get("generated_artifacts", []),
             "machine_readable_events": result_payload.get("machine_readable_events", []),
             "log_available": bool(result_payload.get("log_available")),
@@ -158,6 +163,7 @@ def _ensure_job_workspace(workspace: Path) -> dict[str, Path]:
         "result": results_dir / "result.json",
         "software_results": results_dir / "software-results.json",
         "preflight": results_dir / "preflight.json",
+        "iso_stage": results_dir / "iso-stage.json",
         "error_summary": results_dir / "error-summary.txt",
     }
 
@@ -314,6 +320,7 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
 
     software_results: list[dict] = []
     preflight_results: list[dict] = []
+    staged_isos: list[dict] = []
     generated_artifacts: list[dict] = []
     machine_readable_events: list[dict] = []
     archive_available = False
@@ -355,12 +362,24 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
             preflight_results = _run_preflight(build_profile=build_profile, payload=payload, log_fp=log_fp)
             _write_json(paths["preflight"], {"checks": preflight_results})
 
+            _set_stage(job, TemplateBuildJob.STAGE_ASSETS)
+            staged_isos = _stage_required_isos(
+                job=job,
+                build_profile=build_profile,
+                payload=payload,
+                paths=paths,
+                log_fp=log_fp,
+            )
+            _write_json(paths["iso_stage"], {"items": staged_isos})
+
             profile_artifacts, profile_context = _write_profile_artifacts(
                 build_profile=build_profile,
                 payload=payload,
                 workspace=paths["generated"],
             )
             generated_artifacts = profile_artifacts
+            if paths["iso_stage"].exists():
+                generated_artifacts.append(_artifact_record("staged_iso_metadata", paths["iso_stage"], workspace))
             bootstrap_script = _write_bootstrap_script(
                 build_profile=build_profile,
                 target_os=target_os,
@@ -376,6 +395,7 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
                 workspace=paths["generated"],
                 bootstrap_script=bootstrap_script,
                 profile_context=profile_context,
+                staged_isos=staged_isos,
             )
             generated_artifacts.append(_artifact_record("packer_vars", vars_file, workspace))
 
@@ -431,6 +451,7 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         job.result_payload = {
             "software_results": software_results,
             "preflight": preflight_results,
+            "staged_isos": staged_isos,
             "generated_artifacts": generated_artifacts,
             "machine_readable_events": machine_readable_events,
             "guest_networking": payload.get("guest_networking") or "dhcp",
@@ -466,6 +487,7 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         job.result_payload = {
             "software_results": software_results,
             "preflight": preflight_results,
+            "staged_isos": staged_isos,
             "generated_artifacts": generated_artifacts,
             "machine_readable_events": machine_readable_events,
             "guest_networking": payload.get("guest_networking") or "dhcp",
@@ -520,6 +542,241 @@ def _resolve_template_file(build_profile: str, payload: dict) -> Path:
     return path
 
 
+def _proxmox_api_headers() -> dict[str, str]:
+    token_id = str(os.environ.get("PROXMOX_TOKEN_ID") or "").strip()
+    token_secret = str(os.environ.get("PROXMOX_TOKEN_SECRET") or "").strip()
+    if not token_id or not token_secret:
+        raise RuntimeError("Missing Proxmox API token credentials in the worker environment.")
+    return {
+        "Accept": "application/json",
+        "Authorization": f"PVEAPIToken={token_id}={token_secret}",
+    }
+
+
+def _proxmox_api_url(path: str) -> str:
+    base_url = str(os.environ.get("PROXMOX_BASE_URL") or "").rstrip("/")
+    if not base_url:
+        raise RuntimeError("Missing PROXMOX_BASE_URL in the worker environment.")
+    return f"{base_url}{path}"
+
+
+def _proxmox_api_get(path: str, timeout=(5, 20)):
+    verify_tls = str(os.environ.get("PROXMOX_TLS_VERIFY", "1")).strip().lower() in {"1", "true", "yes", "on"}
+    response = requests.get(
+        _proxmox_api_url(path),
+        headers=_proxmox_api_headers(),
+        timeout=timeout,
+        verify=verify_tls,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if isinstance(payload, dict) and "data" in payload:
+        return payload["data"]
+    return payload
+
+
+def _fetch_proxmox_storage(node: str, storage_name: str) -> dict:
+    storages = _proxmox_api_get(f"/nodes/{node}/storage")
+    if not isinstance(storages, list):
+        raise RuntimeError("Unexpected Proxmox storage response shape.")
+    for item in storages:
+        if str(item.get("storage") or "").strip() == storage_name:
+            return item
+    raise RuntimeError(f"Configured ISO storage pool was not found on node {node}: {storage_name}")
+
+
+def _content_tokens(value) -> set[str]:
+    if isinstance(value, list):
+        return {str(item).strip().lower() for item in value if str(item).strip()}
+    return {part.strip().lower() for part in str(value or "").split(",") if part.strip()}
+
+
+def _filename_from_url(url: str) -> str:
+    parsed = urlparse(str(url or ""))
+    return unquote(Path(parsed.path).name) or "download.iso"
+
+
+def _stage_manifest_path_for(iso_path: Path) -> Path:
+    return iso_path.with_name(f"{iso_path.name}.json")
+
+
+def _load_stage_manifest(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _manifest_matches_source(manifest: dict | None, source_url: str) -> bool:
+    if not manifest:
+        return False
+    source = str(manifest.get("source_url") or "").strip()
+    final = str(manifest.get("final_url") or "").strip()
+    return source == source_url or final == source_url
+
+
+def _next_available_iso_path(root: Path, filename: str) -> Path:
+    candidate = root / filename
+    if not candidate.exists() and not _stage_manifest_path_for(candidate).exists():
+        return candidate
+
+    stem = candidate.stem
+    suffix = candidate.suffix or ".iso"
+    index = 2
+    while True:
+        alt = root / f"{stem}-{index}{suffix}"
+        if not alt.exists() and not _stage_manifest_path_for(alt).exists():
+            return alt
+        index += 1
+
+
+def _parse_content_length(value) -> int | None:
+    text = str(value or "").strip()
+    return int(text) if text.isdigit() else None
+
+
+def _stage_single_iso(
+    *,
+    role: str,
+    source_url: str,
+    preferred_filename: str,
+    log_fp,
+    heartbeat_cb: Callable[[], None] | None = None,
+) -> dict:
+    requested_url = str(source_url or "").strip()
+    if not requested_url:
+        raise RuntimeError(f"Missing source URL for staged ISO role: {role}")
+
+    iso_storage_pool = str(getattr(settings, "PROXMOX_ISO_STORAGE_POOL", "ChirpNAS_ISO_Templates") or "").strip()
+    nas_iso_dir = Path(settings.PACKER_NAS_ISO_DIR)
+    filename = str(preferred_filename or "").strip() or _filename_from_url(requested_url)
+    destination = nas_iso_dir / filename
+    manifest_path = _stage_manifest_path_for(destination)
+    existing_manifest = _load_stage_manifest(manifest_path)
+    if destination.exists() and _manifest_matches_source(existing_manifest, requested_url):
+        log_fp.write(
+            f"iso-stage: role={role} reuse existing source={requested_url} path={destination} storage={iso_storage_pool}\n"
+        )
+        if heartbeat_cb:
+            heartbeat_cb()
+        reused_payload = dict(existing_manifest or {})
+        reused_payload.update(
+            {
+                "role": role,
+                "local_path": str(destination),
+                "manifest_path": str(manifest_path),
+                "storage_pool": iso_storage_pool,
+                "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
+                "reused": True,
+            }
+        )
+        return reused_payload
+
+    if destination.exists():
+        destination = _next_available_iso_path(nas_iso_dir, filename)
+        manifest_path = _stage_manifest_path_for(destination)
+
+    temp_path = destination.with_name(f"{destination.name}.part")
+    if temp_path.exists():
+        temp_path.unlink()
+
+    log_fp.write(
+        f"iso-stage: role={role} download source={requested_url} dest={destination} storage={iso_storage_pool}\n"
+    )
+    log_fp.flush()
+
+    bytes_written = 0
+    final_url = requested_url
+    content_type = ""
+    last_modified = ""
+    expected_size = None
+    try:
+        with requests.get(requested_url, stream=True, allow_redirects=True, timeout=_ISO_STAGE_TIMEOUT) as response:
+            response.raise_for_status()
+            final_url = str(response.url or requested_url)
+            content_type = str(response.headers.get("Content-Type") or "")
+            last_modified = str(response.headers.get("Last-Modified") or "")
+            expected_size = _parse_content_length(response.headers.get("Content-Length"))
+
+            with temp_path.open("wb") as handle:
+                for chunk in response.iter_content(chunk_size=_ISO_STAGE_CHUNK_SIZE):
+                    if not chunk:
+                        continue
+                    handle.write(chunk)
+                    bytes_written += len(chunk)
+                    if heartbeat_cb:
+                        heartbeat_cb()
+        temp_path.replace(destination)
+    except Exception as exc:
+        if temp_path.exists():
+            temp_path.unlink()
+        raise RuntimeError(
+            "Failed to stage ISO for "
+            f"{role}: source={requested_url} dest={destination} storage={iso_storage_pool} error={exc}"
+        ) from exc
+
+    size_bytes = bytes_written if bytes_written > 0 else expected_size
+    manifest = {
+        "role": role,
+        "source_url": requested_url,
+        "final_url": final_url,
+        "filename": destination.name,
+        "size_bytes": size_bytes,
+        "content_type": content_type or None,
+        "last_modified": last_modified or None,
+        "local_path": str(destination),
+        "manifest_path": str(manifest_path),
+        "storage_pool": iso_storage_pool,
+        "iso_file": f"{iso_storage_pool}:iso/{destination.name}",
+        "reused": False,
+        "staged_at": timezone.now().isoformat(),
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
+    log_fp.write(
+        f"iso-stage: role={role} staged final_url={final_url} bytes={size_bytes or 0} iso_file={manifest['iso_file']}\n"
+    )
+    log_fp.flush()
+    if heartbeat_cb:
+        heartbeat_cb()
+    return manifest
+
+
+def _stage_required_isos(
+    *,
+    job: TemplateBuildJob,
+    build_profile: str,
+    payload: dict,
+    paths: dict[str, Path],
+    log_fp,
+) -> list[dict]:
+    staged = [
+        _stage_single_iso(
+            role="boot_iso",
+            source_url=str(payload.get("iso_url") or "").strip(),
+            preferred_filename=str(payload.get("iso_filename") or "").strip(),
+            log_fp=log_fp,
+            heartbeat_cb=lambda: _touch_job_heartbeat(job),
+        )
+    ]
+
+    if build_profile == BUILD_PROFILE_WINDOWS_UNATTEND:
+        windows = payload.get("windows") if isinstance(payload.get("windows"), dict) else {}
+        staged.append(
+            _stage_single_iso(
+                role="windows_virtio_iso",
+                source_url=str(windows.get("virtio_iso_url") or "").strip(),
+                preferred_filename=_filename_from_url(str(windows.get("virtio_iso_url") or "").strip()),
+                log_fp=log_fp,
+                heartbeat_cb=lambda: _touch_job_heartbeat(job),
+            )
+        )
+
+    return staged
+
+
 def _run_preflight(build_profile: str, payload: dict, log_fp) -> list[dict]:
     results = []
     packer_bin = str(getattr(settings, "PACKER_BIN", "packer") or "packer")
@@ -539,6 +796,37 @@ def _run_preflight(build_profile: str, payload: dict, log_fp) -> list[dict]:
     plugin_version = str(getattr(settings, "PACKER_PROXMOX_PLUGIN_VERSION", "") or "")
     results.append({"check": "plugin", "ok": True, "value": f"{plugin_source} {plugin_version}".strip()})
     log_fp.write(f"preflight: plugin={plugin_source} {plugin_version}\n")
+
+    nas_iso_dir = Path(settings.PACKER_NAS_ISO_DIR)
+    if not nas_iso_dir.exists() or not nas_iso_dir.is_dir():
+        raise RuntimeError(f"PACKER_NAS_ISO_DIR does not exist or is not a directory: {nas_iso_dir}")
+    if not os.access(nas_iso_dir, os.W_OK):
+        raise RuntimeError(f"PACKER_NAS_ISO_DIR is not writable by the worker: {nas_iso_dir}")
+    results.append({"check": "nas_iso_dir", "ok": True, "value": str(nas_iso_dir)})
+    log_fp.write(f"preflight: nas_iso_dir={nas_iso_dir}\n")
+
+    storage_pool = str(getattr(settings, "PROXMOX_STORAGE_POOL", "local-lvm") or "").strip()
+    iso_storage_pool = str(getattr(settings, "PROXMOX_ISO_STORAGE_POOL", "ChirpNAS_ISO_Templates") or "").strip()
+    if not iso_storage_pool:
+        raise RuntimeError("PROXMOX_ISO_STORAGE_POOL is not configured.")
+    if iso_storage_pool == storage_pool:
+        raise RuntimeError(
+            f"Configured ISO storage pool matches VM disk storage ({iso_storage_pool}). "
+            "Set PROXMOX_ISO_STORAGE_POOL to the ISO-capable NAS storage, e.g. ChirpNAS_ISO_Templates."
+        )
+
+    proxmox_node = str(getattr(settings, "PROXMOX_NODE", "") or "pve").strip()
+    storage_info = _fetch_proxmox_storage(proxmox_node, iso_storage_pool)
+    content = _content_tokens(storage_info.get("content"))
+    if "iso" not in content:
+        raise RuntimeError(
+            f"Configured ISO storage pool does not advertise ISO content on node {proxmox_node}: "
+            f"{iso_storage_pool} (content={storage_info.get('content')})"
+        )
+    results.append({"check": "iso_storage_pool", "ok": True, "value": f"{iso_storage_pool} ({storage_info.get('type') or 'unknown'})"})
+    log_fp.write(
+        f"preflight: iso_storage_pool={iso_storage_pool} type={storage_info.get('type')} content={storage_info.get('content')}\n"
+    )
 
     if build_profile == BUILD_PROFILE_WINDOWS_UNATTEND:
         windows = payload.get("windows") if isinstance(payload.get("windows"), dict) else {}
@@ -639,10 +927,17 @@ def _write_packer_vars_file(
     workspace: Path,
     bootstrap_script: Path,
     profile_context: dict,
+    staged_isos: list[dict],
 ) -> Path:
     hardware = payload.get("hardware") if isinstance(payload.get("hardware"), dict) else {}
     network = payload.get("network") if isinstance(payload.get("network"), dict) else {}
     windows = payload.get("windows") if isinstance(payload.get("windows"), dict) else {}
+    staged_map = {
+        str(item.get("role") or "").strip(): item
+        for item in (staged_isos or [])
+        if isinstance(item, dict)
+    }
+    boot_iso = staged_map.get("boot_iso") or {}
 
     vars_payload = {
         "proxmox_url": str(os.environ.get("PROXMOX_BASE_URL") or "").rstrip("/"),
@@ -651,11 +946,10 @@ def _write_packer_vars_file(
         "proxmox_insecure_skip_tls_verify": str(os.environ.get("PROXMOX_TLS_VERIFY", "1")).strip().lower() not in {"1", "true", "yes", "on"},
         "proxmox_node": str(getattr(settings, "PROXMOX_NODE", "") or "pve"),
         "storage_pool": str(getattr(settings, "PROXMOX_STORAGE_POOL", "local-lvm")),
-        "iso_storage_pool": str(getattr(settings, "PROXMOX_ISO_STORAGE_POOL", "local")),
+        "iso_storage_pool": str(getattr(settings, "PROXMOX_ISO_STORAGE_POOL", "ChirpNAS_ISO_Templates")),
         "template_name": str(payload.get("template_name") or "").strip(),
         "template_vmid": int(payload.get("template_vmid") or 0),
-        "iso_url": str(payload.get("iso_url") or "").strip(),
-        "iso_checksum": str(payload.get("iso_checksum") or "none"),
+        "iso_file": str(boot_iso.get("iso_file") or ""),
         "cpu": int(hardware.get("cpu") or 2),
         "ram_mb": int(hardware.get("ram_gb") or 4) * 1024,
         "disk_gb": int(hardware.get("disk_gb") or 32),
@@ -666,9 +960,10 @@ def _write_packer_vars_file(
     vars_payload.update(profile_context)
 
     if build_profile == BUILD_PROFILE_WINDOWS_UNATTEND:
+        windows_virtio = staged_map.get("windows_virtio_iso") or {}
         vars_payload.update(
             {
-                "windows_virtio_iso_url": str(windows.get("virtio_iso_url") or ""),
+                "windows_virtio_iso_file": str(windows_virtio.get("iso_file") or ""),
                 "windows_image_selector_type": str(windows.get("image_selector_type") or "image_name"),
                 "windows_image_selector_value": str(windows.get("image_selector_value") or ""),
                 "windows_firmware_profile": str(windows.get("firmware_profile") or ""),
@@ -756,7 +1051,7 @@ def _archive_job_bundle(job: TemplateBuildJob, paths: dict[str, Path], payload: 
 
     archive_dir = archive_root / f"job-{job.uuid}"
     archive_dir.mkdir(parents=True, exist_ok=True)
-    for name in ["request", "status", "result", "software_results", "preflight"]:
+    for name in ["request", "status", "result", "software_results", "preflight", "iso_stage"]:
         source = paths[name]
         if source.exists():
             shutil.copy2(source, archive_dir / source.name)
@@ -799,6 +1094,7 @@ def _run_dev_bypass_job(
     job.result_payload = {
         "software_results": software_results,
         "preflight": preflight_results,
+        "staged_isos": [],
         "generated_artifacts": [],
         "machine_readable_events": machine_readable_events,
         "guest_networking": payload.get("guest_networking") or "dhcp",

@@ -19,8 +19,10 @@ from .packer_profiles import (
 from .template_builds import (
     _redact_text,
     _derive_machine_readable_error_summary,
+    _run_preflight,
     _render_windows_script,
     _render_windows_unattend,
+    _stage_single_iso,
     enqueue_template_build,
     ensure_worker_runtime_ready,
     recover_stale_running_jobs,
@@ -37,6 +39,24 @@ def _iso_info(url: str, filename: str = "ubuntu.iso") -> dict:
         "size_bytes": 123456,
         "content_type": "application/octet-stream",
         "last_modified": "Mon, 01 Jan 2024 00:00:00 GMT",
+    }
+
+
+def _staged_iso(role: str = "boot_iso", filename: str = "ubuntu.iso", reused: bool = False) -> dict:
+    return {
+        "role": role,
+        "source_url": f"https://example.com/{filename}",
+        "final_url": f"https://cdn.example.com/{filename}",
+        "filename": filename,
+        "size_bytes": 123456,
+        "content_type": "application/octet-stream",
+        "last_modified": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "local_path": str(Path("database") / "test-worker-nas" / "isos" / filename),
+        "manifest_path": str(Path("database") / "test-worker-nas" / "isos" / f"{filename}.json"),
+        "storage_pool": "ChirpNAS_ISO_Templates",
+        "iso_file": f"ChirpNAS_ISO_Templates:iso/{filename}",
+        "reused": reused,
+        "staged_at": timezone.now().isoformat(),
     }
 
 
@@ -615,13 +635,20 @@ class StaticSettingsTests(TestCase):
 @override_settings(
     TEMPLATE_BUILD_WORKDIR=Path("database") / "test-worker-jobs",
     PACKER_CACHE_DIR=Path("database") / "test-worker-cache",
+    PACKER_NAS_ROOT=Path("database") / "test-worker-nas",
+    PACKER_NAS_ISO_DIR=Path("database") / "test-worker-nas" / "isos",
+    PACKER_NAS_ARCHIVE_DIR=Path("database") / "test-worker-nas" / "archive",
+    PROXMOX_ISO_STORAGE_POOL="ChirpNAS_ISO_Templates",
 )
 class WorkerExecutionTests(TestCase):
     def setUp(self):
         self.workdir = Path("database") / "test-worker-jobs"
         self.cache_dir = Path("database") / "test-worker-cache"
+        self.nas_root = Path("database") / "test-worker-nas"
+        self.nas_iso_dir = self.nas_root / "isos"
         self.workdir.mkdir(parents=True, exist_ok=True)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.nas_iso_dir.mkdir(parents=True, exist_ok=True)
         user_model = get_user_model()
         self.user = user_model.objects.create_user(username="worker", password="pass12345")
         self.template = TemplateDefinition.objects.create(
@@ -639,6 +666,7 @@ class WorkerExecutionTests(TestCase):
     def tearDown(self):
         shutil.rmtree(self.workdir, ignore_errors=True)
         shutil.rmtree(self.cache_dir, ignore_errors=True)
+        shutil.rmtree(self.nas_root, ignore_errors=True)
 
     def _job_payload(self):
         return {
@@ -667,9 +695,11 @@ class WorkerExecutionTests(TestCase):
         }
 
     @patch("core.template_builds._run_preflight")
+    @patch("core.template_builds._stage_required_isos")
     @patch("core.template_builds._run_command")
-    def test_worker_marks_success_and_collects_software_results(self, run_command_mock, preflight_mock):
+    def test_worker_marks_success_and_collects_software_results(self, run_command_mock, stage_mock, preflight_mock):
         preflight_mock.return_value = [{"check": "packer_bin", "ok": True, "value": "packer"}]
+        stage_mock.return_value = [_staged_iso()]
 
         def fake_run_command(cmd, cwd, timeout_sec, log_fp, on_output, **kwargs):
             on_output("CAPSTONE_ITEM_RESULT|software-1|installed|0|Tool installed")
@@ -693,15 +723,22 @@ class WorkerExecutionTests(TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(result.result_payload["software_results"][0]["status"], "installed")
         self.assertEqual(result.result_payload["preflight"][0]["check"], "packer_bin")
+        self.assertEqual(result.result_payload["staged_isos"][0]["iso_file"], "ChirpNAS_ISO_Templates:iso/ubuntu.iso")
         self.assertTrue(any(item["kind"] == "user_data" for item in result.result_payload["generated_artifacts"]))
         self.assertTrue((self.workdir / f"job-{job.uuid}" / "status.json").exists())
         self.assertTrue((self.workdir / f"job-{job.uuid}" / "results" / "result.json").exists())
+        self.assertTrue((self.workdir / f"job-{job.uuid}" / "results" / "iso-stage.json").exists())
+        vars_payload = json.loads((self.workdir / f"job-{job.uuid}" / "generated" / "template.auto.pkrvars.json").read_text(encoding="utf-8"))
+        self.assertEqual(vars_payload["iso_file"], "ChirpNAS_ISO_Templates:iso/ubuntu.iso")
+        self.assertNotIn("iso_url", vars_payload)
         self.assertTrue(result.result_payload["log_available"])
 
     @patch("core.template_builds._run_preflight")
+    @patch("core.template_builds._stage_required_isos")
     @patch("core.template_builds._run_command")
-    def test_worker_marks_failure_when_command_raises(self, run_command_mock, preflight_mock):
+    def test_worker_marks_failure_when_command_raises(self, run_command_mock, stage_mock, preflight_mock):
         preflight_mock.return_value = [{"check": "packer_bin", "ok": True, "value": "packer"}]
+        stage_mock.return_value = [_staged_iso()]
         run_command_mock.side_effect = RuntimeError("packer failed")
 
         job = TemplateBuildJob.objects.create(
@@ -799,6 +836,125 @@ class WorkerExecutionTests(TestCase):
         self.assertEqual(preflight_payload["checks"][0]["reason"], "dev_bypass")
 
 
+@override_settings(
+    PACKER_NAS_ROOT=Path("database") / "test-stage-nas",
+    PACKER_NAS_ISO_DIR=Path("database") / "test-stage-nas" / "isos",
+    PROXMOX_ISO_STORAGE_POOL="ChirpNAS_ISO_Templates",
+    PROXMOX_STORAGE_POOL="local-lvm",
+    PROXMOX_NODE="pve",
+)
+class IsoStagingTests(TestCase):
+    def setUp(self):
+        self.nas_root = Path("database") / "test-stage-nas"
+        self.iso_dir = self.nas_root / "isos"
+        self.iso_dir.mkdir(parents=True, exist_ok=True)
+        self.log_path = self.nas_root / "stage.log"
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.nas_root, ignore_errors=True)
+
+    def test_stage_single_iso_downloads_and_writes_manifest(self):
+        response = Mock()
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+        response.url = "https://cdn.example.com/ubuntu.iso"
+        response.headers = {
+            "Content-Type": "application/octet-stream",
+            "Content-Length": "11",
+            "Last-Modified": "Tue, 02 Apr 2024 00:00:00 GMT",
+        }
+        response.iter_content = Mock(return_value=[b"hello ", b"world"])
+        response.raise_for_status = Mock()
+
+        with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds.requests.get", return_value=response):
+            staged = _stage_single_iso(
+                role="boot_iso",
+                source_url="https://example.com/ubuntu.iso",
+                preferred_filename="ubuntu.iso",
+                log_fp=log_fp,
+            )
+
+        self.assertFalse(staged["reused"])
+        self.assertEqual(staged["iso_file"], "ChirpNAS_ISO_Templates:iso/ubuntu.iso")
+        self.assertTrue((self.iso_dir / "ubuntu.iso").exists())
+        self.assertTrue((self.iso_dir / "ubuntu.iso.json").exists())
+
+    def test_stage_single_iso_reuses_existing_manifest(self):
+        iso_path = self.iso_dir / "ubuntu.iso"
+        iso_path.write_bytes(b"cached")
+        manifest_path = self.iso_dir / "ubuntu.iso.json"
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "source_url": "https://example.com/ubuntu.iso",
+                    "final_url": "https://cdn.example.com/ubuntu.iso",
+                    "filename": "ubuntu.iso",
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds.requests.get") as get_mock:
+            staged = _stage_single_iso(
+                role="boot_iso",
+                source_url="https://example.com/ubuntu.iso",
+                preferred_filename="ubuntu.iso",
+                log_fp=log_fp,
+            )
+
+        self.assertTrue(staged["reused"])
+        self.assertEqual(staged["local_path"], str(iso_path))
+        get_mock.assert_not_called()
+
+    def test_stage_single_iso_conflicting_filename_uses_suffix(self):
+        (self.iso_dir / "ubuntu.iso").write_bytes(b"existing")
+        (self.iso_dir / "ubuntu.iso.json").write_text(
+            json.dumps({"source_url": "https://other.example.com/ubuntu.iso"}),
+            encoding="utf-8",
+        )
+
+        response = Mock()
+        response.__enter__ = Mock(return_value=response)
+        response.__exit__ = Mock(return_value=False)
+        response.url = "https://cdn.example.com/ubuntu.iso"
+        response.headers = {"Content-Length": "4"}
+        response.iter_content = Mock(return_value=[b"test"])
+        response.raise_for_status = Mock()
+
+        with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds.requests.get", return_value=response):
+            staged = _stage_single_iso(
+                role="boot_iso",
+                source_url="https://example.com/ubuntu.iso",
+                preferred_filename="ubuntu.iso",
+                log_fp=log_fp,
+            )
+
+        self.assertEqual(staged["filename"], "ubuntu-2.iso")
+        self.assertTrue((self.iso_dir / "ubuntu-2.iso").exists())
+
+    @patch("core.template_builds._fetch_proxmox_storage")
+    def test_run_preflight_requires_distinct_iso_storage_pool(self, fetch_storage_mock):
+        fetch_storage_mock.return_value = {"storage": "local-lvm", "content": "iso,images", "type": "dir"}
+        with override_settings(PROXMOX_STORAGE_POOL="same-pool", PROXMOX_ISO_STORAGE_POOL="same-pool"):
+            with self.log_path.open("a", encoding="utf-8") as log_fp:
+                with self.assertRaises(RuntimeError):
+                    _run_preflight(BUILD_PROFILE_UBUNTU_AUTOINSTALL, _linux_create_payload(), log_fp)
+
+    @patch("core.template_builds._fetch_proxmox_storage")
+    def test_run_preflight_accepts_iso_capable_storage(self, fetch_storage_mock):
+        fetch_storage_mock.return_value = {
+            "storage": "ChirpNAS_ISO_Templates",
+            "content": "iso,images",
+            "type": "dir",
+        }
+        with override_settings(PACKER_BIN="packer"):
+            with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds._detect_iso_tool", return_value="xorriso"), patch("core.template_builds.shutil.which", return_value="/usr/bin/packer"):
+                results = _run_preflight(BUILD_PROFILE_UBUNTU_AUTOINSTALL, _linux_create_payload(), log_fp)
+
+        self.assertTrue(any(item["check"] == "iso_storage_pool" for item in results))
+
+
 class ArtifactGenerationTests(TestCase):
     def test_windows_unattend_uses_bios_disk_layout(self):
         unattend = _render_windows_unattend(
@@ -854,28 +1010,31 @@ class ArtifactGenerationTests(TestCase):
         hcl = (Path("core") / "packer" / "templates" / "ubuntu_autoinstall.pkr.hcl").read_text(encoding="utf-8")
 
         self.assertIn("cd_label         = \"cidata\"", hcl)
+        self.assertIn("iso_file = var.iso_file", hcl)
         self.assertIn("iso_storage_pool = var.iso_storage_pool", hcl)
-        self.assertIn("iso_download_pve = true", hcl)
+        self.assertNotIn("iso_download_pve = true", hcl)
 
     def test_windows_autounattend_cd_uses_iso_storage_pool(self):
         bios_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_bios.pkr.hcl").read_text(encoding="utf-8")
         uefi_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_uefi.pkr.hcl").read_text(encoding="utf-8")
 
+        self.assertIn("iso_file = var.iso_file", bios_hcl)
         self.assertIn("cd_label         = \"AUTOUNATTEND\"", bios_hcl)
         self.assertIn("iso_storage_pool = var.iso_storage_pool", bios_hcl)
+        self.assertIn("iso_file = var.iso_file", uefi_hcl)
         self.assertIn("cd_label         = \"AUTOUNATTEND\"", uefi_hcl)
         self.assertIn("iso_storage_pool = var.iso_storage_pool", uefi_hcl)
 
-    def test_boot_and_windows_driver_isos_download_on_pve_node(self):
+    def test_boot_and_windows_driver_isos_use_staged_proxmox_iso_files(self):
         ubuntu_hcl = (Path("core") / "packer" / "templates" / "ubuntu_autoinstall.pkr.hcl").read_text(encoding="utf-8")
         debian_hcl = (Path("core") / "packer" / "templates" / "debian_preseed.pkr.hcl").read_text(encoding="utf-8")
         bios_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_bios.pkr.hcl").read_text(encoding="utf-8")
         uefi_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_uefi.pkr.hcl").read_text(encoding="utf-8")
 
-        self.assertIn("iso_download_pve = true", ubuntu_hcl)
-        self.assertIn("iso_download_pve = true", debian_hcl)
-        self.assertGreaterEqual(bios_hcl.count("iso_download_pve = true"), 2)
-        self.assertGreaterEqual(uefi_hcl.count("iso_download_pve = true"), 2)
+        self.assertIn("iso_file = var.iso_file", ubuntu_hcl)
+        self.assertIn("iso_file = var.iso_file", debian_hcl)
+        self.assertIn("iso_file = var.windows_virtio_iso_file", bios_hcl)
+        self.assertIn("iso_file = var.windows_virtio_iso_file", uefi_hcl)
 
     def test_log_redaction_masks_secret_values(self):
         redacted = _redact_text("token=secret-value password=abc123", ["secret-value", "abc123"])

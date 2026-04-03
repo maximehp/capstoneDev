@@ -178,6 +178,7 @@ The app expects these keys to be set in `.env` or the environment.
 - `PACKER_PROXMOX_PLUGIN_VERSION`
 - `PACKER_CACHE_DIR`
 - `PACKER_NAS_ROOT`
+- `PACKER_NAS_ISO_DIR`
 - `PACKER_NAS_ARCHIVE_DIR`
 - `APP_USERDATA_DIR`
 - `PACKER_JOBS_HOST_PATH`
@@ -224,6 +225,7 @@ The app expects these keys to be set in `.env` or the environment.
 - The worker updates job heartbeat and marks stale running jobs as failed on restart.
 - The status API does not expose raw container filesystem paths.
 - For Ubuntu server deployment, mount the NAS on the host and bind-mount it into `web` and `packer-worker`; the final template artifact still lives in Proxmox storage.
+- Template ISOs are staged into `PACKER_NAS_ISO_DIR` first, then referenced from the Proxmox ISO storage configured by `PROXMOX_ISO_STORAGE_POOL` (default `ChirpNAS_ISO_Templates`).
 - For local development, run both processes:
   - `.\.venv\Scripts\python.exe manage.py runserver`
   - `.\.venv\Scripts\python.exe manage.py run_template_build_worker`

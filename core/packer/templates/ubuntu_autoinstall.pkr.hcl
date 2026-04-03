@@ -16,8 +16,7 @@ variable "storage_pool" { type = string }
 variable "iso_storage_pool" { type = string }
 variable "template_name" { type = string }
 variable "template_vmid" { type = number }
-variable "iso_url" { type = string }
-variable "iso_checksum" { type = string }
+variable "iso_file" { type = string }
 variable "cpu" { type = number }
 variable "ram_mb" { type = number }
 variable "disk_gb" { type = number }
@@ -45,12 +44,9 @@ source "proxmox-iso" "ubuntu" {
   cores  = var.cpu
 
   boot_iso {
-    type             = "scsi"
-    iso_url          = var.iso_url
-    iso_checksum     = var.iso_checksum
-    iso_storage_pool = var.iso_storage_pool
-    iso_download_pve = true
-    unmount          = true
+    type     = "scsi"
+    iso_file = var.iso_file
+    unmount  = true
   }
 
   additional_iso_files {

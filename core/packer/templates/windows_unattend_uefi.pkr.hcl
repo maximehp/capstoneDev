@@ -16,15 +16,14 @@ variable "storage_pool" { type = string }
 variable "iso_storage_pool" { type = string }
 variable "template_name" { type = string }
 variable "template_vmid" { type = number }
-variable "iso_url" { type = string }
-variable "iso_checksum" { type = string }
+variable "iso_file" { type = string }
 variable "cpu" { type = number }
 variable "ram_mb" { type = number }
 variable "disk_gb" { type = number }
 variable "bridge" { type = string }
 variable "vlan" { type = number }
 variable "autounattend_path" { type = string }
-variable "windows_virtio_iso_url" { type = string }
+variable "windows_virtio_iso_file" { type = string }
 variable "winrm_username" { type = string }
 variable "winrm_password" { type = string }
 variable "winrm_port" { type = number }
@@ -60,21 +59,15 @@ source "proxmox-iso" "windows" {
   cores  = var.cpu
 
   boot_iso {
-    type             = "sata"
-    iso_url          = var.iso_url
-    iso_checksum     = var.iso_checksum
-    iso_storage_pool = var.iso_storage_pool
-    iso_download_pve = true
-    unmount          = true
+    type     = "sata"
+    iso_file = var.iso_file
+    unmount  = true
   }
 
   additional_iso_files {
-    type             = "sata"
-    iso_url          = var.windows_virtio_iso_url
-    iso_checksum     = "none"
-    iso_storage_pool = var.iso_storage_pool
-    iso_download_pve = true
-    unmount          = true
+    type     = "sata"
+    iso_file = var.windows_virtio_iso_file
+    unmount  = true
   }
 
   additional_iso_files {

@@ -147,6 +147,7 @@ class TemplateBuildJob(models.Model):
 
     STAGE_QUEUED = "queued"
     STAGE_PREFLIGHT = "preflight"
+    STAGE_ASSETS = "assets"
     STAGE_INIT = "init"
     STAGE_VALIDATE = "validate"
     STAGE_BUILD = "build"
@@ -157,6 +158,7 @@ class TemplateBuildJob(models.Model):
     STAGE_CHOICES = [
         (STAGE_QUEUED, "Queued"),
         (STAGE_PREFLIGHT, "Preflight"),
+        (STAGE_ASSETS, "ISO Staging"),
         (STAGE_INIT, "Init"),
         (STAGE_VALIDATE, "Validate"),
         (STAGE_BUILD, "Build"),
