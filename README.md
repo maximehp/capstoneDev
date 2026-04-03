@@ -5,7 +5,7 @@ Capstone is a Django app for lab VM lifecycle management with AD-backed login an
 ## Stack
 - Django 6
 - SQLite for local dev
-- PostgreSQL planned for staging/production (TrueNAS)
+- PostgreSQL for Compose/staging/production via `DATABASE_URL`
 - Proxmox REST API
 - AD auth via ldap3
 - Vanilla JS/CSS
@@ -60,6 +60,7 @@ Compose expects these host paths in the deploy/server shape:
 - `PACKER_NAS_HOST_PATH` default `/mnt/capstone-nas`
 
 Recommended TrueNAS-backed runtime paths:
+- `/mnt/capstone-nas/isos`
 - `/mnt/capstone-nas/Templates/archives`
 - `/mnt/capstone-nas/Templates/packer-cache`
 - `/mnt/capstone-nas/UserData`
@@ -165,6 +166,9 @@ The app expects these keys to be set in `.env` or the environment.
 - `PROXMOX_TOKEN_ID`
 - `PROXMOX_TOKEN_SECRET`
 - `PROXMOX_TLS_VERIFY`
+- `PROXMOX_NODE`
+- `PROXMOX_STORAGE_POOL`
+- `PROXMOX_ISO_STORAGE_POOL`
 - `AD_LDAP_HOST`
 - `AD_UPN_SUFFIX`
 - `AD_BASE_DN`
@@ -220,17 +224,35 @@ The app expects these keys to be set in `.env` or the environment.
   - `results/result.json`
   - `results/software-results.json`
   - `results/preflight.json`
+  - `results/iso-stage.json`
   - `results/error-summary.txt`
 - Job workspaces are created under `TEMPLATE_BUILD_WORKDIR/job-<uuid>/`.
 - The worker updates job heartbeat and marks stale running jobs as failed on restart.
 - The status API does not expose raw container filesystem paths.
 - For Ubuntu server deployment, mount the NAS on the host and bind-mount it into `web` and `packer-worker`; the final template artifact still lives in Proxmox storage.
 - Template ISOs are staged into `PACKER_NAS_ISO_DIR` first, then referenced from the Proxmox ISO storage configured by `PROXMOX_ISO_STORAGE_POOL` (default `ChirpNAS_ISO_Templates`).
+- The build progress page now has a dedicated `ISO staging` step with byte/progress/speed reporting during staged ISO downloads.
+- `ChirpNAS_ISO_Templates` is a valid Proxmox storage choice for both VM disks and ISOs if Proxmox reports both `Disk image` and `ISO image` content for that storage.
+- `web` writes the initial queued job manifests and `packer-worker` rewrites them later, so queued job files under `TEMPLATE_BUILD_WORKDIR` must remain shared-writable between both services.
+- In the Compose deploy shape, `packer-worker` runs as UID/GID `1000:1000` to match the writable NAS export on the Ubuntu host.
 - For local development, run both processes:
   - `.\.venv\Scripts\python.exe manage.py runserver`
   - `.\.venv\Scripts\python.exe manage.py run_template_build_worker`
 - For Compose deployment, the one-shot `migrate` service applies migrations before `web` and `packer-worker` start.
 - A deploy helper is provided at `scripts/deploy.sh`.
+
+## Current Production Notes
+- If template jobs stay `Queued` forever, check `docker compose logs packer-worker` first. The most common causes seen so far were:
+  - the worker could not rewrite job manifests under `/var/lib/capstone/jobs/...`
+  - the NAS export allowed host UID `1000:1000` writes but squashed container root
+- If template ISO staging fails immediately, verify:
+  - `PACKER_NAS_ISO_DIR` exists and is writable by the `packer-worker` container user
+  - `PROXMOX_STORAGE_POOL` and `PROXMOX_ISO_STORAGE_POOL` are both set correctly in `.env`
+  - the configured Proxmox storage exposes the required content types (`iso` for staged installer media, `images` or equivalent disk-image content for VM disks)
+- Logs for a given job live under:
+  - host: `${PACKER_JOBS_HOST_PATH}/job-<uuid>/`
+  - container: `${TEMPLATE_BUILD_WORKDIR}/job-<uuid>/`
+  - primary files: `logs/packer.log`, `results/preflight.json`, `results/iso-stage.json`, `results/result.json`, `results/error-summary.txt`
 
 ## Docs
 See `wiki/README.md` for architecture, API notes, and the roadmap.
