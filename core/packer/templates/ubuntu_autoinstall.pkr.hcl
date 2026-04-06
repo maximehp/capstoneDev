@@ -44,7 +44,7 @@ source "proxmox-iso" "ubuntu" {
   cores  = var.cpu
 
   boot_iso {
-    type     = "scsi"
+    type     = "ide"
     iso_file = var.iso_file
     unmount  = true
   }

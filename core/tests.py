@@ -1364,6 +1364,7 @@ class ArtifactGenerationTests(TestCase):
         hcl = (Path("core") / "packer" / "templates" / "ubuntu_autoinstall.pkr.hcl").read_text(encoding="utf-8")
 
         self.assertIn("cd_label         = \"cidata\"", hcl)
+        self.assertIn("type     = \"ide\"", hcl)
         self.assertIn("iso_file = var.iso_file", hcl)
         self.assertIn("iso_storage_pool = var.iso_storage_pool", hcl)
         self.assertNotIn("iso_download_pve = true", hcl)
@@ -1386,7 +1387,9 @@ class ArtifactGenerationTests(TestCase):
         uefi_hcl = (Path("core") / "packer" / "templates" / "windows_unattend_uefi.pkr.hcl").read_text(encoding="utf-8")
 
         self.assertIn("iso_file = var.iso_file", ubuntu_hcl)
+        self.assertIn("type     = \"ide\"", ubuntu_hcl)
         self.assertIn("iso_file = var.iso_file", debian_hcl)
+        self.assertIn("type     = \"ide\"", debian_hcl)
         self.assertIn("iso_file = var.windows_virtio_iso_file", bios_hcl)
         self.assertIn("iso_file = var.windows_virtio_iso_file", uefi_hcl)
 

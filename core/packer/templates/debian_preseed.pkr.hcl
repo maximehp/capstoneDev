@@ -43,7 +43,7 @@ source "proxmox-iso" "debian" {
   cores  = var.cpu
 
   boot_iso {
-    type     = "scsi"
+    type     = "ide"
     iso_file = var.iso_file
     unmount  = true
   }
