@@ -57,6 +57,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set}
       HOME: /tmp/capstone-worker
       XDG_CONFIG_HOME: /tmp/capstone-worker/.config
+      PACKER_PLUGIN_PATH: /tmp/capstone-worker/.config/packer/plugins
+      TMPDIR: /tmp/capstone-worker/tmp
       TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
       PACKER_CACHE_DIR: ${PACKER_CACHE_DIR:-/mnt/capstone-nas/Templates/packer-cache}
       PACKER_NAS_ROOT: ${PACKER_NAS_ROOT:-/mnt/capstone-nas}

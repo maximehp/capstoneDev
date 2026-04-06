@@ -24,6 +24,8 @@ services:
       DATABASE_URL: ${DATABASE_URL:-}
       HOME: /tmp/capstone-worker
       XDG_CONFIG_HOME: /tmp/capstone-worker/.config
+      PACKER_PLUGIN_PATH: /tmp/capstone-worker/.config/packer/plugins
+      TMPDIR: /tmp/capstone-worker/tmp
       PACKER_BIN: ${PACKER_BIN:-/usr/bin/packer}
       PACKER_ISO_TOOL: ${PACKER_ISO_TOOL:-xorriso}
       RUN_COLLECTSTATIC: "0"

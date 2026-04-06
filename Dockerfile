@@ -28,6 +28,11 @@ CMD ["gunicorn", "capstoneDev.wsgi:application", "--bind", "0.0.0.0:8000"]
 
 FROM app-base AS packer-runtime
 
+ENV HOME=/tmp/capstone-worker
+ENV XDG_CONFIG_HOME=/tmp/capstone-worker/.config
+ENV PACKER_PLUGIN_PATH=/tmp/capstone-worker/.config/packer/plugins
+ENV TMPDIR=/tmp/capstone-worker/tmp
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl gnupg jq wget xorriso \
     && wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
