@@ -20,6 +20,7 @@ from .template_builds import (
     _redact_text,
     _derive_machine_readable_error_summary,
     _run_preflight,
+    _render_ubuntu_user_data,
     _render_windows_script,
     _render_windows_unattend,
     _stage_single_iso,
@@ -1310,6 +1311,13 @@ class IsoStagingTests(TestCase):
 
 
 class ArtifactGenerationTests(TestCase):
+    def test_ubuntu_autoinstall_user_data_avoids_installer_time_guest_agent_step(self):
+        user_data = _render_ubuntu_user_data({"template_name": "ubuntu-template"})
+
+        self.assertIn("install-server: true", user_data)
+        self.assertNotIn("qemu-guest-agent", user_data)
+        self.assertNotIn("late-commands", user_data)
+
     def test_windows_unattend_uses_bios_disk_layout(self):
         unattend = _render_windows_unattend(
             {

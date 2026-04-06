@@ -1669,11 +1669,6 @@ def _render_ubuntu_user_data(payload: dict) -> str:
         "  ssh:\n"
         "    install-server: true\n"
         "    allow-pw: true\n"
-        "  packages:\n"
-        "    - qemu-guest-agent\n"
-        "    - cloud-init\n"
-        "  late-commands:\n"
-        "    - curtin in-target --target=/target systemctl enable qemu-guest-agent\n"
     )
 
 
