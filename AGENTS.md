@@ -17,6 +17,7 @@ Build and harden the Capstone Django app for lab VM lifecycle management with AD
 4. Preserve existing visual language unless explicitly asked to redesign.
 
 ## Ground Rules
+- At the start of any new thread, review the current project state, TODOs, wiki, and any other high-signal context files before proposing changes or making edits.
 - Never commit secrets or real credentials. Use `.env` locally only.
 - Treat Proxmox/AD calls as external dependencies: isolate logic, handle errors explicitly, and mock in tests.
 - Keep JS framework-free unless the user asks to adopt a framework.
