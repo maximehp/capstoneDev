@@ -5,8 +5,13 @@ set -eu
 : "${PACKER_CACHE_DIR:=/var/lib/capstone/packer-cache}"
 : "${PACKER_NAS_ROOT:=/mnt/capstone-nas}"
 : "${PACKER_NAS_ARCHIVE_DIR:=${PACKER_NAS_ROOT}/archive}"
+: "${HOME:=/tmp/capstone-worker}"
+: "${XDG_CONFIG_HOME:=${HOME}/.config}"
 
-mkdir -p "${TEMPLATE_BUILD_WORKDIR}" "${PACKER_CACHE_DIR}"
+export HOME
+export XDG_CONFIG_HOME
+
+mkdir -p "${HOME}" "${XDG_CONFIG_HOME}" "${XDG_CONFIG_HOME}/packer" "${TEMPLATE_BUILD_WORKDIR}" "${PACKER_CACHE_DIR}"
 if [ -d "${PACKER_NAS_ROOT}" ]; then
     mkdir -p "${PACKER_NAS_ARCHIVE_DIR}" || true
 fi

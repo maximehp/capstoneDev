@@ -22,6 +22,8 @@ services:
     environment:
       DEBUG: ${DEBUG:-1}
       DATABASE_URL: ${DATABASE_URL:-}
+      HOME: /tmp/capstone-worker
+      XDG_CONFIG_HOME: /tmp/capstone-worker/.config
       PACKER_BIN: ${PACKER_BIN:-/usr/bin/packer}
       PACKER_ISO_TOOL: ${PACKER_ISO_TOOL:-xorriso}
       RUN_COLLECTSTATIC: "0"

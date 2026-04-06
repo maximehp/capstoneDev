@@ -55,6 +55,8 @@ services:
       DEBUG: ${DEBUG:-0}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-127.0.0.1,localhost}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set}
+      HOME: /tmp/capstone-worker
+      XDG_CONFIG_HOME: /tmp/capstone-worker/.config
       TEMPLATE_BUILD_WORKDIR: ${TEMPLATE_BUILD_WORKDIR:-/var/lib/capstone/jobs}
       PACKER_CACHE_DIR: ${PACKER_CACHE_DIR:-/mnt/capstone-nas/Templates/packer-cache}
       PACKER_NAS_ROOT: ${PACKER_NAS_ROOT:-/mnt/capstone-nas}
