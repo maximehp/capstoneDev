@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_GET, require_POST
 
-from .models import IsoSource, SoftwareSource, TemplateBuildJob, TemplateDefinition
+from .models import IsoSource, SoftwareSource, TemplateBuildJob, TemplateDefinition, VirtualMachine
 from .packer_profiles import (
     BUILD_PROFILE_CHOICES,
     BUILD_PROFILE_DEBIAN_PRESEED,
@@ -177,6 +177,155 @@ def _wants_json(request) -> bool:
     return request.headers.get("X-Requested-With") == "fetch"
 
 
+def _parse_template_id(raw_value) -> int | None:
+    try:
+        value = int(raw_value)
+    except (TypeError, ValueError):
+        return None
+    return value if value > 0 else None
+
+
+def _normalize_vm_name(raw_value) -> str:
+    return str(raw_value or "").strip()
+
+
+def _validate_static_ip_cidr(value: str) -> bool:
+    try:
+        ipaddress.ip_interface(value)
+    except ValueError:
+        return False
+    return True
+
+
+def _validate_gateway_ip(value: str) -> bool:
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return True
+
+
+def _validate_dns_list(values: list[str]) -> bool:
+    for item in values:
+        try:
+            ipaddress.ip_address(item)
+        except ValueError:
+            return False
+    return True
+
+
+def _ready_template_queryset_for_user(user):
+    return (
+        TemplateDefinition.objects
+        .select_related("last_job")
+        .filter(owner=user, last_job__status=TemplateBuildJob.STATUS_SUCCEEDED)
+        .order_by("-updated_at", "-id")
+    )
+
+
+def _template_summary_payload(template_definition: TemplateDefinition) -> dict:
+    return {
+        "id": template_definition.id,
+        "name": template_definition.template_name,
+        "vmid": template_definition.template_vmid,
+        "target_os": template_definition.target_os,
+        "build_profile": template_definition.build_profile,
+        "hardware": template_definition.hardware if isinstance(template_definition.hardware, dict) else {},
+        "network": template_definition.network if isinstance(template_definition.network, dict) else {},
+    }
+
+
+def _virtual_machine_api_payload(vm_record: VirtualMachine) -> dict:
+    return {
+        "id": vm_record.id,
+        "name": vm_record.name,
+        "vmid": vm_record.proxmox_vmid,
+        "node": vm_record.node,
+        "status": vm_record.status,
+        "task_upid": vm_record.task_upid or None,
+        "error": vm_record.last_error or None,
+        "hardware": vm_record.hardware if isinstance(vm_record.hardware, dict) else {},
+        "network": vm_record.network if isinstance(vm_record.network, dict) else {},
+        "created_at": vm_record.created_at.isoformat() if vm_record.created_at else None,
+        "provisioned_at": vm_record.provisioned_at.isoformat() if vm_record.provisioned_at else None,
+        "started_at": vm_record.started_at.isoformat() if vm_record.started_at else None,
+        "template": _template_summary_payload(vm_record.template_definition),
+    }
+
+
+def _normalize_vm_hardware(raw_hardware: dict) -> dict:
+    return {
+        "cpu": _coerce_int(raw_hardware.get("cpu", 2), 2, 1, 64),
+        "ram_gb": _coerce_int(raw_hardware.get("ram_gb", 4), 4, 1, 512),
+        "disk_gb": _coerce_int(raw_hardware.get("disk_gb", 32), 32, 8, 4096),
+    }
+
+
+def _normalize_vm_network(raw_network: dict) -> dict:
+    vlan_raw = raw_network.get("vlan")
+    vlan = None
+    if vlan_raw not in {"", None}:
+        vlan = _coerce_int(vlan_raw, 1, 1, 4094)
+
+    ipv4_mode = str(raw_network.get("ipv4_mode") or "dhcp").strip().lower()
+    if ipv4_mode not in {"dhcp", "static"}:
+        ipv4_mode = "dhcp"
+
+    return {
+        "bridge": str(raw_network.get("bridge") or "").strip(),
+        "vlan": vlan,
+        "ipv4_mode": ipv4_mode,
+        "static_ip": str(raw_network.get("static_ip") or "").strip(),
+        "static_gateway": str(raw_network.get("static_gateway") or "").strip(),
+        "static_dns": _normalize_static_dns(raw_network.get("static_dns")),
+    }
+
+
+def _validate_vm_payload(payload: dict, template_definition: TemplateDefinition | None) -> tuple[dict | None, str | None]:
+    template_id = _parse_template_id(payload.get("template_id"))
+    if template_id is None:
+        return None, "template_id must be a positive integer."
+
+    if template_definition is None:
+        return None, "Template not found."
+
+    name = _normalize_vm_name(payload.get("name"))
+    if not name:
+        return None, "VM name is required."
+
+    raw_hardware = payload.get("hardware") if isinstance(payload.get("hardware"), dict) else {}
+    raw_network = payload.get("network") if isinstance(payload.get("network"), dict) else {}
+    hardware = _normalize_vm_hardware(raw_hardware)
+    network = _normalize_vm_network(raw_network)
+
+    source_hardware = template_definition.hardware if isinstance(template_definition.hardware, dict) else {}
+    source_disk_gb = _coerce_int(source_hardware.get("disk_gb", 0), 0, 0, 4096)
+    if source_disk_gb and hardware["disk_gb"] < source_disk_gb:
+        return None, f"Disk size must be at least {source_disk_gb} GB for this template."
+
+    if not network["bridge"]:
+        return None, "Network bridge is required."
+
+    if network["ipv4_mode"] == "static":
+        if not network["static_ip"] or not _validate_static_ip_cidr(network["static_ip"]):
+            return None, "Static IPv4 address must be a valid CIDR value."
+        if not network["static_gateway"] or not _validate_gateway_ip(network["static_gateway"]):
+            return None, "Static gateway must be a valid IPv4 or IPv6 address."
+        if network["static_dns"] and not _validate_dns_list(network["static_dns"]):
+            return None, "Static DNS values must be valid IP addresses."
+    else:
+        network["static_ip"] = ""
+        network["static_gateway"] = ""
+        network["static_dns"] = []
+
+    return {
+        "template_id": template_id,
+        "name": name,
+        "hardware": hardware,
+        "network": network,
+    }, None
+
+
 @csrf_protect
 def login_view(request):
     if request.user.is_authenticated:
@@ -222,16 +371,23 @@ def start_vm(request):
     except Exception:
         return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
 
-    node = str(payload.get("node", "Kif") or "Kif").strip()
-    try:
-        vmid = int(payload.get("vm_id", 900))
-    except (TypeError, ValueError):
-        return JsonResponse({"ok": False, "error": "vm_id must be an integer"}, status=400)
+    template_id = _parse_template_id(payload.get("template_id"))
+    template_definition = None
+    if template_id is not None:
+        template_definition = _ready_template_queryset_for_user(request.user).filter(id=template_id).first()
+
+    normalized, error = _validate_vm_payload(payload, template_definition)
+    if error:
+        status_code = 404 if error == "Template not found." else 400
+        return JsonResponse({"ok": False, "error": error}, status=status_code)
 
     try:
-        data = proxmox_services.provision_default_vm(
-            node=node,
-            vmid=vmid,
+        vm_record = proxmox_services.provision_vm_from_template(
+            owner=request.user,
+            template_definition=template_definition,
+            name=normalized["name"],
+            hardware=normalized["hardware"],
+            network=normalized["network"],
         )
     except Exception as exc:
         return JsonResponse({"ok": False, "error": f"Proxmox request failed: {exc}"}, status=502)
@@ -239,8 +395,9 @@ def start_vm(request):
     return JsonResponse(
         {
             "ok": True,
-            "data": data,
-        }
+            "vm": _virtual_machine_api_payload(vm_record),
+        },
+        status=201,
     )
 
 def _is_public_hostname(hostname: str) -> bool:
@@ -494,6 +651,13 @@ def software_saved(request):
             }
         )
     return JsonResponse({"ok": True, "items": payload})
+
+
+@require_GET
+@login_required
+def template_list(request):
+    items = [_template_summary_payload(item) for item in _ready_template_queryset_for_user(request.user)]
+    return JsonResponse({"ok": True, "items": items}, status=200)
 
 def _normalize_url_list(items):
     if not isinstance(items, list):

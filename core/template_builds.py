@@ -27,6 +27,7 @@ from .packer_profiles import (
     WINDOWS_FIRMWARE_BIOS_LEGACY,
     WINDOWS_FIRMWARE_UEFI_TPM,
 )
+from .proxmox.client import normalize_proxmox_api_base
 
 
 _RESULT_MARKER_RE = re.compile(r"CAPSTONE_ITEM_RESULT\|([^|]+)\|([^|]+)\|([^|]+)\|(.*)")
@@ -575,10 +576,11 @@ def _proxmox_api_headers() -> dict[str, str]:
 
 
 def _proxmox_api_url(path: str) -> str:
-    base_url = str(os.environ.get("PROXMOX_BASE_URL") or "").rstrip("/")
-    if not base_url:
+    raw_base_url = str(os.environ.get("PROXMOX_BASE_URL") or "").strip()
+    if not raw_base_url:
         raise RuntimeError("Missing PROXMOX_BASE_URL in the worker environment.")
-    return f"{base_url}{path}"
+    suffix = path if str(path).startswith("/") else f"/{path}"
+    return f"{normalize_proxmox_api_base(raw_base_url)}{suffix}"
 
 
 def _proxmox_api_get(path: str, timeout=(5, 20)):

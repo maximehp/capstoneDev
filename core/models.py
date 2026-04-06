@@ -207,3 +207,50 @@ class TemplateBuildJob(models.Model):
 
     def __str__(self) -> str:
         return f"TemplateBuildJob<{self.uuid}> {self.status}/{self.stage}"
+
+
+class VirtualMachine(models.Model):
+    STATUS_PROVISIONING = "provisioning"
+    STATUS_RUNNING = "running"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = [
+        (STATUS_PROVISIONING, "Provisioning"),
+        (STATUS_RUNNING, "Running"),
+        (STATUS_FAILED, "Failed"),
+    ]
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="virtual_machines",
+    )
+    template_definition = models.ForeignKey(
+        TemplateDefinition,
+        on_delete=models.CASCADE,
+        related_name="virtual_machines",
+    )
+    proxmox_vmid = models.PositiveIntegerField(unique=True)
+    name = models.CharField(max_length=128)
+    node = models.CharField(max_length=64)
+
+    hardware = models.JSONField(default=dict)
+    network = models.JSONField(default=dict)
+
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_PROVISIONING)
+    task_upid = models.TextField(blank=True)
+    last_error = models.TextField(blank=True)
+
+    provisioned_at = models.DateTimeField(null=True, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["owner", "created_at"]),
+            models.Index(fields=["status", "updated_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.proxmox_vmid})"

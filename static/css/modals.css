@@ -383,6 +383,10 @@ Each slide:
     align-items: start;
 }
 
+.vm-field-row-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 @media (max-width: 760px) {
     .field-row-two {
         grid-template-columns: 1fr;
@@ -390,6 +394,10 @@ Each slide:
 
     .field-row-two-name-os {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .vm-field-row-three {
+        grid-template-columns: 1fr;
     }
 }
 

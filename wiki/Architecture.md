@@ -7,6 +7,7 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
 - Django views render full pages and optional fragments for partial navigation.
 - AD authentication via `ldap3` in a custom auth backend.
 - Proxmox REST API integration for VM cloning and start operations.
+- Completed templates can now be used as the source of truth for user VM provisioning through the app.
 - Docker Compose runs separate `web` and `packer-worker` containers against the same PostgreSQL database.
 - Frontend is vanilla JS/CSS and depends on consistent `X-Requested-With` headers for fragment requests.
 - Template wizard is profile-driven and currently supports:
@@ -16,6 +17,8 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
 - Template wizard Step 2 uses a single software input (`URL` or `package`) plus a selectable list for saved/added software items.
 - `POST /api/template/validate-software/` normalizes software selections before create-time validation.
 - `POST /api/template/create/` persists a `TemplateDefinition`, creates a queued `TemplateBuildJob`, and returns async job metadata.
+- `GET /api/template/list/` returns completed templates that the caller can provision from.
+- `POST /api/vm/start/` provisions a VM from a stored template definition and persists a `VirtualMachine` record.
 - `GET /api/template/builds/<job_uuid>/status/` exposes lifecycle state plus structured result data.
 - `manage.py run_template_build_worker` claims queued jobs and runs the Packer workflow in the background.
 - The worker container uses Postgres as the job queue source of truth and a shared filesystem only for workspaces, logs, and generated artifacts.
@@ -58,6 +61,8 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
   - owner, template name, VMID, build profile, target OS, ISO metadata, normalized payload snapshot, hardware/network/windows/ansible options
 - `TemplateBuildJob`
   - async status/stage, timestamps, workspace/log/template paths, payload snapshot, result payload, exit code, error summary
+- `VirtualMachine`
+  - owner, source template, Proxmox VMID, name, node, hardware/network snapshot, provisioning status, task id, error state
 
 ## Current Constraints
 - Template networking is DHCP-only.
@@ -66,4 +71,5 @@ Capstone is a Django monolith with one app (`core`). Pages are server-rendered a
 - The `web` container does not include `packer`; only the `packer-worker` image does.
 - `web` creates the queued job manifests and `packer-worker` rewrites them later, so job workspaces under `TEMPLATE_BUILD_WORKDIR` must remain shared-writable.
 - `ChirpNAS_ISO_Templates` may be used for both VM disks and staged ISO media if Proxmox reports both content types for that storage.
+- `PROXMOX_BASE_URL` may be configured either as the Proxmox host root or with `/api2/json`; the app normalizes either form before making API requests.
 - Unsupported OSes are not part of the automated Packer path in the current implementation.

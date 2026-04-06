@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/software/inspect/", views.software_inspect, name="software_inspect"),
     path("api/iso/saved/", views.iso_saved, name="iso_saved"),
     path("api/software/saved/", views.software_saved, name="software_saved"),
+    path("api/template/list/", views.template_list, name="template_list"),
     path(
         "api/template/validate-software/",
         views.validate_template_software,

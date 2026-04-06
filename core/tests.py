@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 
-from .models import DirectoryProfile, TemplateBuildJob, TemplateDefinition
+from .models import DirectoryProfile, TemplateBuildJob, TemplateDefinition, VirtualMachine
 from .packer_profiles import (
     BUILD_PROFILE_UBUNTU_AUTOINSTALL,
     BUILD_PROFILE_WINDOWS_UNATTEND,
@@ -29,6 +29,8 @@ from .template_builds import (
     run_build_job,
 )
 from .auth_backends import _candidate_endpoints
+from .proxmox.client import ProxmoxClient, normalize_proxmox_api_base
+from .proxmox.services import provision_vm_from_template
 from capstoneDev.settings import _database_settings
 
 
@@ -117,6 +119,30 @@ def _directory_profile_for(user, ad_rid: int = 1536, role: str = DirectoryProfil
         directory_role=role,
         raw_attributes={"objectSid": [f"S-1-5-21-2396734983-2603881837-2963403330-{ad_rid}"]},
     )
+
+
+def _ready_template_for(user, template_vmid: str = "1536001", name: str = "ubuntu-template"):
+    template = TemplateDefinition.objects.create(
+        owner=user,
+        template_name=name,
+        template_vmid=template_vmid,
+        build_profile=BUILD_PROFILE_UBUNTU_AUTOINSTALL,
+        target_os=TemplateDefinition.TARGET_OS_LINUX,
+        iso_url="https://example.com/ubuntu.iso",
+        normalized_payload={},
+        hardware={"cpu": 2, "ram_gb": 4, "disk_gb": 32},
+        network={"bridge": "vmbr0", "vlan": 20, "ipv4_mode": "dhcp"},
+    )
+    job = TemplateBuildJob.objects.create(
+        owner=user,
+        template_definition=template,
+        status=TemplateBuildJob.STATUS_SUCCEEDED,
+        stage=TemplateBuildJob.STAGE_DONE,
+        payload_snapshot={},
+    )
+    template.last_job = job
+    template.save(update_fields=["last_job", "updated_at"])
+    return template
 
 
 @override_settings(TEMPLATE_BUILD_WORKDIR=Path("database") / "test-api-jobs")
@@ -430,26 +456,290 @@ class VmStartApiTests(TestCase):
         self.client = Client()
         user_model = get_user_model()
         self.user = user_model.objects.create_user(username="vmuser", password="pass12345")
+        self.other = user_model.objects.create_user(username="other-vmuser", password="pass12345")
+        self.template = _ready_template_for(self.user, template_vmid="1536001")
+        self.other_template = _ready_template_for(self.other, template_vmid="1801001", name="other-template")
+
+    def _payload(self):
+        return {
+            "template_id": self.template.id,
+            "name": "student-vm-01",
+            "hardware": {"cpu": 4, "ram_gb": 8, "disk_gb": 64},
+            "network": {"bridge": "vmbr0", "vlan": 20, "ipv4_mode": "dhcp"},
+        }
 
     def test_requires_login(self):
         response = self.client.post(
             "/api/vm/start/",
-            data=json.dumps({"node": "Kif", "vm_id": 900}),
+            data=json.dumps(self._payload()),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 302)
 
-    @patch("core.views.proxmox_services.provision_default_vm")
+    @patch("core.views.proxmox_services.provision_vm_from_template")
     def test_proxmox_failure_returns_502(self, provision_mock):
         provision_mock.side_effect = RuntimeError("boom")
         self.client.force_login(self.user)
         response = self.client.post(
             "/api/vm/start/",
-            data=json.dumps({"node": "Kif", "vm_id": 900}),
+            data=json.dumps(self._payload()),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 502)
         self.assertFalse(response.json()["ok"])
+
+    @override_settings(PROXMOX_NODE="Farnsworth")
+    @patch("core.views.proxmox_services.provision_vm_from_template")
+    def test_provisions_vm_from_selected_template(self, provision_mock):
+        vm_record = VirtualMachine.objects.create(
+            owner=self.user,
+            template_definition=self.template,
+            proxmox_vmid=2400,
+            name="student-vm-01",
+            node="Farnsworth",
+            hardware={"cpu": 4, "ram_gb": 8, "disk_gb": 64},
+            network={"bridge": "vmbr0", "vlan": 20, "ipv4_mode": "dhcp"},
+            status=VirtualMachine.STATUS_RUNNING,
+            task_upid="UPID:start",
+            provisioned_at=timezone.now(),
+            started_at=timezone.now(),
+        )
+        provision_mock.return_value = vm_record
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            "/api/vm/start/",
+            data=json.dumps(self._payload()),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        body = response.json()
+        self.assertTrue(body["ok"])
+        self.assertEqual(body["vm"]["vmid"], 2400)
+        self.assertEqual(body["vm"]["template"]["id"], self.template.id)
+        provision_mock.assert_called_once()
+        kwargs = provision_mock.call_args.kwargs
+        self.assertEqual(kwargs["owner"], self.user)
+        self.assertEqual(kwargs["template_definition"], self.template)
+        self.assertEqual(kwargs["hardware"]["cpu"], 4)
+        self.assertEqual(kwargs["network"]["bridge"], "vmbr0")
+
+    def test_rejects_missing_template_id(self):
+        payload = self._payload()
+        payload["template_id"] = ""
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            "/api/vm/start/",
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "template_id must be a positive integer.")
+
+    def test_rejects_other_users_template(self):
+        payload = self._payload()
+        payload["template_id"] = self.other_template.id
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            "/api/vm/start/",
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"], "Template not found.")
+
+    def test_rejects_static_network_without_gateway(self):
+        payload = self._payload()
+        payload["network"] = {
+            "bridge": "vmbr0",
+            "vlan": 20,
+            "ipv4_mode": "static",
+            "static_ip": "10.0.20.50/24",
+            "static_gateway": "",
+            "static_dns": ["10.0.20.10"],
+        }
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            "/api/vm/start/",
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "Static gateway must be a valid IPv4 or IPv6 address.")
+
+    def test_rejects_disk_smaller_than_source_template(self):
+        payload = self._payload()
+        payload["hardware"]["disk_gb"] = 16
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            "/api/vm/start/",
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Disk size must be at least 32 GB", response.json()["error"])
+
+
+class TemplateListApiTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(username="template-owner", password="pass12345")
+        self.other = user_model.objects.create_user(username="template-other", password="pass12345")
+
+    def test_returns_ready_templates_for_current_user_only(self):
+        ready_template = _ready_template_for(self.user, template_vmid="1536001")
+        queued_template = TemplateDefinition.objects.create(
+            owner=self.user,
+            template_name="queued-template",
+            template_vmid="1536002",
+            build_profile=BUILD_PROFILE_UBUNTU_AUTOINSTALL,
+            target_os=TemplateDefinition.TARGET_OS_LINUX,
+            iso_url="https://example.com/ubuntu.iso",
+            normalized_payload={},
+            hardware={"cpu": 2, "ram_gb": 4, "disk_gb": 32},
+            network={"bridge": "vmbr0", "vlan": 20, "ipv4_mode": "dhcp"},
+        )
+        queued_job = TemplateBuildJob.objects.create(
+            owner=self.user,
+            template_definition=queued_template,
+            status=TemplateBuildJob.STATUS_QUEUED,
+            stage=TemplateBuildJob.STAGE_QUEUED,
+            payload_snapshot={},
+        )
+        queued_template.last_job = queued_job
+        queued_template.save(update_fields=["last_job", "updated_at"])
+        _ready_template_for(self.other, template_vmid="1801001")
+
+        self.client.force_login(self.user)
+        response = self.client.get("/api/template/list/")
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body["ok"])
+        self.assertEqual(len(body["items"]), 1)
+        self.assertEqual(body["items"][0]["id"], ready_template.id)
+        self.assertEqual(body["items"][0]["hardware"]["disk_gb"], 32)
+
+
+class ProxmoxUrlNormalizationTests(TestCase):
+    def test_normalize_root_base_url_adds_api_prefix(self):
+        self.assertEqual(
+            normalize_proxmox_api_base("https://172.27.80.4:8006"),
+            "https://172.27.80.4:8006/api2/json",
+        )
+
+    def test_normalize_versioned_base_url_keeps_existing_prefix(self):
+        self.assertEqual(
+            normalize_proxmox_api_base("https://172.27.80.4:8006/api2/json"),
+            "https://172.27.80.4:8006/api2/json",
+        )
+
+    def test_worker_url_builder_accepts_root_base_url(self):
+        from .template_builds import _proxmox_api_url
+
+        with patch.dict(os.environ, {"PROXMOX_BASE_URL": "https://172.27.80.4:8006"}, clear=False):
+            url = _proxmox_api_url("/nodes/Farnsworth/storage")
+
+        self.assertEqual(url, "https://172.27.80.4:8006/api2/json/nodes/Farnsworth/storage")
+
+    def test_worker_url_builder_accepts_versioned_base_url(self):
+        from .template_builds import _proxmox_api_url
+
+        with patch.dict(os.environ, {"PROXMOX_BASE_URL": "https://172.27.80.4:8006/api2/json"}, clear=False):
+            url = _proxmox_api_url("/nodes/Farnsworth/storage")
+
+        self.assertEqual(url, "https://172.27.80.4:8006/api2/json/nodes/Farnsworth/storage")
+
+    @patch.dict(
+        os.environ,
+        {
+            "PROXMOX_BASE_URL": "https://172.27.80.4:8006",
+            "PROXMOX_TOKEN_ID": "user@pve!token",
+            "PROXMOX_TOKEN_SECRET": "secret",
+        },
+        clear=False,
+    )
+    def test_client_uses_normalized_api_base(self):
+        client = ProxmoxClient()
+
+        self.assertEqual(client._api_url("/cluster/nextid"), "https://172.27.80.4:8006/api2/json/cluster/nextid")
+
+
+@override_settings(PROXMOX_NODE="Farnsworth")
+class VmProvisioningServiceTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_user(username="service-owner", password="pass12345")
+        self.template = _ready_template_for(self.user, template_vmid="1536001")
+
+    @patch("core.proxmox.services._client_instance")
+    def test_provision_service_persists_running_vm(self, client_factory_mock):
+        client = Mock()
+        client.allocate_next_vmid.return_value = 2400
+        client.clone_from_template.return_value = "UPID:clone"
+        client.update_vm_config.return_value = None
+        client.get_vm_config.return_value = {"scsi0": "local-lvm:vm-2400-disk-0,size=32G"}
+        client.resize_disk.return_value = "UPID:resize"
+        client.start_vm.return_value = "UPID:start"
+        client_factory_mock.return_value = client
+
+        vm_record = provision_vm_from_template(
+            owner=self.user,
+            template_definition=self.template,
+            name="student-vm-01",
+            hardware={"cpu": 4, "ram_gb": 8, "disk_gb": 64},
+            network={"bridge": "vmbr0", "vlan": 20, "ipv4_mode": "dhcp", "static_ip": "", "static_gateway": "", "static_dns": []},
+        )
+
+        vm_record.refresh_from_db()
+        self.assertEqual(vm_record.status, VirtualMachine.STATUS_RUNNING)
+        self.assertEqual(vm_record.proxmox_vmid, 2400)
+        self.assertEqual(vm_record.task_upid, "UPID:start")
+        client.clone_from_template.assert_called_once_with(
+            node="Farnsworth",
+            template_vmid=1536001,
+            new_vmid=2400,
+            name="student-vm-01",
+        )
+        client.update_vm_config.assert_called_once()
+        config_payload = client.update_vm_config.call_args.kwargs["config"]
+        self.assertEqual(config_payload["cores"], 4)
+        self.assertEqual(config_payload["memory"], 8192)
+        self.assertEqual(config_payload["ipconfig0"], "ip=dhcp")
+        self.assertIn("bridge=vmbr0", config_payload["net0"])
+        self.assertIn("tag=20", config_payload["net0"])
+        client.resize_disk.assert_called_once_with(node="Farnsworth", vmid=2400, disk="scsi0", size_gb=64)
+        self.assertEqual(client.wait_for_task.call_count, 3)
+
+    @patch("core.proxmox.services._client_instance")
+    def test_provision_service_marks_failed_vm_when_clone_fails(self, client_factory_mock):
+        client = Mock()
+        client.allocate_next_vmid.return_value = 2500
+        client.clone_from_template.side_effect = RuntimeError("clone failed")
+        client_factory_mock.return_value = client
+
+        with self.assertRaises(RuntimeError):
+            provision_vm_from_template(
+                owner=self.user,
+                template_definition=self.template,
+                name="failed-vm",
+                hardware={"cpu": 2, "ram_gb": 4, "disk_gb": 32},
+                network={"bridge": "vmbr0", "vlan": None, "ipv4_mode": "dhcp", "static_ip": "", "static_gateway": "", "static_dns": []},
+            )
+
+        vm_record = VirtualMachine.objects.get(name="failed-vm")
+        self.assertEqual(vm_record.status, VirtualMachine.STATUS_FAILED)
+        self.assertIn("clone failed", vm_record.last_error)
 
 
 class ActiveDirectoryEndpointTests(TestCase):

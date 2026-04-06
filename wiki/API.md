@@ -3,6 +3,7 @@
 ## Current Endpoints
 - `POST /login/`
 - `POST /api/vm/start/`
+- `GET /api/template/list/`
 - `GET /api/iso/inspect`
 - `GET /api/software/inspect`
 - `GET /api/iso/saved/`
@@ -13,7 +14,8 @@
 
 ## Expected Behaviors
 - `POST /login/` authenticates against AD and establishes a Django session.
-- `POST /api/vm/start/` clones from a Proxmox template and starts a VM.
+- `POST /api/vm/start/` provisions a VM from a stored template definition, allocates the destination VMID server-side, applies hardware/network config, and starts the VM.
+- `GET /api/template/list/` returns the caller's completed templates that are ready to provision from.
 - `GET /api/iso/inspect` validates a URL and returns basic ISO metadata.
 - `GET /api/software/inspect` validates a software download URL and returns metadata.
 - `GET /api/iso/saved/` returns up to 50 saved ISO URLs for the logged-in user.
@@ -113,6 +115,57 @@ Important behavior:
 - `POST /api/template/create/` does not create the generated Packer files inline.
 - Those files are created later by the background worker when it executes the queued job.
 
+## Template List Contract
+`GET /api/template/list/` response body:
+- `ok`
+- `items`
+  - `id`
+  - `name`
+  - `vmid`
+  - `target_os`
+  - `build_profile`
+  - `hardware`
+  - `network`
+
+Important behavior:
+- Only completed templates with a succeeded last build are returned.
+- The list is scoped to the authenticated user.
+
+## VM Provision Contract
+`POST /api/vm/start/` request body:
+- `template_id`
+- `name`
+- `hardware`
+  - `cpu`
+  - `ram_gb`
+  - `disk_gb`
+- `network`
+  - `bridge`
+  - `vlan`
+  - `ipv4_mode` (`dhcp` or `static`)
+  - `static_ip` when `ipv4_mode=static`
+  - `static_gateway` when `ipv4_mode=static`
+  - `static_dns` optional list
+
+Current rules:
+- `template_id` must reference one of the caller's completed templates.
+- Destination VMID is allocated by the backend, not supplied by the client.
+- Requested disk size must not be smaller than the source template disk size.
+- Static networking requires a CIDR IP and a gateway.
+
+Successful provision response:
+- HTTP `201`
+- `vm`
+  - `id`
+  - `name`
+  - `vmid`
+  - `node`
+  - `status`
+  - `task_upid`
+  - `hardware`
+  - `network`
+  - `template`
+
 ## Build Status Contract
 `GET /api/template/builds/<job_uuid>/status/` response body:
 - `job.id`
@@ -169,12 +222,9 @@ Current build-stage semantics:
 - `local_path`
 - `final_url`
 
-## Planned Endpoints
-- `GET /api/template/list/` for listing templates.
-- `POST /api/vm/create/` for user-provisioned VMs with configuration.
-
 ## Notes
 - Requests from the UI use `X-Requested-With: fetch` or `prefetch` for partial navigation.
 - Software validation remains a preflight/normalization step.
 - Packer execution happens in the worker, not in the create request.
+- `PROXMOX_BASE_URL` may be configured either as the Proxmox host root or with `/api2/json`; both forms are normalized internally.
 - Windows native installer items currently get backend default silent args (`/quiet /norestart`) when args are missing.

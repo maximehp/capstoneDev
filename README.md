@@ -196,8 +196,11 @@ The app expects these keys to be set in `.env` or the environment.
 - AD auth is mandatory.
 - ISO source URLs are unrestricted.
 - `DATABASE_URL` supports `sqlite:///...` and `postgresql://...`.
+- `PROXMOX_BASE_URL` may be set either to the Proxmox host root (for example `https://proxmox.example:8006`) or the API root ending in `/api2/json`; the app normalizes both forms.
 - Template VMID policy: `"100" + user.id` as a string.
 - Template creation policy is configurable with `TEMPLATE_CREATION_POLICY` (`faculty_only` default, `allow_all` optional).
+- `GET /api/template/list/` returns the authenticated user's completed templates that are ready for VM provisioning.
+- `POST /api/vm/start/` now provisions a VM from a stored `TemplateDefinition`, allocates the destination VMID server-side, applies requested hardware/network config, starts the VM, and persists a `VirtualMachine` record in Django.
 - Template wizard currently uses explicit build profiles:
   - `ubuntu_autoinstall`
   - `debian_preseed`
@@ -235,6 +238,7 @@ The app expects these keys to be set in `.env` or the environment.
 - `ChirpNAS_ISO_Templates` is a valid Proxmox storage choice for both VM disks and ISOs if Proxmox reports both `Disk image` and `ISO image` content for that storage.
 - `web` writes the initial queued job manifests and `packer-worker` rewrites them later, so queued job files under `TEMPLATE_BUILD_WORKDIR` must remain shared-writable between both services.
 - In the Compose deploy shape, `packer-worker` runs as UID/GID `1000:1000` to match the writable NAS export on the Ubuntu host.
+- The Create VM modal now loads completed templates from the app, lets the user choose hardware/network settings, and submits a real provisioning request instead of the previous placeholder clone/start path.
 - For local development, run both processes:
   - `.\.venv\Scripts\python.exe manage.py runserver`
   - `.\.venv\Scripts\python.exe manage.py run_template_build_worker`

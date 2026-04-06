@@ -88,6 +88,20 @@
 
     var vmNextBtn = qs("#vm-next");
     var tcNextBtn = qs("#tc-next");
+    var vmTemplateSelect = qs("#vm-template-select");
+    var vmNameInput = qs("#vm-name");
+    var vmHwCpuInput = qs("#vm-hw-cpu");
+    var vmHwRamInput = qs("#vm-hw-ram");
+    var vmHwDiskInput = qs("#vm-hw-disk");
+    var vmNetBridgeSelect = qs("#vm-net-bridge");
+    var vmNetVlanInput = qs("#vm-net-vlan");
+    var vmNetIpv4Select = qs("#vm-net-ipv4");
+    var vmStaticNetworkBox = qs("#vm-static-network");
+    var vmStaticIpInput = qs("#vm-static-ip");
+    var vmStaticGatewayInput = qs("#vm-static-gateway");
+    var vmStaticDnsInput = qs("#vm-static-dns");
+    var vmTemplateStatus = qs("#vm-template-status");
+    var vmCreateStatus = qs("#vm-create-status");
 
     var templateNameInput = qs("#tc-template-name");
     var isoSavedSelect = qs("#tc-iso-saved");
@@ -137,9 +151,11 @@
 
     var tcIndex = 0;
     var tcCount = 0;
+    var isCreatingVm = false;
     var isCreatingTemplate = false;
     var activeBuildJobId = null;
     var buildPollTimer = null;
+    var availableTemplates = [];
 
     var lastIsoCheckedUrl = null;
     var lastIsoOk = false;
@@ -243,6 +259,36 @@
             createStatus.classList.add("is-ok");
         } else if (kind === "warn") {
             createStatus.classList.add("is-warn");
+        }
+    }
+
+    function setVmTemplateStatus(text, kind) {
+        if (!vmTemplateStatus) {
+            return;
+        }
+        vmTemplateStatus.textContent = text || "";
+        vmTemplateStatus.classList.remove("is-error", "is-ok", "is-warn");
+        if (kind === "error") {
+            vmTemplateStatus.classList.add("is-error");
+        } else if (kind === "ok") {
+            vmTemplateStatus.classList.add("is-ok");
+        } else if (kind === "warn") {
+            vmTemplateStatus.classList.add("is-warn");
+        }
+    }
+
+    function setVmCreateStatus(text, kind) {
+        if (!vmCreateStatus) {
+            return;
+        }
+        vmCreateStatus.textContent = text || "";
+        vmCreateStatus.classList.remove("is-error", "is-ok", "is-warn");
+        if (kind === "error") {
+            vmCreateStatus.classList.add("is-error");
+        } else if (kind === "ok") {
+            vmCreateStatus.classList.add("is-ok");
+        } else if (kind === "warn") {
+            vmCreateStatus.classList.add("is-warn");
         }
     }
 
@@ -1365,6 +1411,127 @@
         });
     }
 
+    function getSelectedTemplateOption() {
+        if (!vmTemplateSelect) {
+            return null;
+        }
+        var templateId = String(vmTemplateSelect.value || "");
+        if (!templateId) {
+            return null;
+        }
+        for (var i = 0; i < availableTemplates.length; i++) {
+            if (String(availableTemplates[i].id || "") === templateId) {
+                return availableTemplates[i];
+            }
+        }
+        return null;
+    }
+
+    function applyVmTemplateDetails(template) {
+        setText("vm-template-build-profile", template && template.build_profile ? titleCaseWords(template.build_profile) : "-");
+        setText("vm-template-vmid", template && template.vmid ? String(template.vmid) : "-");
+        setText("vm-template-target-os", template && template.target_os ? titleCaseWords(template.target_os) : "-");
+        if (template) {
+            show("vm-template-details");
+        } else {
+            hide("vm-template-details");
+        }
+    }
+
+    function applyTemplateDefaults(template) {
+        if (!template) {
+            applyVmTemplateDetails(null);
+            return;
+        }
+
+        applyVmTemplateDetails(template);
+
+        var hardware = template.hardware || {};
+        var network = template.network || {};
+
+        if (vmHwCpuInput) {
+            vmHwCpuInput.value = String(clampInt(hardware.cpu, 2, 1, 64));
+        }
+        if (vmHwRamInput) {
+            vmHwRamInput.value = String(clampInt(hardware.ram_gb, 4, 1, 512));
+        }
+        if (vmHwDiskInput) {
+            vmHwDiskInput.value = String(clampInt(hardware.disk_gb, 32, 8, 4096));
+        }
+        if (vmNetBridgeSelect && network.bridge) {
+            vmNetBridgeSelect.value = String(network.bridge || "");
+            syncCustomSelectForElement(vmNetBridgeSelect);
+        }
+        if (vmNetVlanInput) {
+            vmNetVlanInput.value = network.vlan !== null && network.vlan !== undefined ? String(network.vlan) : "";
+        }
+    }
+
+    function toggleVmStaticNetworkFields() {
+        if (!vmStaticNetworkBox || !vmNetIpv4Select) {
+            return;
+        }
+        if (String(vmNetIpv4Select.value || "dhcp") === "static") {
+            vmStaticNetworkBox.classList.remove("hidden");
+        } else {
+            vmStaticNetworkBox.classList.add("hidden");
+        }
+    }
+
+    function buildVmHardwarePayload() {
+        return {
+            cpu: clampInt(vmHwCpuInput ? vmHwCpuInput.value : "", 2, 1, 64),
+            ram_gb: clampInt(vmHwRamInput ? vmHwRamInput.value : "", 4, 1, 512),
+            disk_gb: clampInt(vmHwDiskInput ? vmHwDiskInput.value : "", 32, 8, 4096)
+        };
+    }
+
+    function buildVmNetworkPayload() {
+        var ipv4Mode = vmNetIpv4Select ? String(vmNetIpv4Select.value || "dhcp") : "dhcp";
+        if (ipv4Mode !== "dhcp" && ipv4Mode !== "static") {
+            ipv4Mode = "dhcp";
+        }
+        var vlanValue = vmNetVlanInput ? String(vmNetVlanInput.value || "").trim() : "";
+        var vlan = vlanValue ? clampInt(vlanValue, 0, 1, 4094) : null;
+        return {
+            bridge: vmNetBridgeSelect ? String(vmNetBridgeSelect.value || "") : "",
+            vlan: vlan,
+            ipv4_mode: ipv4Mode,
+            static_ip: vmStaticIpInput ? String(vmStaticIpInput.value || "").trim() : "",
+            static_gateway: vmStaticGatewayInput ? String(vmStaticGatewayInput.value || "").trim() : "",
+            static_dns: splitDnsList(vmStaticDnsInput ? vmStaticDnsInput.value : "")
+        };
+    }
+
+    function buildVmCreatePayload() {
+        var selectedTemplate = getSelectedTemplateOption();
+        return {
+            template_id: selectedTemplate ? selectedTemplate.id : null,
+            name: vmNameInput ? String(vmNameInput.value || "").trim() : "",
+            hardware: buildVmHardwarePayload(),
+            network: buildVmNetworkPayload()
+        };
+    }
+
+    function vmStaticFieldsReady(networkPayload) {
+        if (!networkPayload || networkPayload.ipv4_mode !== "static") {
+            return true;
+        }
+        return !!(
+            networkPayload.static_ip &&
+            networkPayload.static_gateway
+        );
+    }
+
+    function setVmNextEnabledIfReady() {
+        if (!vmNextBtn) {
+            return;
+        }
+        var payload = buildVmCreatePayload();
+        vmNextBtn.textContent = isCreatingVm ? "Creating..." : "Create VM";
+        vmNextBtn.disabled = isCreatingVm || !payload.template_id || !payload.name || !payload.network.bridge || !vmStaticFieldsReady(payload.network);
+    }
+
     function buildHardwarePayload() {
         return {
             cpu: clampInt(hwCpuInput ? hwCpuInput.value : "", 2, 1, 64),
@@ -1783,6 +1950,7 @@
                 var meta = getBuildStageMeta(job.stage, targetOs, job.status);
                 if (job.status === "succeeded") {
                     setCreateStatus("Build completed successfully in " + getBuildElapsedText(job) + ".", "ok");
+                    fetchAvailableTemplates();
                     stopBuildPolling();
                     return;
                 }
@@ -2061,6 +2229,132 @@
             });
     }
 
+    function populateTemplateSelect(items) {
+        if (!vmTemplateSelect) {
+            return;
+        }
+
+        vmTemplateSelect.innerHTML = "";
+
+        var empty = document.createElement("option");
+        empty.value = "";
+        empty.textContent = "Select completed template";
+        empty.selected = true;
+        vmTemplateSelect.appendChild(empty);
+
+        (items || []).forEach(function (item) {
+            var opt = document.createElement("option");
+            opt.value = String(item.id || "");
+            opt.textContent = item.name ? (item.name + " (" + item.vmid + ")") : String(item.vmid || "");
+            vmTemplateSelect.appendChild(opt);
+        });
+
+        resetSelectToPlaceholder(vmTemplateSelect);
+        syncCustomSelectForElement(vmTemplateSelect);
+    }
+
+    function fetchAvailableTemplates() {
+        if (!vmTemplateSelect) {
+            return;
+        }
+
+        setVmTemplateStatus("Loading available templates...", "");
+        fetch("/api/template/list/", {
+            method: "GET",
+            credentials: "same-origin",
+            headers: { "Accept": "application/json" }
+        })
+            .then(function (res) {
+                return res.json().then(function (data) {
+                    return { ok: res.ok, status: res.status, data: data };
+                });
+            })
+            .then(function (result) {
+                if (!result.ok || !result.data || result.data.ok !== true) {
+                    throw new Error((result.data && result.data.error) ? result.data.error : ("Template list failed (HTTP " + result.status + ")"));
+                }
+
+                availableTemplates = result.data.items || [];
+                populateTemplateSelect(availableTemplates);
+                applyTemplateDefaults(null);
+                if (availableTemplates.length === 0) {
+                    setVmTemplateStatus("No completed templates are ready yet. Create one first.", "warn");
+                } else {
+                    setVmTemplateStatus("Select a completed template to provision a VM from it.", "ok");
+                }
+                setVmNextEnabledIfReady();
+            })
+            .catch(function (err) {
+                availableTemplates = [];
+                populateTemplateSelect([]);
+                applyTemplateDefaults(null);
+                setVmTemplateStatus("Template list failed: " + String(err && err.message ? err.message : err), "error");
+                setVmNextEnabledIfReady();
+            });
+    }
+
+    function createVmFromTemplate() {
+        if (isCreatingVm) {
+            return;
+        }
+
+        var payload = buildVmCreatePayload();
+        var csrftoken = getCookie("csrftoken");
+        if (!payload.template_id) {
+            setVmCreateStatus("Select a completed template first.", "error");
+            return;
+        }
+        if (!payload.name) {
+            setVmCreateStatus("VM name is required.", "error");
+            return;
+        }
+        if (!payload.network.bridge) {
+            setVmCreateStatus("Network bridge is required.", "error");
+            return;
+        }
+        if (!vmStaticFieldsReady(payload.network)) {
+            setVmCreateStatus("Static networking requires both an IP/CIDR and a gateway.", "error");
+            return;
+        }
+
+        isCreatingVm = true;
+        setVmNextEnabledIfReady();
+        setVmCreateStatus("Provisioning VM from the selected template...", "");
+
+        fetch("/api/vm/start/", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken || ""
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(function (res) {
+                return res.json().then(function (data) {
+                    return { ok: res.ok, status: res.status, data: data };
+                });
+            })
+            .then(function (result) {
+                if (!result.ok || !result.data || result.data.ok !== true) {
+                    throw new Error((result.data && result.data.error) ? result.data.error : ("Create VM failed (HTTP " + result.status + ")"));
+                }
+
+                var vm = result.data.vm || {};
+                setVmCreateStatus(
+                    "Provisioned " + String(vm.name || "VM") + " as VMID " + String(vm.vmid || "-") + " on " + String(vm.node || "-") + ".",
+                    "ok"
+                );
+            })
+            .catch(function (err) {
+                setVmCreateStatus("VM provisioning failed: " + String(err && err.message ? err.message : err), "error");
+            })
+            .finally(function () {
+                isCreatingVm = false;
+                setVmNextEnabledIfReady();
+            });
+    }
+
     function openModal() {
         if (!modal) {
             return;
@@ -2075,21 +2369,60 @@
         lastIsoCheckedUrl = null;
         lastIsoOk = false;
         lastIsoData = null;
+        availableTemplates = [];
 
         setIsoStatus("", "");
         setSwStatus("", "");
         setValidateStatus("", "");
         setCreateStatus("", "");
+        setVmTemplateStatus("", "");
+        setVmCreateStatus("", "");
         resetBuildHistory();
         setBuildStatus(null);
         stopBuildPolling();
         activeBuildJobId = null;
         clearIsoDetails();
         resetSoftwareState();
+        isCreatingVm = false;
         isCreatingTemplate = false;
+
+        applyTemplateDefaults(null);
 
         if (templateNameInput) {
             templateNameInput.value = "";
+        }
+        if (vmTemplateSelect) {
+            populateTemplateSelect([]);
+        }
+        if (vmNameInput) {
+            vmNameInput.value = "";
+        }
+        if (vmHwCpuInput) {
+            vmHwCpuInput.value = "2";
+        }
+        if (vmHwRamInput) {
+            vmHwRamInput.value = "4";
+        }
+        if (vmHwDiskInput) {
+            vmHwDiskInput.value = "32";
+        }
+        if (vmNetBridgeSelect) {
+            resetSelectToPlaceholder(vmNetBridgeSelect);
+        }
+        if (vmNetVlanInput) {
+            vmNetVlanInput.value = "";
+        }
+        if (vmNetIpv4Select) {
+            vmNetIpv4Select.value = "dhcp";
+        }
+        if (vmStaticIpInput) {
+            vmStaticIpInput.value = "";
+        }
+        if (vmStaticGatewayInput) {
+            vmStaticGatewayInput.value = "";
+        }
+        if (vmStaticDnsInput) {
+            vmStaticDnsInput.value = "";
         }
         if (isoSavedSelect) {
             resetSelectToPlaceholder(isoSavedSelect);
@@ -2121,11 +2454,13 @@
         if (winFirmwareProfileInput) {
             winFirmwareProfileInput.value = "bios_legacy";
         }
+        toggleVmStaticNetworkFields();
         toggleWindowsOptions();
         syncAllCustomSelects();
         closeAllCustomSelects(null);
 
         if (vmNextBtn) {
+            vmNextBtn.textContent = "Create VM";
             vmNextBtn.disabled = true;
         }
 
@@ -2143,6 +2478,8 @@
 
         renderOverview(null);
         fetchSavedLists();
+        fetchAvailableTemplates();
+        setVmNextEnabledIfReady();
     }
 
     function closeModal() {
@@ -2202,6 +2539,12 @@
         });
     }
 
+    if (vmNextBtn) {
+        vmNextBtn.addEventListener("click", function () {
+            createVmFromTemplate();
+        });
+    }
+
     if (tcBackBtn) {
         tcBackBtn.addEventListener("click", function () {
             if (tcIndex > 0) {
@@ -2209,6 +2552,7 @@
                 return;
             }
             setScene("vm");
+            fetchAvailableTemplates();
         });
     }
 
@@ -2238,6 +2582,39 @@
             renderOverview(null);
         });
     }
+
+    if (vmTemplateSelect) {
+        vmTemplateSelect.addEventListener("change", function () {
+            var template = getSelectedTemplateOption();
+            applyTemplateDefaults(template);
+            setVmCreateStatus("", "");
+            setVmNextEnabledIfReady();
+        });
+    }
+
+    [vmNameInput, vmHwCpuInput, vmHwRamInput, vmHwDiskInput, vmNetVlanInput, vmStaticIpInput, vmStaticGatewayInput, vmStaticDnsInput].forEach(function (inputEl) {
+        if (!inputEl) {
+            return;
+        }
+        inputEl.addEventListener("input", function () {
+            setVmCreateStatus("", "");
+            setVmNextEnabledIfReady();
+        });
+    });
+
+    [vmNetBridgeSelect, vmNetIpv4Select].forEach(function (selectEl) {
+        if (!selectEl) {
+            return;
+        }
+        selectEl.addEventListener("change", function () {
+            if (selectEl === vmNetIpv4Select) {
+                toggleVmStaticNetworkFields();
+            }
+            setVmCreateStatus("", "");
+            setVmNextEnabledIfReady();
+            syncCustomSelectForElement(selectEl);
+        });
+    });
 
     if (isoSavedSelect && isoUrlInput) {
         isoSavedSelect.addEventListener("change", function () {

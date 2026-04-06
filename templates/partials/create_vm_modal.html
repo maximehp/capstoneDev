@@ -26,17 +26,127 @@
                             >
                                 <section class="content-page">
                                     <div class="step-block">
-                                        <div class="step-block-title">Template</div>
+                                        <div class="step-block-title">Provision VM</div>
                                     </div>
 
-                                    <button id="select-template" type="button" class="select-box" disabled>
-                                        <span class="select-box-text">Select template</span>
-                                        <span class="select-box-caret">&#9662;</span>
-                                    </button>
+                                    <div class="form-stack">
+                                        <label class="field">
+                                            <span class="field-label">Template</span>
+                                            <select id="vm-template-select" class="field-control select-control" aria-label="Select template">
+                                                <option value="" selected>Select completed template</option>
+                                            </select>
+                                        </label>
 
-                                    <button id="to-tc" type="button" class="btn btn-primary btn-full">
-                                        Create a template
-                                    </button>
+                                        <div id="vm-template-status" class="hint muted" aria-live="polite"></div>
+
+                                        <div id="vm-template-details" class="details-card hidden">
+                                            <div class="details-row">
+                                                <div class="details-k">Build profile</div>
+                                                <div id="vm-template-build-profile" class="details-v">-</div>
+                                            </div>
+                                            <div class="details-row">
+                                                <div class="details-k">Template VMID</div>
+                                                <div id="vm-template-vmid" class="details-v">-</div>
+                                            </div>
+                                            <div class="details-row">
+                                                <div class="details-k">Target OS</div>
+                                                <div id="vm-template-target-os" class="details-v">-</div>
+                                            </div>
+                                        </div>
+
+                                        <button id="to-tc" type="button" class="btn btn-primary btn-full">
+                                            Create a template
+                                        </button>
+
+                                        <label class="field">
+                                            <span class="field-label">VM name</span>
+                                            <input
+                                                id="vm-name"
+                                                class="field-control"
+                                                type="text"
+                                                placeholder="ex: student-lab-01"
+                                                autocomplete="off"
+                                            />
+                                        </label>
+
+                                        <div class="field-row-two vm-field-row-three">
+                                            <label class="field">
+                                                <span class="field-label">vCPU</span>
+                                                <input id="vm-hw-cpu" class="field-control" type="number" min="1" max="64" value="2" />
+                                            </label>
+
+                                            <label class="field">
+                                                <span class="field-label">Memory (GB)</span>
+                                                <input id="vm-hw-ram" class="field-control" type="number" min="1" max="512" value="4" />
+                                            </label>
+
+                                            <label class="field">
+                                                <span class="field-label">Disk size (GB)</span>
+                                                <input id="vm-hw-disk" class="field-control" type="number" min="8" max="4096" value="32" />
+                                            </label>
+                                        </div>
+
+                                        <div class="field-row-two">
+                                            <label class="field">
+                                                <span class="field-label">Bridge</span>
+                                                <select id="vm-net-bridge" class="field-control select-control" aria-label="Select bridge">
+                                                    <option value="" selected>Select bridge</option>
+                                                    <option value="vmbr0">vmbr0</option>
+                                                    <option value="vmbr1">vmbr1</option>
+                                                </select>
+                                            </label>
+
+                                            <label class="field">
+                                                <span class="field-label">VLAN (optional)</span>
+                                                <input id="vm-net-vlan" class="field-control" type="number" min="1" max="4094" placeholder="ex: 20" />
+                                            </label>
+                                        </div>
+
+                                        <label class="field">
+                                            <span class="field-label">IPv4</span>
+                                            <select id="vm-net-ipv4" class="field-control select-control" aria-label="Select IPv4 mode">
+                                                <option value="dhcp" selected>DHCP</option>
+                                                <option value="static">Static</option>
+                                            </select>
+                                        </label>
+
+                                        <div id="vm-static-network" class="form-stack hidden">
+                                            <label class="field">
+                                                <span class="field-label">Static IP (CIDR)</span>
+                                                <input
+                                                    id="vm-static-ip"
+                                                    class="field-control"
+                                                    type="text"
+                                                    placeholder="ex: 10.0.20.50/24"
+                                                    autocomplete="off"
+                                                />
+                                            </label>
+
+                                            <label class="field">
+                                                <span class="field-label">Gateway</span>
+                                                <input
+                                                    id="vm-static-gateway"
+                                                    class="field-control"
+                                                    type="text"
+                                                    placeholder="ex: 10.0.20.1"
+                                                    autocomplete="off"
+                                                />
+                                            </label>
+
+                                            <label class="field">
+                                                <span class="field-label">DNS servers</span>
+                                                <input
+                                                    id="vm-static-dns"
+                                                    class="field-control"
+                                                    type="text"
+                                                    placeholder="ex: 10.0.20.10,10.0.20.11"
+                                                    autocomplete="off"
+                                                />
+                                            </label>
+                                        </div>
+
+                                        <div id="vm-create-status" class="hint muted" aria-live="polite"></div>
+                                    </div>
                                 </section>
                             </div>
                         </div>
@@ -44,7 +154,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-ghost" data-close>Cancel</button>
-                        <button id="vm-next" type="button" class="btn btn-primary" disabled>Next</button>
+                        <button id="vm-next" type="button" class="btn btn-primary" disabled>Create VM</button>
                     </div>
                 </section>
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import IsoSource, SoftwareSource, TemplateBuildJob, TemplateDefinition
+from .models import IsoSource, SoftwareSource, TemplateBuildJob, TemplateDefinition, VirtualMachine
 
 
 @admin.register(IsoSource)
@@ -25,3 +25,9 @@ class TemplateDefinitionAdmin(admin.ModelAdmin):
 class TemplateBuildJobAdmin(admin.ModelAdmin):
     list_display = ("id", "uuid", "template_definition", "status", "stage", "created_at")
     search_fields = ("uuid", "template_definition__template_name", "owner__username")
+
+
+@admin.register(VirtualMachine)
+class VirtualMachineAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "proxmox_vmid", "status", "node", "owner", "created_at")
+    search_fields = ("name", "proxmox_vmid", "template_definition__template_name", "owner__username")
