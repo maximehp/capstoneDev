@@ -1018,7 +1018,17 @@ class WorkerExecutionTests(TestCase):
             stage=TemplateBuildJob.STAGE_INIT,
         )
 
-        result = run_build_job(job)
+        with patch.dict(
+            os.environ,
+            {
+                "PROXMOX_BASE_URL": "https://172.27.80.4:8006",
+                "PROXMOX_TOKEN_ID": "user@pve!token",
+                "PROXMOX_TOKEN_SECRET": "secret",
+                "PROXMOX_TLS_VERIFY": "0",
+            },
+            clear=False,
+        ):
+            result = run_build_job(job)
         result.refresh_from_db()
 
         self.assertEqual(result.status, TemplateBuildJob.STATUS_SUCCEEDED)
@@ -1032,6 +1042,7 @@ class WorkerExecutionTests(TestCase):
         self.assertTrue((self.workdir / f"job-{job.uuid}" / "results" / "result.json").exists())
         self.assertTrue((self.workdir / f"job-{job.uuid}" / "results" / "iso-stage.json").exists())
         vars_payload = json.loads((self.workdir / f"job-{job.uuid}" / "generated" / "template.auto.pkrvars.json").read_text(encoding="utf-8"))
+        self.assertEqual(vars_payload["proxmox_url"], "https://172.27.80.4:8006/api2/json")
         self.assertEqual(vars_payload["iso_file"], "ChirpNAS_ISO_Templates:iso/ubuntu.iso")
         self.assertNotIn("iso_url", vars_payload)
         self.assertTrue(result.result_payload["log_available"])
@@ -1264,6 +1275,38 @@ class IsoStagingTests(TestCase):
 
         self.assertTrue(any(item["check"] == "iso_storage_pool" for item in results))
         self.assertTrue(any(item["check"] == "vm_disk_storage_pool" for item in results))
+
+    @patch("core.template_builds._fetch_proxmox_storage")
+    def test_run_preflight_accepts_permission_limited_storage_metadata(self, fetch_storage_mock):
+        fetch_storage_mock.return_value = {
+            "storage": "TrueNAS",
+            "type": "permission-limited",
+            "content": "",
+            "permission_limited": True,
+            "message": "Permission check failed (/storage/TrueNAS, Datastore.Audit|Datastore.AllocateSpace)",
+        }
+        with override_settings(PROXMOX_STORAGE_POOL="TrueNAS", PROXMOX_ISO_STORAGE_POOL="TrueNAS", PACKER_BIN="packer"):
+            with self.log_path.open("a", encoding="utf-8") as log_fp, patch("core.template_builds._detect_iso_tool", return_value="xorriso"), patch("core.template_builds.shutil.which", return_value="/usr/bin/packer"):
+                results = _run_preflight(BUILD_PROFILE_UBUNTU_AUTOINSTALL, _linux_create_payload(), log_fp)
+
+        self.assertIn(
+            {
+                "check": "iso_storage_pool",
+                "ok": True,
+                "value": "TrueNAS (permission-limited metadata)",
+                "warning": "Permission check failed (/storage/TrueNAS, Datastore.Audit|Datastore.AllocateSpace)",
+            },
+            results,
+        )
+        self.assertIn(
+            {
+                "check": "vm_disk_storage_pool",
+                "ok": True,
+                "value": "TrueNAS (permission-limited metadata)",
+                "warning": "Permission check failed (/storage/TrueNAS, Datastore.Audit|Datastore.AllocateSpace)",
+            },
+            results,
+        )
 
 
 class ArtifactGenerationTests(TestCase):

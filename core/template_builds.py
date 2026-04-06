@@ -605,6 +605,28 @@ def _fetch_proxmox_storage(node: str, storage_name: str) -> dict:
     for item in storages:
         if str(item.get("storage") or "").strip() == storage_name:
             return item
+    try:
+        storage_status = _proxmox_api_get(f"/nodes/{node}/storage/{storage_name}/status")
+    except requests.HTTPError as exc:
+        response = getattr(exc, "response", None)
+        message = ""
+        if response is not None:
+            try:
+                payload = response.json()
+            except Exception:
+                payload = {}
+            message = str(payload.get("message") or response.text or "").strip()
+        if response is not None and response.status_code == 403 and f"/storage/{storage_name}" in message:
+            return {
+                "storage": storage_name,
+                "type": "permission-limited",
+                "content": "",
+                "permission_limited": True,
+                "message": message,
+            }
+        raise
+    if isinstance(storage_status, dict):
+        return storage_status
     raise RuntimeError(f"Configured ISO storage pool was not found on node {node}: {storage_name}")
 
 
@@ -983,27 +1005,53 @@ def _run_preflight(build_profile: str, payload: dict, log_fp) -> list[dict]:
     proxmox_node = str(getattr(settings, "PROXMOX_NODE", "") or "pve").strip()
     iso_storage_info = _fetch_proxmox_storage(proxmox_node, iso_storage_pool)
     iso_content = _content_tokens(iso_storage_info.get("content"))
-    if "iso" not in iso_content:
-        raise RuntimeError(
-            f"Configured ISO storage pool does not advertise ISO content on node {proxmox_node}: "
-            f"{iso_storage_pool} (content={iso_storage_info.get('content')})"
+    if iso_storage_info.get("permission_limited"):
+        results.append(
+            {
+                "check": "iso_storage_pool",
+                "ok": True,
+                "value": f"{iso_storage_pool} (permission-limited metadata)",
+                "warning": str(iso_storage_info.get("message") or "").strip() or "permission_limited",
+            }
         )
-    results.append({"check": "iso_storage_pool", "ok": True, "value": f"{iso_storage_pool} ({iso_storage_info.get('type') or 'unknown'})"})
-    log_fp.write(
-        f"preflight: iso_storage_pool={iso_storage_pool} type={iso_storage_info.get('type')} content={iso_storage_info.get('content')}\n"
-    )
+        log_fp.write(
+            f"preflight: iso_storage_pool={iso_storage_pool} permission_limited message={iso_storage_info.get('message')}\n"
+        )
+    else:
+        if "iso" not in iso_content:
+            raise RuntimeError(
+                f"Configured ISO storage pool does not advertise ISO content on node {proxmox_node}: "
+                f"{iso_storage_pool} (content={iso_storage_info.get('content')})"
+            )
+        results.append({"check": "iso_storage_pool", "ok": True, "value": f"{iso_storage_pool} ({iso_storage_info.get('type') or 'unknown'})"})
+        log_fp.write(
+            f"preflight: iso_storage_pool={iso_storage_pool} type={iso_storage_info.get('type')} content={iso_storage_info.get('content')}\n"
+        )
 
     disk_storage_info = iso_storage_info if storage_pool == iso_storage_pool else _fetch_proxmox_storage(proxmox_node, storage_pool)
     disk_content = _content_tokens(disk_storage_info.get("content"))
-    if not ({"images", "rootdir"} & disk_content):
-        raise RuntimeError(
-            f"Configured VM disk storage pool does not advertise disk-image content on node {proxmox_node}: "
-            f"{storage_pool} (content={disk_storage_info.get('content')})"
+    if disk_storage_info.get("permission_limited"):
+        results.append(
+            {
+                "check": "vm_disk_storage_pool",
+                "ok": True,
+                "value": f"{storage_pool} (permission-limited metadata)",
+                "warning": str(disk_storage_info.get("message") or "").strip() or "permission_limited",
+            }
         )
-    results.append({"check": "vm_disk_storage_pool", "ok": True, "value": f"{storage_pool} ({disk_storage_info.get('type') or 'unknown'})"})
-    log_fp.write(
-        f"preflight: vm_disk_storage_pool={storage_pool} type={disk_storage_info.get('type')} content={disk_storage_info.get('content')}\n"
-    )
+        log_fp.write(
+            f"preflight: vm_disk_storage_pool={storage_pool} permission_limited message={disk_storage_info.get('message')}\n"
+        )
+    else:
+        if not ({"images", "rootdir"} & disk_content):
+            raise RuntimeError(
+                f"Configured VM disk storage pool does not advertise disk-image content on node {proxmox_node}: "
+                f"{storage_pool} (content={disk_storage_info.get('content')})"
+            )
+        results.append({"check": "vm_disk_storage_pool", "ok": True, "value": f"{storage_pool} ({disk_storage_info.get('type') or 'unknown'})"})
+        log_fp.write(
+            f"preflight: vm_disk_storage_pool={storage_pool} type={disk_storage_info.get('type')} content={disk_storage_info.get('content')}\n"
+        )
 
     if build_profile == BUILD_PROFILE_WINDOWS_UNATTEND:
         windows = payload.get("windows") if isinstance(payload.get("windows"), dict) else {}
@@ -1117,7 +1165,7 @@ def _write_packer_vars_file(
     boot_iso = staged_map.get("boot_iso") or {}
 
     vars_payload = {
-        "proxmox_url": str(os.environ.get("PROXMOX_BASE_URL") or "").rstrip("/"),
+        "proxmox_url": normalize_proxmox_api_base(str(os.environ.get("PROXMOX_BASE_URL") or "").strip()) if str(os.environ.get("PROXMOX_BASE_URL") or "").strip() else "",
         "proxmox_username": str(os.environ.get("PROXMOX_TOKEN_ID") or ""),
         "proxmox_token": str(os.environ.get("PROXMOX_TOKEN_SECRET") or ""),
         "proxmox_insecure_skip_tls_verify": str(os.environ.get("PROXMOX_TLS_VERIFY", "1")).strip().lower() not in {"1", "true", "yes", "on"},
