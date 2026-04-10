@@ -17,6 +17,8 @@ from .packer_profiles import (
     WINDOWS_FIRMWARE_UEFI_TPM,
 )
 from .template_builds import (
+    _derive_failure_summary,
+    _derive_log_error_summary,
     _redact_text,
     _derive_machine_readable_error_summary,
     _run_preflight,
@@ -1427,3 +1429,36 @@ class ArtifactGenerationTests(TestCase):
         )
 
         self.assertEqual(summary, "Command failed (1): /usr/bin/packer build")
+
+    def test_log_error_summary_appends_relevant_log_lines(self):
+        log_path = Path("database") / "test-error-summary.log"
+        log_path.write_text(
+            "\n".join(
+                [
+                    "==> proxmox-iso.ubuntu: Running validation",
+                    "Error: Unsupported argument",
+                    "  on template.pkr.hcl line 42:",
+                    '  cloud_init_storage_pool = "ChirpNAS_ISO_Templates"',
+                ]
+            ),
+            encoding="utf-8",
+        )
+        self.addCleanup(lambda: log_path.unlink(missing_ok=True))
+
+        summary = _derive_log_error_summary("Command failed (1): /usr/bin/packer validate", log_path)
+
+        self.assertIn("Command failed (1): /usr/bin/packer validate", summary)
+        self.assertIn("Unsupported argument", summary)
+
+    def test_failure_summary_prefers_machine_readable_events_over_log_tail(self):
+        log_path = Path("database") / "test-failure-summary.log"
+        log_path.write_text("Error: log detail", encoding="utf-8")
+        self.addCleanup(lambda: log_path.unlink(missing_ok=True))
+
+        summary = _derive_failure_summary(
+            fallback="Command failed (1): /usr/bin/packer build",
+            machine_readable_events=[{"type": "error", "data": ["real machine error"]}],
+            log_path=log_path,
+        )
+
+        self.assertEqual(summary, "real machine error")

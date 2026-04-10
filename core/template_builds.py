@@ -505,7 +505,11 @@ def run_build_job(job: TemplateBuildJob) -> TemplateBuildJob:
         job.stage = TemplateBuildJob.STAGE_DONE
         job.finished_at = timezone.now()
         job.exit_code = 1 if job.exit_code is None else job.exit_code
-        job.error_summary = _derive_machine_readable_error_summary(str(exc), machine_readable_events)
+        job.error_summary = _derive_failure_summary(
+            fallback=str(exc),
+            machine_readable_events=machine_readable_events,
+            log_path=log_path,
+        )
         job.result_payload = {
             "software_results": software_results,
             "preflight": preflight_results,
@@ -1266,6 +1270,47 @@ def _derive_machine_readable_error_summary(
                 return detail
 
     return fallback
+
+
+def _derive_log_error_summary(fallback: str, log_path: Path | None) -> str:
+    if not log_path or not log_path.exists():
+        return fallback
+    try:
+        lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    except Exception:
+        return fallback
+
+    interesting: list[str] = []
+    markers = ("error:", "failed", "unsupported", "invalid", "unknown", "cannot", "could not")
+    for line in reversed(lines):
+        text = _clean_machine_event_text(line)
+        if not text:
+            continue
+        lowered = text.lower()
+        if any(marker in lowered for marker in markers):
+            interesting.append(text)
+        if len(interesting) >= 4:
+            break
+
+    if not interesting:
+        return fallback
+
+    detail = " | ".join(reversed(interesting))
+    if fallback and detail and detail != fallback:
+        return f"{fallback} | {detail}"
+    return detail or fallback
+
+
+def _derive_failure_summary(
+    *,
+    fallback: str,
+    machine_readable_events: list[dict],
+    log_path: Path | None,
+) -> str:
+    summary = _derive_machine_readable_error_summary(fallback, machine_readable_events)
+    if summary != fallback:
+        return summary
+    return _derive_log_error_summary(fallback, log_path)
 
 
 def _archive_job_bundle(job: TemplateBuildJob, paths: dict[str, Path], payload: dict) -> Path | None:
