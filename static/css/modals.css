@@ -601,7 +601,7 @@ select.field-control::-ms-expand {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: rgba(var(--modal-shell-rgb), var(--modal-shell-overlay-alpha));
+    background: rgba(var(--modal-shell-rgb), calc(var(--modal-shell-alpha) + 0.04));
     backdrop-filter: blur(18px) saturate(130%);
     -webkit-backdrop-filter: blur(18px) saturate(130%);
     z-index: 0;
