@@ -11,8 +11,15 @@
     --tertiary-color: 0, 0, 0;
     --contrast: 255, 255, 255;
 
-    --backdrop-rgb: 0, 0, 0;
-    --backdrop-alpha: 0.40;
+    --modal-backdrop-rgb: 0, 0, 0;
+    --modal-backdrop-alpha: 0.40;
+    --modal-shell-rgb: 0, 0, 0;
+    --modal-shell-alpha: 0.14;
+    --modal-fill-rgb: 0, 0, 0;
+    --modal-fill-alpha: 0.08;
+    --modal-fill-alpha-hover: 0.12;
+    --modal-fill-alpha-strong: 0.14;
+    --modal-fill-alpha-stronger: 0.22;
     --status-danger-text: 255, 219, 219;
     --status-success-text: 160, 255, 190;
     --status-warn-text: 255, 214, 148;
