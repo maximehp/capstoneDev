@@ -36,18 +36,23 @@ ENV TMPDIR=/tmp/capstone-worker/tmp
 ARG PACKER_VERSION=1.11.2
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl jq unzip wget xorriso \
-    && arch="$(dpkg --print-architecture)" \
-    && case "${arch}" in \
+    && apt-get install -y --no-install-recommends curl jq unzip xorriso \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "${arch}" in \
         amd64) packer_arch="amd64" ;; \
         arm64) packer_arch="arm64" ;; \
         *) echo "unsupported packer architecture: ${arch}" >&2; exit 1 ;; \
-    esac \
-    && wget -O /tmp/packer.zip "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${packer_arch}.zip" \
-    && unzip /tmp/packer.zip -d /usr/bin \
-    && chmod +x /usr/bin/packer \
-    && rm -f /tmp/packer.zip \
-    && rm -rf /var/lib/apt/lists/*
+    esac; \
+    curl -fL --retry 5 --retry-delay 2 --retry-all-errors \
+        -o /tmp/packer.zip \
+        "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${packer_arch}.zip"; \
+    unzip /tmp/packer.zip -d /usr/bin; \
+    chmod +x /usr/bin/packer; \
+    rm -f /tmp/packer.zip; \
+    /usr/bin/packer version
 
 COPY docker/packer-worker/start.sh /usr/local/bin/packer-worker-start.sh
 RUN chmod +x /usr/local/bin/packer-worker-start.sh
