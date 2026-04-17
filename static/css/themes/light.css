@@ -1,22 +1,13 @@
-:root[data-theme="light"] {
-    color-scheme: light;
-
-    --bg: #f3f6fb;
-    --text: 20, 24, 38;
-    --text-alt: 255, 255, 255;
+:root {
+    --bg: #FFFFFF;
+    --text: 0, 0, 0;
     --header-bg: #ba0c2f;
 
     --primary-color: 186, 12, 47;
     --secondary-color: 84, 88, 90;
     --tertiary-color: 255, 255, 255;
-    --contrast: 20, 24, 38;
-
-    --backdrop-rgb: 15, 23, 42;
-    --backdrop-alpha: 0.24;
-    --status-danger-text: 131, 35, 35;
-    --status-success-text: 17, 108, 58;
-    --status-warn-text: 142, 88, 18;
+    --contrast: 0, 0, 0;
 
     --vanta-color: #ba0c2f;
-    --vanta-bg: #f3f6fb;
+    --vanta-bg: #FFFFFF;
 }

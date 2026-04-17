@@ -1,6 +1,4 @@
-:root[data-theme="dark"] {
-    color-scheme: dark;
-
+:root {
     --bg: #000000;
     --text: 255, 255, 255;
     --text-alt: 0, 0, 0;
@@ -10,12 +8,6 @@
     --secondary-color: 84, 88, 90;
     --tertiary-color: 0, 0, 0;
     --contrast: 255, 255, 255;
-
-    --backdrop-rgb: 0, 0, 0;
-    --backdrop-alpha: 0.40;
-    --status-danger-text: 255, 219, 219;
-    --status-success-text: 160, 255, 190;
-    --status-warn-text: 255, 214, 148;
 
     --vanta-color: #ba0c2f;
     --vanta-bg: #000000;

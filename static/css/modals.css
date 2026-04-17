@@ -23,7 +23,7 @@
 .modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(var(--backdrop-rgb), var(--backdrop-alpha));
+    background: rgba(0, 0, 0, 0.40);
 }
 
 .modal-shell {
@@ -520,7 +520,7 @@ select.field-control::-ms-expand {
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.14);
     background: rgba(var(--tertiary-color), 0.08);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 8px 24px rgba(var(--tertiary-color), 0.16);
     padding: 0 10px 0 12px;
     display: flex;
     align-items: center;
@@ -543,7 +543,7 @@ select.field-control::-ms-expand {
 .custom-select-trigger:focus-visible {
     border-color: rgba(var(--primary-color), 0.55);
     background: rgba(var(--tertiary-color), 0.14);
-    box-shadow: 0 0 0 1px rgba(var(--primary-color), 0.25), 0 10px 28px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 1px rgba(var(--primary-color), 0.25), 0 10px 28px rgba(var(--tertiary-color), 0.2);
 }
 
 .custom-select-value {
@@ -1070,7 +1070,7 @@ select.field-control::-ms-expand {
 .build-error-box.has-error {
     border-color: rgba(176, 57, 57, 0.3);
     background: rgba(176, 57, 57, 0.1);
-    color: rgba(var(--status-danger-text), 0.92);
+    color: rgba(255, 219, 219, 0.92);
 }
 
 .build-results-field {
@@ -1321,15 +1321,15 @@ select.field-control::-ms-expand {
 }
 
 .hint.is-error {
-    color: rgba(var(--status-danger-text), 0.92);
+    color: rgba(255, 140, 140, 0.92);
 }
 
 .hint.is-ok {
-    color: rgba(var(--status-success-text), 0.92);
+    color: rgba(160, 255, 190, 0.92);
 }
 
 .hint.is-warn {
-    color: rgba(var(--status-warn-text), 0.95);
+    color: rgba(255, 214, 148, 0.95);
 }
 
 @media (max-width: 760px) {
