@@ -41,7 +41,7 @@
 
     border-radius: 18px;
     border: 1px solid rgba(var(--contrast), 0.15);
-    box-shadow: 0 12px 40px rgba(var(--tertiary-color), 0.30);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.30);
 
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);

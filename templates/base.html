@@ -7,6 +7,28 @@
     <title>{% block title %}Capstone{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script>
+        (function () {
+            function getThemePreference() {
+                var match = document.cookie.match(/(?:^|; )themePreference=([^;]+)/);
+                var pref = match ? decodeURIComponent(match[1]) : "system";
+
+                if (pref !== "light" && pref !== "dark" && pref !== "system") {
+                    pref = "system";
+                }
+
+                if (pref === "system") {
+                    pref = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)
+                        ? "dark"
+                        : "light";
+                }
+
+                document.documentElement.setAttribute("data-theme", pref);
+            }
+
+            getThemePreference();
+        })();
+    </script>
     <link id="theme-light" rel="stylesheet" href="{% static 'css/themes/light.css' %}">
     <link id="theme-dark" rel="stylesheet" href="{% static 'css/themes/dark.css' %}">
 
