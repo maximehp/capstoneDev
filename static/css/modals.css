@@ -1391,3 +1391,128 @@ select.field-control::-ms-expand {
 .content-page::-webkit-scrollbar-corner {
     background: transparent;
 }
+
+/* =========================
+   LIGHT THEME OVERRIDES
+   ========================= */
+
+html[data-theme="light"] .modal {
+    --modal-shell-bg: rgba(255, 255, 255, 0.92);
+    --modal-surface-weak: rgba(15, 23, 42, 0.06);
+    --modal-surface: rgba(15, 23, 42, 0.08);
+    --modal-surface-strong: rgba(15, 23, 42, 0.12);
+    --modal-surface-stronger: rgba(15, 23, 42, 0.16);
+    --modal-shadow: 0 16px 60px rgba(15, 23, 42, 0.18);
+    --modal-menu-shadow: 0 16px 38px rgba(15, 23, 42, 0.18);
+}
+
+html[data-theme="light"] .modal-backdrop {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="light"] .modal-shell {
+    background: var(--modal-shell-bg);
+    box-shadow: var(--modal-shadow);
+}
+
+html[data-theme="light"] .modal-close:hover,
+html[data-theme="light"] .btn-ghost,
+html[data-theme="light"] .select-box,
+html[data-theme="light"] .placeholder-card,
+html[data-theme="light"] .details-card,
+html[data-theme="light"] .build-status-shell,
+html[data-theme="light"] .build-metric,
+html[data-theme="light"] .build-progress-step,
+html[data-theme="light"] .build-activity-item,
+html[data-theme="light"] .build-preflight-item,
+html[data-theme="light"] .build-result-item,
+html[data-theme="light"] .build-empty,
+html[data-theme="light"] .build-status-chip,
+html[data-theme="light"] .build-transfer-card,
+html[data-theme="light"] .build-transfer-stat,
+html[data-theme="light"] .build-error-box,
+html[data-theme="light"] .saved-software-box,
+html[data-theme="light"] .saved-item,
+html[data-theme="light"] .check-row,
+html[data-theme="light"] .overview-list .overview-item,
+html[data-theme="light"] .chip-list,
+html[data-theme="light"] .chip {
+    background: var(--modal-surface);
+}
+
+html[data-theme="light"] .btn-ghost:hover,
+html[data-theme="light"] .select-box:hover,
+html[data-theme="light"] .field-control:focus,
+html[data-theme="light"] select.field-control:hover,
+html[data-theme="light"] .custom-select-trigger:hover,
+html[data-theme="light"] .custom-select-trigger.is-open,
+html[data-theme="light"] .custom-select-trigger:focus-visible,
+html[data-theme="light"] .build-status-badge.build-status-badge-muted,
+html[data-theme="light"] .build-status-badge.is-queued,
+html[data-theme="light"] .saved-item:hover,
+html[data-theme="light"] .check-row:hover,
+html[data-theme="light"] .saved-item-remove,
+html[data-theme="light"] .chip-remove {
+    background: var(--modal-surface-strong);
+}
+
+html[data-theme="light"] .field-control,
+html[data-theme="light"] select.field-control.select-control,
+html[data-theme="light"] .custom-select-trigger {
+    background: var(--modal-surface-weak);
+}
+
+html[data-theme="light"] .custom-select-menu {
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--modal-menu-shadow);
+}
+
+html[data-theme="light"] .custom-select-menu::before {
+    background: rgba(255, 255, 255, 0.96);
+}
+
+html[data-theme="light"] .custom-select-option:hover {
+    background: var(--modal-surface-stronger);
+}
+
+html[data-theme="light"] .build-status-shell {
+    background:
+        linear-gradient(180deg, rgba(var(--primary-color), 0.10), rgba(15, 23, 42, 0.04)),
+        rgba(255, 255, 255, 0.80);
+}
+
+html[data-theme="light"] .build-progress-step::before {
+    box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+}
+
+html[data-theme="light"] .build-transfer-progress {
+    background: rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme="light"] .build-error-box.has-error {
+    color: rgba(131, 35, 35, 0.92);
+}
+
+html[data-theme="light"] .hint.is-error {
+    color: rgba(131, 35, 35, 0.92);
+}
+
+html[data-theme="light"] .hint.is-ok {
+    color: rgba(17, 108, 58, 0.92);
+}
+
+html[data-theme="light"] .hint.is-warn {
+    color: rgba(142, 88, 18, 0.95);
+}
+
+html[data-theme="light"] .content-page {
+    scrollbar-color: rgba(var(--contrast), 0.28) rgba(15, 23, 42, 0.05);
+}
+
+html[data-theme="light"] .content-page::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+html[data-theme="light"] .content-page::-webkit-scrollbar-thumb {
+    border-color: rgba(15, 23, 42, 0.05);
+}
