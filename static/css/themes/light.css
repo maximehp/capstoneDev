@@ -1,7 +1,7 @@
 :root[data-theme="light"] {
     color-scheme: light;
 
-    --bg: #FFFFFF;
+    --bg: #f3f6fb;
     --text: 20, 24, 38;
     --text-alt: 255, 255, 255;
     --header-bg: #ba0c2f;
@@ -11,19 +11,12 @@
     --tertiary-color: 255, 255, 255;
     --contrast: 20, 24, 38;
 
-    --modal-backdrop-rgb: 255, 255, 255;
-    --modal-backdrop-alpha: 0.18;
-    --modal-shell-rgb: 255, 255, 255;
-    --modal-shell-alpha: 0.92;
-    --modal-fill-rgb: 15, 23, 42;
-    --modal-fill-alpha: 0.06;
-    --modal-fill-alpha-hover: 0.10;
-    --modal-fill-alpha-strong: 0.14;
-    --modal-fill-alpha-stronger: 0.18;
+    --backdrop-rgb: 15, 23, 42;
+    --backdrop-alpha: 0.24;
     --status-danger-text: 131, 35, 35;
     --status-success-text: 17, 108, 58;
     --status-warn-text: 142, 88, 18;
 
     --vanta-color: #ba0c2f;
-    --vanta-bg: #FFFFFF;
+    --vanta-bg: #f3f6fb;
 }

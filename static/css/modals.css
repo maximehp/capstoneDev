@@ -23,7 +23,7 @@
 .modal-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(var(--modal-backdrop-rgb), var(--modal-backdrop-alpha));
+    background: rgba(var(--backdrop-rgb), var(--backdrop-alpha));
 }
 
 .modal-shell {
@@ -41,7 +41,7 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 
-    background: rgba(var(--modal-shell-rgb), var(--modal-shell-alpha));
+    background: rgba(var(--tertiary-color), 0.14);
     overflow: hidden;
 }
 
@@ -122,7 +122,7 @@
 }
 
 .modal-close:hover {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-stronger));
+    background: rgba(var(--tertiary-color), 0.22);
     filter: brightness(1.05);
 }
 
@@ -252,14 +252,14 @@ Each slide:
 }
 
 .btn-ghost {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.12);
     color: rgba(var(--text), 0.88);
     border: 1px solid rgba(var(--contrast), 0.14);
 }
 
 .btn-ghost:hover {
     filter: brightness(1.06);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.18);
 }
 
 .btn-primary {
@@ -292,7 +292,7 @@ Each slide:
 
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.10);
 
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -313,7 +313,7 @@ Each slide:
 
 .select-box:hover {
     filter: brightness(1.05);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.16);
 }
 
 .select-box:active {
@@ -345,7 +345,7 @@ Each slide:
     padding: 16px 14px;
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.10);
 }
 
 .placeholder-title {
@@ -442,7 +442,7 @@ Each slide:
 
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
 
     color: rgba(var(--text), 0.92);
     padding: 0 12px;
@@ -458,7 +458,7 @@ Each slide:
 
 .field-control:focus {
     border-color: rgba(var(--primary-color), 0.55);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.12);
     filter: brightness(1.03);
 }
 
@@ -475,7 +475,7 @@ select.field-control.select-control {
     cursor: pointer;
     padding-right: 2.9em;
     line-height: 1.2;
-    background-color: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background-color: rgba(var(--tertiary-color), 0.08);
     background-image:
         linear-gradient(45deg, transparent 50%, rgba(var(--text), 0.62) 50%),
         linear-gradient(135deg, rgba(var(--text), 0.62) 50%, transparent 50%),
@@ -492,7 +492,7 @@ select.field-control.select-control {
 }
 
 select.field-control:hover {
-    background-color: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background-color: rgba(var(--tertiary-color), 0.12);
 }
 
 select.field-control:disabled {
@@ -519,7 +519,7 @@ select.field-control::-ms-expand {
 .custom-select-trigger {
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
     padding: 0 10px 0 12px;
     display: flex;
@@ -536,13 +536,13 @@ select.field-control::-ms-expand {
 }
 
 .custom-select-trigger:hover {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.12);
 }
 
 .custom-select-trigger.is-open,
 .custom-select-trigger:focus-visible {
     border-color: rgba(var(--primary-color), 0.55);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.14);
     box-shadow: 0 0 0 1px rgba(var(--primary-color), 0.25), 0 10px 28px rgba(0, 0, 0, 0.2);
 }
 
@@ -579,7 +579,7 @@ select.field-control::-ms-expand {
     z-index: 60;
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-shell-rgb), var(--modal-shell-alpha));
+    background: rgba(var(--tertiary-color), 0.12);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     box-shadow: 0 16px 38px rgba(0, 0, 0, 0.3);
@@ -601,7 +601,7 @@ select.field-control::-ms-expand {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: rgba(var(--modal-shell-rgb), calc(var(--modal-shell-alpha) + 0.04));
+    background: rgba(var(--tertiary-color), 0.40);
     backdrop-filter: blur(18px) saturate(130%);
     -webkit-backdrop-filter: blur(18px) saturate(130%);
     z-index: 0;
@@ -634,7 +634,7 @@ select.field-control::-ms-expand {
 }
 
 .custom-select-option:hover {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-stronger));
+    background: rgba(var(--tertiary-color), 0.26);
     filter: brightness(1.05);
 }
 
@@ -668,7 +668,7 @@ select.field-control::-ms-expand {
 .details-card {
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.10);
 
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -687,8 +687,8 @@ select.field-control::-ms-expand {
     border-radius: 18px;
     border: 1px solid rgba(var(--contrast), 0.16);
     background:
-        linear-gradient(180deg, rgba(var(--primary-color), 0.12), rgba(var(--modal-fill-rgb), var(--modal-fill-alpha))),
-        rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+        linear-gradient(180deg, rgba(var(--primary-color), 0.12), rgba(var(--tertiary-color), 0.08)),
+        rgba(var(--tertiary-color), 0.1);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     padding: 16px;
@@ -752,12 +752,12 @@ select.field-control::-ms-expand {
 }
 
 .build-status-badge.build-status-badge-muted {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.16);
     color: rgba(var(--text), 0.78);
 }
 
 .build-status-badge.is-queued {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-stronger));
+    background: rgba(var(--tertiary-color), 0.2);
 }
 
 .build-status-badge.is-running {
@@ -784,7 +784,7 @@ select.field-control::-ms-expand {
 .build-metric {
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.1);
     padding: 12px;
     display: grid;
     gap: 4px;
@@ -838,7 +838,7 @@ select.field-control::-ms-expand {
 .build-result-item {
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     padding: 12px;
     min-width: 0;
 }
@@ -855,7 +855,7 @@ select.field-control::-ms-expand {
     height: 10px;
     border-radius: 999px;
     background: rgba(var(--contrast), 0.25);
-    box-shadow: 0 0 0 4px rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    box-shadow: 0 0 0 4px rgba(var(--tertiary-color), 0.1);
 }
 
 .build-progress-step.is-active {
@@ -943,7 +943,7 @@ select.field-control::-ms-expand {
 .build-empty {
     border-radius: 14px;
     border: 1px dashed rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.06);
     padding: 12px;
     color: rgba(var(--text), 0.6);
     font-size: 13px;
@@ -958,7 +958,7 @@ select.field-control::-ms-expand {
     padding: 0 9px;
     border-radius: 999px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.16);
     color: rgba(var(--text), 0.82);
     font-size: 11px;
     font-weight: 800;
@@ -986,7 +986,7 @@ select.field-control::-ms-expand {
 .build-transfer-card {
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     padding: 12px;
     display: grid;
     gap: 10px;
@@ -1016,7 +1016,7 @@ select.field-control::-ms-expand {
     height: 10px;
     border-radius: 999px;
     overflow: hidden;
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-stronger));
+    background: rgba(var(--tertiary-color), 0.22);
     border: 1px solid rgba(var(--contrast), 0.08);
 }
 
@@ -1036,7 +1036,7 @@ select.field-control::-ms-expand {
 .build-transfer-stat {
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.1);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     padding: 10px;
     display: grid;
     gap: 4px;
@@ -1060,7 +1060,7 @@ select.field-control::-ms-expand {
 .build-error-box {
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     padding: 12px;
     color: rgba(var(--text), 0.75);
     line-height: 1.45;
@@ -1108,7 +1108,7 @@ select.field-control::-ms-expand {
     overflow-y: auto;
     border-radius: 14px;
     border: 1px solid rgba(var(--contrast), 0.14);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     padding: 8px;
     box-sizing: border-box;
     display: grid;
@@ -1130,12 +1130,12 @@ select.field-control::-ms-expand {
     align-items: center;
     border: 1px solid rgba(var(--contrast), 0.14);
     border-radius: 12px;
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.1);
     transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
 .saved-item:hover {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.15);
     border-color: rgba(var(--contrast), 0.25);
 }
 
@@ -1180,7 +1180,7 @@ select.field-control::-ms-expand {
     border: 0;
     border-radius: 999px;
     cursor: pointer;
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-stronger));
+    background: rgba(var(--tertiary-color), 0.22);
     color: rgba(var(--text), 0.9);
     font-size: 16px;
     line-height: 1;
@@ -1227,7 +1227,7 @@ select.field-control::-ms-expand {
 
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
 
     padding: 10px 12px;
     box-sizing: border-box;
@@ -1240,7 +1240,7 @@ select.field-control::-ms-expand {
 
 .check-row:hover {
     filter: brightness(1.05);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-hover));
+    background: rgba(var(--tertiary-color), 0.12);
 }
 
 .check-row input[type="checkbox"] {
@@ -1259,7 +1259,7 @@ select.field-control::-ms-expand {
 .overview-list .overview-item {
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
     padding: 10px 12px;
 }
 
@@ -1275,7 +1275,7 @@ select.field-control::-ms-expand {
     padding: 8px;
     border-radius: 12px;
     border: 1px solid rgba(var(--contrast), 0.12);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.08);
 }
 
 .chip-list:empty::before {
@@ -1292,7 +1292,7 @@ select.field-control::-ms-expand {
     padding: 6px 10px;
     border-radius: 999px;
     border: 1px solid rgba(var(--contrast), 0.16);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-strong));
+    background: rgba(var(--tertiary-color), 0.16);
     color: rgba(var(--text), 0.9);
     font-size: 13px;
 }
@@ -1313,7 +1313,7 @@ select.field-control::-ms-expand {
     line-height: 1;
     font-size: 14px;
     color: rgba(var(--text), 0.86);
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha-stronger));
+    background: rgba(var(--tertiary-color), 0.24);
 }
 
 .chip-remove:hover {
@@ -1364,7 +1364,7 @@ select.field-control::-ms-expand {
 /* Firefox */
 .content-page {
     scrollbar-width: thin;
-    scrollbar-color: rgba(var(--contrast), 0.28) rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    scrollbar-color: rgba(var(--contrast), 0.28) rgba(var(--tertiary-color), 0.06);
 }
 
 /* Chromium, Edge, Safari */
@@ -1374,14 +1374,14 @@ select.field-control::-ms-expand {
 }
 
 .content-page::-webkit-scrollbar-track {
-    background: rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    background: rgba(var(--tertiary-color), 0.06);
     border-left: 1px solid rgba(var(--contrast), 0.10);
 }
 
 .content-page::-webkit-scrollbar-thumb {
     background: rgba(var(--contrast), 0.22);
     border-radius: 999px;
-    border: 2px solid rgba(var(--modal-fill-rgb), var(--modal-fill-alpha));
+    border: 2px solid rgba(var(--tertiary-color), 0.06);
 }
 
 .content-page::-webkit-scrollbar-thumb:hover {
