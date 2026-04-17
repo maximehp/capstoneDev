@@ -33,13 +33,20 @@ ENV XDG_CONFIG_HOME=/tmp/capstone-worker/.config
 ENV PACKER_PLUGIN_PATH=/tmp/capstone-worker/.config/packer/plugins
 ENV TMPDIR=/tmp/capstone-worker/tmp
 
+ARG PACKER_VERSION=1.11.2
+
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl gnupg jq wget xorriso \
-    && wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
-    && . /etc/os-release \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com ${VERSION_CODENAME} main" > /etc/apt/sources.list.d/hashicorp.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends packer \
+    && apt-get install -y --no-install-recommends curl jq unzip wget xorriso \
+    && arch="$(dpkg --print-architecture)" \
+    && case "${arch}" in \
+        amd64) packer_arch="amd64" ;; \
+        arm64) packer_arch="arm64" ;; \
+        *) echo "unsupported packer architecture: ${arch}" >&2; exit 1 ;; \
+    esac \
+    && wget -O /tmp/packer.zip "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${packer_arch}.zip" \
+    && unzip /tmp/packer.zip -d /usr/bin \
+    && chmod +x /usr/bin/packer \
+    && rm -f /tmp/packer.zip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY docker/packer-worker/start.sh /usr/local/bin/packer-worker-start.sh
