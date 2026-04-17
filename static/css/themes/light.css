@@ -15,6 +15,7 @@
     --modal-backdrop-alpha: 0.18;
     --modal-shell-rgb: 255, 255, 255;
     --modal-shell-alpha: 0.92;
+    --modal-shell-overlay-alpha: 0.96;
     --modal-fill-rgb: 15, 23, 42;
     --modal-fill-alpha: 0.06;
     --modal-fill-alpha-hover: 0.10;
