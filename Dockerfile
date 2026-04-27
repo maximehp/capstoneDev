@@ -52,6 +52,7 @@ RUN set -eux; \
     unzip /tmp/packer.zip -d /usr/bin; \
     chmod +x /usr/bin/packer; \
     rm -f /tmp/packer.zip; \
+    mkdir -p "${HOME}" "${XDG_CONFIG_HOME}" "${PACKER_PLUGIN_PATH}" "${TMPDIR}"; \
     /usr/bin/packer version
 
 COPY docker/packer-worker/start.sh /usr/local/bin/packer-worker-start.sh
