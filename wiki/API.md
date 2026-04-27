@@ -1,230 +1,649 @@
 # API
 
-## Current Endpoints
+All API endpoints are implemented in `core/views.py` and registered in `capstoneDev/urls.py`.
+
+## General Rules
+
+- Login uses Django CSRF protection.
+- JSON POSTs from the frontend include:
+  - `Content-Type: application/json`
+  - `X-CSRFToken`
+  - `X-Requested-With: fetch`
+- Authenticated endpoints use `@login_required`.
+- Unauthenticated API calls generally receive Django's login redirect unless the view handles auth differently.
+- External HTTP URL inspection accepts only `http` and `https`.
+- Private URL hosts are allowed by default through `ALLOW_PRIVATE_TEMPLATE_ASSET_URLS=1`.
+- When `ALLOW_PRIVATE_TEMPLATE_ASSET_URLS=0`, localhost, private, loopback, link-local, reserved, and multicast addresses are rejected.
+
+## Endpoint Inventory
+
+- `GET /`
+- `GET /settings/`
+- `GET /login/`
 - `POST /login/`
+- `POST /logout/`
 - `POST /api/vm/start/`
 - `GET /api/template/list/`
 - `GET /api/iso/inspect`
+- `GET /api/iso/inspect/`
 - `GET /api/software/inspect`
+- `GET /api/software/inspect/`
 - `GET /api/iso/saved/`
 - `GET /api/software/saved/`
 - `POST /api/template/validate-software/`
 - `POST /api/template/create/`
 - `GET /api/template/builds/<job_uuid>/status/`
 
-## Expected Behaviors
-- `POST /login/` authenticates against AD and establishes a Django session.
-- `POST /api/vm/start/` provisions a VM from a stored template definition, allocates the destination VMID server-side, applies hardware/network config, and starts the VM.
-- `GET /api/template/list/` returns the caller's completed templates that are ready to provision from.
-- `GET /api/iso/inspect` validates a URL and returns basic ISO metadata.
-- `GET /api/software/inspect` validates a software download URL and returns metadata.
-- `GET /api/iso/saved/` returns up to 50 saved ISO URLs for the logged-in user.
-- `GET /api/software/saved/` returns up to 50 saved software URLs for the logged-in user.
-- `POST /api/template/validate-software/` validates Step 2 software/services/package inputs and returns a normalized payload for template creation.
-- `POST /api/template/create/` validates payload, creates a `TemplateDefinition`, and enqueues an async `TemplateBuildJob`.
-- `GET /api/template/builds/<job_uuid>/status/` returns build job lifecycle status and structured build result payload.
+## Partial Page Navigation
 
-## Validation Contract
-`POST /api/template/validate-software/` request body:
-- `build_profile`: `ubuntu_autoinstall`, `debian_preseed`, or `windows_unattend`
-- `target_os`: `linux` or `windows`
-- `software_items`: array of selected items
-  - `kind`: `url` or `package`
-  - `label`: display name
-  - `url`: when kind is `url`
-  - `artifact_type`: inferred/provided file type
-  - `install_strategy`: inferred/provided strategy
-  - `silent_args`: optional args for installer execution
-- backward-compat keys are still accepted:
-  - `software_urls`
-  - `custom_packages`
-- `services`: object with boolean flags
-  - `qemu_guest`
-  - `docker`
-  - `devtools`
+`GET /` and `GET /settings/` return full HTML normally.
 
-Response body:
-- `ok`: request processing status
-- `valid`: `true` if no validation errors
-- `errors`: list of validation errors
-- `warnings`: list of non-blocking issues
-- `normalized`: canonicalized data for downstream provisioning
-  - `build_profile`
-  - `target_os`
-  - `software_urls`
-  - `software_items` (URL/package + metadata + strategy + args)
-  - `custom_packages`
-  - `services`
+When `X-Requested-With` is `fetch` or `prefetch`, the views render the same template, extract named regions, and return JSON:
 
-## Template Create Contract
-`POST /api/template/create/` request body:
-- `template_name`
-- `build_profile`
-- `target_os`
-- `iso_url`
-- `hardware`
-  - `cpu`
-  - `ram_gb`
-  - `disk_gb`
-- `network`
-  - `bridge`
-  - `vlan`
-  - `ipv4_mode` must remain `dhcp`
-- `software_items`
+```json
+{
+  "title": "Capstone Home",
+  "head": "<link ...>",
+  "html": "<div ...>",
+  "scripts": "<script ...>"
+}
+```
+
+The frontend replaces `#app-content`, dynamic page head tags, and dynamic scripts.
+
+## Login
+
+### `GET /login/`
+
+Renders the login page.
+
+If the user is already authenticated, redirects to a safe `next` target or `LOGIN_REDIRECT_URL`.
+
+### `POST /login/`
+
+Expected headers:
+
+- `Content-Type: application/json`
+- `X-Requested-With: fetch`
+- CSRF token
+
+Request body:
+
+```json
+{
+  "username": "jdoe",
+  "password": "secret",
+  "next": "/settings/"
+}
+```
+
+Success:
+
+- HTTP `200`
+
+```json
+{
+  "ok": true,
+  "redirect": "/settings/"
+}
+```
+
+Failure:
+
+- Invalid JSON: HTTP `400`
+- Invalid credentials: HTTP `401`
+
+```json
+{
+  "ok": false,
+  "error": "Invalid username or password"
+}
+```
+
+Redirect safety:
+
+- Only same-host targets are accepted.
+- Unsafe `next` values fall back to `/`.
+
+## Logout
+
+### `POST /logout/`
+
+Requires login and CSRF.
+
+Behavior:
+
+- Calls Django logout.
+- Redirects to `/login/`.
+
+## ISO Inspection
+
+### `GET /api/iso/inspect?url=<url>`
+
+Requires login.
+
+Behavior:
+
+- Validates URL presence and scheme.
+- Rejects private hosts only when `ALLOW_PRIVATE_TEMPLATE_ASSET_URLS=0`.
+- Performs `HEAD`.
+- Falls back to `GET` with `Range: bytes=0-0` when size is missing.
+- Extracts filename from `Content-Disposition` or URL path.
+- Requires filename to end in `.iso`.
+- Saves or updates an `IsoSource` row for the user.
+
+Success:
+
+```json
+{
+  "ok": true,
+  "final_url": "https://cdn.example/ubuntu.iso",
+  "filename": "ubuntu.iso",
+  "size_bytes": 123456,
+  "content_type": "application/octet-stream",
+  "last_modified": "Mon, 01 Jan 2024 00:00:00 GMT"
+}
+```
+
+Failures:
+
+- Missing URL: HTTP `400`
+- Non-http scheme: HTTP `400`
+- Not a `.iso` filename: HTTP `400`
+- HTTP metadata failure: HTTP `400`
+
+## Software Inspection
+
+### `GET /api/software/inspect?url=<url>`
+
+Requires login.
+
+Same behavior as ISO inspection, except it does not require `.iso`.
+
+It saves or updates a `SoftwareSource` row for the user.
+
+Success:
+
+```json
+{
+  "ok": true,
+  "final_url": "https://cdn.example/tool.exe",
+  "filename": "tool.exe",
+  "size_bytes": 123456,
+  "content_type": "application/octet-stream",
+  "last_modified": "Mon, 01 Jan 2024 00:00:00 GMT"
+}
+```
+
+## Saved Sources
+
+### `GET /api/iso/saved/`
+
+Requires login.
+
+Returns up to 50 recent ISO sources for the current user.
+
+Response:
+
+```json
+{
+  "ok": true,
+  "items": [
+    {
+      "url": "https://example/ubuntu.iso",
+      "filename": "ubuntu.iso",
+      "label": "",
+      "size_bytes": 123456,
+      "content_type": "application/octet-stream",
+      "last_modified": "Mon, 01 Jan 2024 00:00:00 GMT",
+      "last_seen_at": "2026-04-27T13:00:00+00:00"
+    }
+  ]
+}
+```
+
+### `GET /api/software/saved/`
+
+Requires login.
+
+Returns up to 50 recent software sources for the current user with the same shape as saved ISO sources.
+
+## Software Validation
+
+### `POST /api/template/validate-software/`
+
+Requires login and CSRF.
+
+Purpose:
+
+- Normalizes Step 2 software selections.
+- Validates package names.
+- Inspects software URLs.
+- Infers artifact type and install strategy.
+- Applies target OS compatibility rules.
+- Returns canonical software payload for template creation.
+
+Request body:
+
+```json
+{
+  "build_profile": "ubuntu_autoinstall",
+  "target_os": "linux",
+  "software_items": [
+    {
+      "kind": "url",
+      "label": "Example installer",
+      "url": "https://example/tool.deb",
+      "artifact_type": "",
+      "install_strategy": "",
+      "silent_args": ""
+    },
+    {
+      "kind": "package",
+      "label": "nginx"
+    }
+  ],
+  "services": {
+    "qemu_guest": true,
+    "docker": false,
+    "devtools": false
+  }
+}
+```
+
+Backward-compatible keys accepted:
+
 - `software_urls`
 - `custom_packages`
-- `services`
-- `linux`
-  - `ssh_timeout`
-- `windows` for `windows_unattend`
-  - `admin_username`
-  - `admin_password`
-  - `image_selector_type`
-  - `image_selector_value`
-  - `virtio_iso_url`
-  - `firmware_profile` (`bios_legacy` or `uefi_tpm`)
-  - `winrm_port`
-  - `winrm_use_ssl`
-  - `winrm_timeout`
-- `ansible` optional metadata only
 
-Current rules:
-- `build_profile` is required.
-- `target_os` must match the selected profile.
-- Static template networking is rejected.
-- Windows builds require the full Windows block above.
-- ISO URLs and VirtIO URLs are inspected before job creation.
-- VMID is assigned as `"100" + user.id`.
+Package rules:
 
-Successful create response:
+- Package names must match `^[a-z0-9][a-z0-9+.-]{0,63}$`.
+- Package-manager packages are supported for Linux targets.
+- Package-manager packages are rejected for Windows targets.
+
+Artifact inference:
+
+- Windows native installers: `exe`, `msi`, `msix`
+- Windows scripts: `ps1`, `bat`, `cmd`
+- Linux packages: `deb`, `rpm`, `apk`
+- Archives: `zip`, `tar`
+- Linux scripts/binaries: `sh`, `run`, `bin`
+- Unknown values are allowed with warnings in some paths.
+
+Install strategy inference:
+
+- `package_manager`
+- `native_installer`
+- `archive`
+- `script`
+- `custom_command`
+
+Windows native installers get default silent args `/quiet /norestart` when args are missing.
+
+Response:
+
+```json
+{
+  "ok": true,
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "normalized": {
+    "target_os": "linux",
+    "software_urls": ["https://example/tool.deb"],
+    "software_items": [
+      {
+        "id": "software-1",
+        "kind": "url",
+        "url": "https://example/tool.deb",
+        "label": "tool.deb",
+        "filename": "tool.deb",
+        "size_bytes": 123456,
+        "content_type": "application/octet-stream",
+        "last_modified": "Mon, 01 Jan 2024 00:00:00 GMT",
+        "artifact_type": "deb",
+        "install_strategy": "package_manager",
+        "silent_args": ""
+      }
+    ],
+    "custom_packages": ["nginx"],
+    "services": {
+      "qemu_guest": true,
+      "docker": false,
+      "devtools": false
+    }
+  }
+}
+```
+
+## Template Creation
+
+### `POST /api/template/create/`
+
+Requires login and CSRF.
+
+Authorization:
+
+- If `TEMPLATE_CREATION_POLICY=faculty_only`, `request.user.is_staff` must be true.
+- Otherwise returns HTTP `403`.
+
+Request body:
+
+```json
+{
+  "template_name": "ubuntu-24.04-base",
+  "build_profile": "ubuntu_autoinstall",
+  "target_os": "linux",
+  "iso_url": "https://example/ubuntu.iso",
+  "hardware": {
+    "cpu": 2,
+    "ram_gb": 4,
+    "disk_gb": 32
+  },
+  "network": {
+    "bridge": "vmbr0",
+    "vlan": 20,
+    "ipv4_mode": "dhcp"
+  },
+  "software_items": [],
+  "services": {
+    "qemu_guest": true,
+    "docker": false,
+    "devtools": false
+  },
+  "linux": {
+    "ssh_timeout": "45m"
+  },
+  "ansible": {}
+}
+```
+
+Windows request body adds:
+
+```json
+{
+  "build_profile": "windows_unattend",
+  "target_os": "windows",
+  "windows": {
+    "admin_username": "Administrator",
+    "admin_password": "secret",
+    "image_selector_type": "image_name",
+    "image_selector_value": "Windows Server 2022 SERVERSTANDARD",
+    "virtio_iso_url": "https://example/virtio-win.iso",
+    "firmware_profile": "uefi_tpm",
+    "winrm_port": 5985,
+    "winrm_use_ssl": false,
+    "winrm_timeout": "2h"
+  }
+}
+```
+
+Validation rules:
+
+- `build_profile` is required and must be one of the supported profiles.
+- `target_os`, when supplied, must match the profile.
+- `template_name` is required.
+- `iso_url` is required and must inspect as an ISO.
+- Software validation must pass.
+- Hardware is clamped:
+  - CPU: `1..64`, default `2`
+  - RAM GB: `1..512`, default `4`
+  - Disk GB: `8..4096`, default `32`
+- `network.bridge` is required.
+- Template networking must be DHCP-ready only.
+- Any static template networking values cause HTTP `400`.
+- Windows builds require all Windows fields above.
+- Windows `virtio_iso_url` is inspected as an ISO.
+- Template VMID requires a synced `DirectoryProfile.ad_rid`.
+
+Success:
+
 - HTTP `202`
-- `template`
-  - `id`
-  - `name`
-  - `vmid`
-  - `target_os`
-  - `build_profile`
-- `job`
-  - `id`
-  - `status`
-  - `stage`
-- `warnings`
-- `normalized`
+
+```json
+{
+  "ok": true,
+  "template": {
+    "id": 1,
+    "name": "ubuntu-24.04-base",
+    "vmid": "1536001",
+    "target_os": "linux",
+    "build_profile": "ubuntu_autoinstall"
+  },
+  "job": {
+    "id": "94c4d723-4b37-46ef-a4a1-03a228a9b7b7",
+    "status": "queued",
+    "stage": "queued"
+  },
+  "warnings": [],
+  "normalized": {}
+}
+```
 
 Important behavior:
-- `POST /api/template/create/` does not create the generated Packer files inline.
-- Those files are created later by the background worker when it executes the queued job.
 
-## Template List Contract
-`GET /api/template/list/` response body:
-- `ok`
-- `items`
-  - `id`
-  - `name`
-  - `vmid`
-  - `target_os`
-  - `build_profile`
-  - `hardware`
-  - `network`
+- This endpoint queues the job.
+- It does not run Packer inline.
+- It writes initial `request.json` and `status.json` only.
+- Generated Packer files are written later by the worker.
+- Request manifests redact keys matching password, secret, or token.
 
-Important behavior:
-- Only completed templates with a succeeded last build are returned.
-- The list is scoped to the authenticated user.
+Failures:
 
-## VM Provision Contract
-`POST /api/vm/start/` request body:
-- `template_id`
-- `name`
-- `hardware`
-  - `cpu`
-  - `ram_gb`
-  - `disk_gb`
-- `network`
-  - `bridge`
-  - `vlan`
-  - `ipv4_mode` (`dhcp` or `static`)
-  - `static_ip` when `ipv4_mode=static`
-  - `static_gateway` when `ipv4_mode=static`
-  - `static_dns` optional list
+- Not faculty under faculty-only policy: HTTP `403`
+- Invalid JSON: HTTP `400`
+- Missing build profile/name/ISO: HTTP `400`
+- ISO validation failure: HTTP `400`
+- Software validation failure: HTTP `400`
+- Static template networking: HTTP `400`
+- Missing directory profile/RID: HTTP `400`
+- Failed queue/write: HTTP `500`, with the new `TemplateDefinition` deleted.
 
-Current rules:
-- `template_id` must reference one of the caller's completed templates.
-- Destination VMID is allocated by the backend, not supplied by the client.
-- Requested disk size must not be smaller than the source template disk size.
-- Static networking requires a CIDR IP and a gateway.
+## Template List
 
-Successful provision response:
+### `GET /api/template/list/`
+
+Requires login.
+
+Returns completed templates owned by the caller. A template is considered ready when `last_job.status == succeeded`.
+
+Response:
+
+```json
+{
+  "ok": true,
+  "items": [
+    {
+      "id": 1,
+      "name": "ubuntu-template",
+      "vmid": "1536001",
+      "target_os": "linux",
+      "build_profile": "ubuntu_autoinstall",
+      "hardware": {
+        "cpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 32
+      },
+      "network": {
+        "bridge": "vmbr0",
+        "vlan": 20,
+        "ipv4_mode": "dhcp"
+      }
+    }
+  ]
+}
+```
+
+## VM Provisioning
+
+### `POST /api/vm/start/`
+
+Requires login and CSRF.
+
+Request body:
+
+```json
+{
+  "template_id": 1,
+  "name": "student-lab-01",
+  "hardware": {
+    "cpu": 4,
+    "ram_gb": 8,
+    "disk_gb": 64
+  },
+  "network": {
+    "bridge": "vmbr0",
+    "vlan": 20,
+    "ipv4_mode": "static",
+    "static_ip": "10.0.20.50/24",
+    "static_gateway": "10.0.20.1",
+    "static_dns": ["10.0.20.10", "10.0.20.11"]
+  }
+}
+```
+
+Validation rules:
+
+- `template_id` must be a positive integer.
+- Template must belong to the caller.
+- Template must have a succeeded last build.
+- VM name is required.
+- Hardware is clamped:
+  - CPU: `1..64`, default `2`
+  - RAM GB: `1..512`, default `4`
+  - Disk GB: `8..4096`, default `32`
+- Requested disk size must be at least the template source disk size.
+- Network bridge is required.
+- VLAN is optional and clamped to `1..4094`.
+- IPv4 mode must be `dhcp` or `static`.
+- Static mode requires valid CIDR `static_ip`.
+- Static mode requires valid IP `static_gateway`.
+- Static DNS values, when supplied, must be valid IP addresses.
+- DHCP mode clears static fields.
+
+Success:
+
 - HTTP `201`
-- `vm`
-  - `id`
-  - `name`
-  - `vmid`
-  - `node`
-  - `status`
-  - `task_upid`
-  - `hardware`
-  - `network`
-  - `template`
 
-## Build Status Contract
-`GET /api/template/builds/<job_uuid>/status/` response body:
-- `job.id`
-- `job.status`
-- `job.stage`
-- `job.error`
-- `job.exit_code`
-- `job.template`
-  - `id`
-  - `name`
-  - `vmid`
-  - `target_os`
-  - `build_profile`
-- `job.result`
-  - `software_results`
-  - `preflight`
-  - `staged_isos`
-  - `iso_stage_progress`
-  - `generated_artifacts`
-  - `image_selector`
-  - `firmware_profile`
-  - `guest_networking`
+```json
+{
+  "ok": true,
+  "vm": {
+    "id": 1,
+    "name": "student-lab-01",
+    "vmid": 2400,
+    "node": "pve",
+    "status": "running",
+    "task_upid": "UPID:...",
+    "error": null,
+    "hardware": {
+      "cpu": 4,
+      "ram_gb": 8,
+      "disk_gb": 64
+    },
+    "network": {
+      "bridge": "vmbr0",
+      "vlan": 20,
+      "ipv4_mode": "static",
+      "static_ip": "10.0.20.50/24",
+      "static_gateway": "10.0.20.1",
+      "static_dns": ["10.0.20.10", "10.0.20.11"]
+    },
+    "created_at": "2026-04-27T13:00:00+00:00",
+    "provisioned_at": "2026-04-27T13:01:00+00:00",
+    "started_at": "2026-04-27T13:01:00+00:00",
+    "template": {
+      "id": 1,
+      "name": "ubuntu-template",
+      "vmid": "1536001",
+      "target_os": "linux",
+      "build_profile": "ubuntu_autoinstall",
+      "hardware": {},
+      "network": {}
+    }
+  }
+}
+```
 
-Current build-stage semantics:
-- `queued`: request persisted but not yet claimed by worker
-- `preflight`: runtime/path/storage validation
-- `assets`: NAS ISO staging and transfer progress
-- `init`: `packer init`
-- `validate`: `packer validate`
-- `build`: live Packer build/install stage
-- `sealing`: late guest finalization/signoff
-- `postprocess`: final worker wrap-up
-- `done`: terminal state
+Failures:
 
-`job.result.staged_isos` items currently include:
-- `role`
-- `filename`
-- `storage_pool`
-- `iso_file`
-- `local_path`
-- `final_url`
-- `size_bytes`
-- `reused`
+- Missing/invalid template ID: HTTP `400`
+- Template not found or not owned by user: HTTP `404`
+- Payload validation failures: HTTP `400`
+- Proxmox/client/service exception: HTTP `502`
 
-`job.result.iso_stage_progress` currently includes:
-- `status`
-- `role`
-- `filename`
-- `iso_file`
-- `downloaded_bytes`
-- `expected_bytes`
-- `percent`
-- `speed_bytes_per_sec`
-- `local_path`
-- `final_url`
+## Build Status
 
-## Notes
-- Requests from the UI use `X-Requested-With: fetch` or `prefetch` for partial navigation.
-- Software validation remains a preflight/normalization step.
-- Packer execution happens in the worker, not in the create request.
-- `PROXMOX_BASE_URL` may be configured either as the Proxmox host root or with `/api2/json`; both forms are normalized internally.
-- Windows native installer items currently get backend default silent args (`/quiet /norestart`) when args are missing.
+### `GET /api/template/builds/<job_uuid>/status/`
+
+Requires login.
+
+Only the job owner can view status. Other users receive HTTP `404`.
+
+Response:
+
+```json
+{
+  "ok": true,
+  "job": {
+    "id": "94c4d723-4b37-46ef-a4a1-03a228a9b7b7",
+    "status": "running",
+    "stage": "assets",
+    "error": null,
+    "exit_code": null,
+    "queued_at": "2026-04-27T13:00:00+00:00",
+    "started_at": "2026-04-27T13:00:05+00:00",
+    "finished_at": null,
+    "template": {
+      "id": 1,
+      "name": "ubuntu-template",
+      "vmid": "1536001",
+      "target_os": "linux",
+      "build_profile": "ubuntu_autoinstall"
+    },
+    "result": {
+      "software_results": [],
+      "preflight": [],
+      "staged_isos": [],
+      "iso_stage_progress": null,
+      "generated_artifacts": [],
+      "machine_readable_events": [],
+      "log_available": false,
+      "archive_available": false,
+      "dev_bypass": false,
+      "execution_mode": null,
+      "summary": null,
+      "build_profile": "ubuntu_autoinstall",
+      "firmware_profile": null,
+      "image_selector": {
+        "type": null,
+        "value": null
+      },
+      "guest_networking": "dhcp"
+    }
+  }
+}
+```
+
+Status values:
+
+- `queued`
+- `running`
+- `succeeded`
+- `failed`
+- `canceled`
+
+Stage values:
+
+- `queued`
+- `preflight`
+- `assets`
+- `init`
+- `validate`
+- `build`
+- `sealing`
+- `postprocess`
+- `done`
+
+The status payload intentionally does not expose raw workspace or log paths.
