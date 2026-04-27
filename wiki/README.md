@@ -22,6 +22,7 @@ This folder is the living project wiki for the Capstone Django app. It documents
 - [Frontend](Frontend.md): templates, JavaScript modules, partial navigation, modals, theme behavior, and assets.
 - [Operations](Operations.md): Compose deployment, NAS/fstab facts, permissions, runbook checks, troubleshooting, and cleanup guidance.
 - [Testing](Testing.md): validation commands, current test coverage map, and manual verification scope.
+- [Project Status](Project-Status.md): user-stated done/planned status and future feature list.
 - [Implementation Inventory](Implementation-Inventory.md): file-by-file repository map from the current scan.
 - [Roadmap](Roadmap.md): current gaps, next work, and stale/mismatch notes.
 

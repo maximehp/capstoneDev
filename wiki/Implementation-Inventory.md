@@ -215,6 +215,8 @@ This is a current file-by-file map from the repository scan.
   - Deployment/runbook/troubleshooting.
 - `wiki/Testing.md`
   - Test coverage and validation.
+- `wiki/Project-Status.md`
+  - User-stated done/planned project status.
 - `wiki/Implementation-Inventory.md`
   - This file.
 - `wiki/Roadmap.md`
