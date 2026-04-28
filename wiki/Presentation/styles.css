@@ -1764,6 +1764,181 @@ body[data-theme="development"] {
 
 /* ── End IaC Diagram ────────────────────────────────────────────────────── */
 
+/* ══════════════════════════════════════════════════════════════════════════
+   SHARED ANIMATION PRIMITIVES
+   Reusable building blocks for any animated vertical pipeline diagram.
+
+   Quickstart — put this in your slide's HTML:
+
+     <div class="your-pipeline">                         ← flex column, fixed width, positioned
+       <div class="anim-step anim-step-trigger" style="--anim-delay:0s">
+         <div class="anim-step-content">
+           <strong>Step Title</strong>
+           <span>Description text</span>
+         </div>
+         <div class="anim-step-emblem" style="background-image:url(...)"></div>
+       </div>
+       <div class="anim-conn-v">
+         <span class="anim-dot" style="--anim-delay:0.6s"></span>
+       </div>
+       <div class="anim-step" style="--anim-delay:1.2s"> ... </div>
+     </div>
+
+   CSS variables (set via inline style on the element):
+     --anim-delay      0s    when this element fires in the cycle
+     --anim-duration   6s    full repeat cycle length
+
+   Step modifiers:
+     .anim-step-trigger   brighter border + glowing entry dot (first step)
+     .anim-step-gold      amber finish (use on final output step)
+
+   Connector / dot modifiers:
+     .anim-conn-gold      amber gradient line (before a gold step)
+     .anim-dot-gold       amber traveling dot
+
+   Emblem strip:
+     .anim-step-emblem is a 48px right-side strip inside .anim-step.
+     Set background-image on it (or a child class) to show an icon.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.anim-step {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  border-top: 2px solid rgba(var(--accent-rgb), 0.4);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.025));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: iac-step-pulse var(--anim-duration, 6s) ease-out infinite;
+  animation-delay: var(--anim-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.anim-step-trigger {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  border-top-color: rgba(var(--accent-rgb), 0.75);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.16), rgba(255, 255, 255, 0.03));
+}
+
+.anim-step-trigger::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.anim-step-gold {
+  border-color: rgba(245, 200, 66, 0.4);
+  border-top-color: rgba(245, 200, 66, 0.7);
+  background: linear-gradient(180deg, rgba(245, 200, 66, 0.1), rgba(255, 255, 255, 0.02));
+  animation-name: anim-gold-pulse;
+}
+
+.anim-step-content {
+  flex: 1;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.anim-step-content strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.4em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.anim-step-content span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.3em;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.anim-step-emblem {
+  flex: 0 0 48px;
+  align-self: stretch;
+  border-left: 1px solid rgba(var(--accent-rgb), 0.2);
+  background-color: rgba(var(--accent-rgb), 0.14);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 54% 54%;
+}
+
+.anim-step-gold .anim-step-emblem {
+  border-left-color: rgba(245, 200, 66, 0.3);
+  background-color: rgba(245, 200, 66, 0.16);
+}
+
+.anim-conn-v {
+  flex: 0 0 26px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.anim-conn-v::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.55));
+}
+
+.anim-conn-gold::before {
+  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.4), rgba(245, 200, 66, 0.55));
+}
+
+.anim-dot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: iac-dot-v-step var(--anim-duration, 6s) linear infinite;
+  animation-delay: var(--anim-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.anim-dot-gold {
+  background: rgb(245, 200, 66);
+  box-shadow: 0 0 6px rgba(245, 200, 66, 0.9), 0 0 12px rgba(245, 200, 66, 0.5);
+}
+
+@keyframes anim-gold-pulse {
+  0%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+  4%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+                     0 0 18px rgba(245, 200, 66, 0.55),
+                     0 0 36px rgba(245, 200, 66, 0.18); }
+  22%  { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+  100% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+}
+
+/* ── End Shared Animation Primitives ────────────────────────────────────── */
+
 .card-grid {
   display: grid;
   gap: 18px;
@@ -2528,6 +2703,7 @@ body[data-theme="development"] {
 }
 
 /* ── Packer Build Pipeline (slide 33) ──────────────────────── */
+/* Layout only — animation classes come from .anim-* primitives  */
 
 .pkr-body {
   position: relative;
@@ -2548,84 +2724,10 @@ body[data-theme="development"] {
   flex-direction: column;
 }
 
-.pkr-step {
-  flex: 1;
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  overflow: hidden;
-  border: 1px solid rgba(var(--accent-rgb), 0.28);
-  border-top: 2px solid rgba(var(--accent-rgb), 0.4);
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.025));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-  animation: iac-step-pulse 8s ease-out infinite;
-  animation-delay: var(--pkr-delay, 0s);
-  animation-fill-mode: both;
-}
+/* Step flex sizing (pipeline fills height, steps share it equally) */
+.pkr-pipeline .anim-step { flex: 1; }
 
-.pkr-step-trigger {
-  border-color: rgba(var(--accent-rgb), 0.45);
-  border-top-color: rgba(var(--accent-rgb), 0.75);
-  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.16), rgba(255, 255, 255, 0.03));
-}
-
-.pkr-step-trigger::before {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
-}
-
-.pkr-step-template {
-  border-color: rgba(245, 200, 66, 0.4);
-  border-top-color: rgba(245, 200, 66, 0.7);
-  background: linear-gradient(180deg, rgba(245, 200, 66, 0.1), rgba(255, 255, 255, 0.02));
-  animation-name: pkr-gold-pulse;
-}
-
-.pkr-step-content {
-  flex: 1;
-  padding: 10px 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  text-align: center;
-}
-
-.pkr-step-content strong {
-  display: block;
-  color: var(--text);
-  font-size: 0.4em;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.pkr-step-content span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.3em;
-  line-height: 1.45;
-  font-weight: 500;
-}
-
-.pkr-emblem {
-  flex: 0 0 48px;
-  align-self: stretch;
-  border-left: 1px solid rgba(var(--accent-rgb), 0.2);
-  background-color: rgba(var(--accent-rgb), 0.14);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 54% 54%;
-}
-
+/* Emblem SVG icons */
 .pkr-emblem-cdrom {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='white' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='white'/%3E%3C/svg%3E");
 }
@@ -2639,65 +2741,7 @@ body[data-theme="development"] {
 }
 
 .pkr-emblem-template {
-  border-left-color: rgba(245, 200, 66, 0.3);
-  background-color: rgba(245, 200, 66, 0.16);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpolygon points='32,5 38,23 58,23 43,35 49,53 32,42 15,53 21,35 6,23 26,23' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
-}
-
-/* Vertical connector between steps */
-.pkr-conn {
-  flex: 0 0 26px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: visible;
-}
-
-.pkr-conn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1.5px;
-  transform: translateX(-50%);
-  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.55));
-}
-
-.pkr-conn-gold::before {
-  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.4), rgba(245, 200, 66, 0.55));
-}
-
-/* Traveling dot — reuses iac-dot-v-step keyframe, slower cycle */
-.pkr-dot {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgb(var(--accent-rgb));
-  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
-  pointer-events: none;
-  will-change: transform, opacity;
-  animation: iac-dot-v-step 8s linear infinite;
-  animation-delay: var(--pkr-delay, 0s);
-  animation-fill-mode: both;
-}
-
-.pkr-dot-gold {
-  background: rgb(245, 200, 66);
-  box-shadow: 0 0 6px rgba(245, 200, 66, 0.9), 0 0 12px rgba(245, 200, 66, 0.5);
-}
-
-@keyframes pkr-gold-pulse {
-  0%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
-  4%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06),
-                     0 0 18px rgba(245, 200, 66, 0.55),
-                     0 0 36px rgba(245, 200, 66, 0.18); }
-  22%  { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
-  100% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
 }
 
 /* ── End Packer Diagram ─────────────────────────────────────── */

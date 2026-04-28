@@ -12,48 +12,48 @@
 
     <div class="pkr-pipeline">
 
-      <div class="pkr-step pkr-step-trigger" style="--pkr-delay:0s">
-        <div class="pkr-step-content">
+      <div class="anim-step anim-step-trigger" style="--anim-delay:0s;--anim-duration:8s">
+        <div class="anim-step-content">
           <strong>Boot Phase</strong>
           <span>ISO boots the VM — CDROM delivers boot commands and writes the Packer SSH key to authorized_keys</span>
         </div>
-        <div class="pkr-emblem pkr-emblem-cdrom"></div>
+        <div class="anim-step-emblem pkr-emblem-cdrom"></div>
       </div>
 
-      <div class="pkr-conn">
-        <span class="pkr-dot" style="--pkr-delay:0.6s"></span>
+      <div class="anim-conn-v">
+        <span class="anim-dot" style="--anim-delay:0.6s;--anim-duration:8s"></span>
       </div>
 
-      <div class="pkr-step" style="--pkr-delay:1.2s">
-        <div class="pkr-step-content">
+      <div class="anim-step" style="--anim-delay:1.2s;--anim-duration:8s">
+        <div class="anim-step-content">
           <strong>Packer SSH In &amp; Provision</strong>
           <span>Packer connects via SSH, runs shell scripts, installs apt packages — Docker, qemu-guest-agent, and common agents</span>
         </div>
-        <div class="pkr-emblem pkr-emblem-ssh"></div>
+        <div class="anim-step-emblem pkr-emblem-ssh"></div>
       </div>
 
-      <div class="pkr-conn">
-        <span class="pkr-dot" style="--pkr-delay:1.8s"></span>
+      <div class="anim-conn-v">
+        <span class="anim-dot" style="--anim-delay:1.8s;--anim-duration:8s"></span>
       </div>
 
-      <div class="pkr-step" style="--pkr-delay:2.4s">
-        <div class="pkr-step-content">
+      <div class="anim-step" style="--anim-delay:2.4s;--anim-duration:8s">
+        <div class="anim-step-content">
           <strong>Key Handoff</strong>
           <span>Ansible SSH key injected into authorized_keys — Packer key removed, leaving a clean handoff</span>
         </div>
-        <div class="pkr-emblem pkr-emblem-key"></div>
+        <div class="anim-step-emblem pkr-emblem-key"></div>
       </div>
 
-      <div class="pkr-conn pkr-conn-gold">
-        <span class="pkr-dot pkr-dot-gold" style="--pkr-delay:3.0s"></span>
+      <div class="anim-conn-v anim-conn-gold">
+        <span class="anim-dot anim-dot-gold" style="--anim-delay:3.0s;--anim-duration:8s"></span>
       </div>
 
-      <div class="pkr-step pkr-step-template" style="--pkr-delay:3.8s">
-        <div class="pkr-step-content">
+      <div class="anim-step anim-step-gold" style="--anim-delay:3.8s;--anim-duration:8s">
+        <div class="anim-step-content">
           <strong>Golden Template</strong>
           <span>VM shut down and snapshotted — stored in Proxmox as a template for Terraform to clone</span>
         </div>
-        <div class="pkr-emblem pkr-emblem-template"></div>
+        <div class="anim-step-emblem pkr-emblem-template"></div>
       </div>
 
     </div>
