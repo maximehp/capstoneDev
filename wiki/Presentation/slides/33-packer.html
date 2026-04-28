@@ -1,18 +1,62 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
   <h2>Packer</h2>
-  <div class="pipeline">
-    <span>ISO + boot commands</span>
-    <span>Packer SSH key</span>
-    <span>Provision common agents</span>
-    <span>Inject Ansible key</span>
-    <span>Golden template</span>
+  <div class="pkr-body">
+
+    <ul class="tight-list">
+      <li>Builds a pre-configured VM template cloned by later stages.</li>
+      <li>Uses a CDROM during build to run boot commands and inject the Packer SSH key.</li>
+      <li>Removes the Packer key and leaves the Ansible key for finished VMs.</li>
+      <li>Bakes in qemu-guest-agent, Docker, and common software.</li>
+    </ul>
+
+    <div class="pkr-pipeline">
+
+      <div class="pkr-step pkr-step-trigger" style="--pkr-delay:0s">
+        <div class="pkr-step-content">
+          <strong>Boot Phase</strong>
+          <span>ISO boots the VM — CDROM delivers boot commands and writes the Packer SSH key to authorized_keys</span>
+        </div>
+        <div class="pkr-emblem pkr-emblem-cdrom"></div>
+      </div>
+
+      <div class="pkr-conn">
+        <span class="pkr-dot" style="--pkr-delay:0.6s"></span>
+      </div>
+
+      <div class="pkr-step" style="--pkr-delay:1.2s">
+        <div class="pkr-step-content">
+          <strong>Packer SSH In &amp; Provision</strong>
+          <span>Packer connects via SSH, runs shell scripts, installs apt packages — Docker, qemu-guest-agent, and common agents</span>
+        </div>
+        <div class="pkr-emblem pkr-emblem-ssh"></div>
+      </div>
+
+      <div class="pkr-conn">
+        <span class="pkr-dot" style="--pkr-delay:1.8s"></span>
+      </div>
+
+      <div class="pkr-step" style="--pkr-delay:2.4s">
+        <div class="pkr-step-content">
+          <strong>Key Handoff</strong>
+          <span>Ansible SSH key injected into authorized_keys — Packer key removed, leaving a clean handoff</span>
+        </div>
+        <div class="pkr-emblem pkr-emblem-key"></div>
+      </div>
+
+      <div class="pkr-conn pkr-conn-gold">
+        <span class="pkr-dot pkr-dot-gold" style="--pkr-delay:3.0s"></span>
+      </div>
+
+      <div class="pkr-step pkr-step-template" style="--pkr-delay:3.8s">
+        <div class="pkr-step-content">
+          <strong>Golden Template</strong>
+          <span>VM shut down and snapshotted — stored in Proxmox as a template for Terraform to clone</span>
+        </div>
+        <div class="pkr-emblem pkr-emblem-template"></div>
+      </div>
+
+    </div>
   </div>
-  <ul class="tight-list">
-    <li>Builds a pre-configured VM template cloned by later stages.</li>
-    <li>Uses a CDROM during build to run boot commands and inject the Packer SSH key.</li>
-    <li>Removes the Packer key and leaves the Ansible key for finished VMs.</li>
-    <li>Bakes in qemu-guest-agent, Docker, and common software.</li>
-  </ul>
   <div class="speaker">Speaker: Liam Callahan</div>
 </section>

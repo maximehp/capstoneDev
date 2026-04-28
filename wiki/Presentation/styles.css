@@ -2527,6 +2527,181 @@ body[data-theme="development"] {
   border: 1px solid rgba(160, 180, 200, 0.18);
 }
 
+/* ── Packer Build Pipeline (slide 33) ──────────────────────── */
+
+.pkr-body {
+  position: relative;
+  min-height: 440px;
+}
+
+.pkr-body .tight-list {
+  width: calc(100% - 490px - 24px);
+}
+
+.pkr-pipeline {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 470px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pkr-step {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  border-top: 2px solid rgba(var(--accent-rgb), 0.4);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.025));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: iac-step-pulse 8s ease-out infinite;
+  animation-delay: var(--pkr-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.pkr-step-trigger {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  border-top-color: rgba(var(--accent-rgb), 0.75);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.16), rgba(255, 255, 255, 0.03));
+}
+
+.pkr-step-trigger::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.pkr-step-template {
+  border-color: rgba(245, 200, 66, 0.4);
+  border-top-color: rgba(245, 200, 66, 0.7);
+  background: linear-gradient(180deg, rgba(245, 200, 66, 0.1), rgba(255, 255, 255, 0.02));
+  animation-name: pkr-gold-pulse;
+}
+
+.pkr-step-content {
+  flex: 1;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.pkr-step-content strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.4em;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.pkr-step-content span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.3em;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.pkr-emblem {
+  flex: 0 0 48px;
+  align-self: stretch;
+  border-left: 1px solid rgba(var(--accent-rgb), 0.2);
+  background-color: rgba(var(--accent-rgb), 0.14);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 54% 54%;
+}
+
+.pkr-emblem-cdrom {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='white' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='white'/%3E%3C/svg%3E");
+}
+
+.pkr-emblem-ssh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpolyline points='10,22 26,32 10,42' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='32' y1='42' x2='54' y2='42' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.pkr-emblem-key {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='22' cy='28' r='12' fill='none' stroke='white' stroke-width='3.5'/%3E%3Cpath d='M34 28 H56 M48 28 V37 M42 28 V34' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.pkr-emblem-template {
+  border-left-color: rgba(245, 200, 66, 0.3);
+  background-color: rgba(245, 200, 66, 0.16);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpolygon points='32,5 38,23 58,23 43,35 49,53 32,42 15,53 21,35 6,23 26,23' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Vertical connector between steps */
+.pkr-conn {
+  flex: 0 0 26px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.pkr-conn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.55));
+}
+
+.pkr-conn-gold::before {
+  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.4), rgba(245, 200, 66, 0.55));
+}
+
+/* Traveling dot — reuses iac-dot-v-step keyframe, slower cycle */
+.pkr-dot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: iac-dot-v-step 8s linear infinite;
+  animation-delay: var(--pkr-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.pkr-dot-gold {
+  background: rgb(245, 200, 66);
+  box-shadow: 0 0 6px rgba(245, 200, 66, 0.9), 0 0 12px rgba(245, 200, 66, 0.5);
+}
+
+@keyframes pkr-gold-pulse {
+  0%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+  4%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+                     0 0 18px rgba(245, 200, 66, 0.55),
+                     0 0 36px rgba(245, 200, 66, 0.18); }
+  22%  { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+  100% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+}
+
+/* ── End Packer Diagram ─────────────────────────────────────── */
+
 .bucket-diagram div {
   border: 1px solid var(--accent-strong);
   background: var(--accent-soft);
