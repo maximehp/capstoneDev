@@ -1506,7 +1506,7 @@ body[data-theme="development"] {
 /* Diagram sits at the right edge; text fills from left to the steps column */
 .iac-body {
   position: relative;
-  min-height: 510px;
+  min-height: 425px;
 }
 
 .iac-lead {
@@ -1533,9 +1533,57 @@ body[data-theme="development"] {
   column-gap: 0;
 }
 
-/* Tighter step card in the vertical layout */
+/* Step card uses flex row: text on left, emblem strip on right */
 .iac-diagram-v .iac-step {
-  padding: 12px 10px 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+/* Text content inside the step card */
+.iac-step-content {
+  flex: 1;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Full-height emblem strip on the right */
+.iac-step-emblem {
+  flex: 0 0 44px;
+  align-self: stretch;
+  border-radius: 0;
+  border: none;
+  border-left: 1px solid rgba(var(--accent-rgb), 0.2);
+  background-color: rgba(var(--accent-rgb), 0.16);
+  margin: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 55% 55%;
+}
+
+.iac-emblem-forgejo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='16' cy='44' r='7' fill='white'/%3E%3Ccircle cx='16' cy='16' r='7' fill='white'/%3E%3Ccircle cx='44' cy='16' r='7' fill='white'/%3E%3Cline x1='16' y1='37' x2='16' y2='23' stroke='white' stroke-width='4'/%3E%3Cpath d='M16,30 Q22,16 44,16' stroke='white' stroke-width='4' fill='none'/%3E%3C/svg%3E");
+}
+
+.iac-emblem-runner {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpolygon points='14,10 14,50 50,30' fill='white'/%3E%3C/svg%3E");
+}
+
+.iac-emblem-packer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect x='8' y='40' width='44' height='11' rx='3' fill='white' opacity='.4'/%3E%3Crect x='8' y='26' width='44' height='11' rx='3' fill='white' opacity='.7'/%3E%3Crect x='8' y='12' width='44' height='11' rx='3' fill='white'/%3E%3C/svg%3E");
+}
+
+.iac-emblem-terraform {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect x='8' y='8' width='44' height='17' rx='3' fill='white'/%3E%3Crect x='8' y='30' width='44' height='17' rx='3' fill='white' opacity='.65'/%3E%3Crect x='8' y='52' width='22' height='6' rx='2' fill='white' opacity='.35'/%3E%3C/svg%3E");
+}
+
+.iac-emblem-ansible {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='11' fill='none' stroke='white' stroke-width='4'/%3E%3Ccircle cx='30' cy='30' r='5' fill='white'/%3E%3Crect x='27' y='5' width='6' height='12' rx='3' fill='white'/%3E%3Crect x='27' y='43' width='6' height='12' rx='3' fill='white'/%3E%3Crect x='5' y='27' width='12' height='6' rx='3' fill='white'/%3E%3Crect x='43' y='27' width='12' height='6' rx='3' fill='white'/%3E%3C/svg%3E");
 }
 
 /* MinIO file items stacked vertically to fit the 210px column */
@@ -2110,18 +2158,202 @@ body[data-theme="development"] {
   font-weight: 800;
 }
 
-.data-split {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+/* Three-way data split diagram */
+.tws-diagram {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 16px;
+  min-height: 460px;
 }
 
-.data-split div {
-  min-height: 210px;
+/* Left: Forgejo source-of-truth card */
+.tws-source-card {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding: 32px 22px;
   border: 1px solid var(--accent-line);
-  background: var(--accent-soft);
-  border-radius: 8px;
-  padding: 24px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255,255,255,0.02));
+}
+
+/* Center: arrow connector */
+.tws-arrow {
+  flex: 0 0 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tws-arrow-track {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.tws-arrow-shaft {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, rgba(var(--accent-rgb), 0.4), rgba(var(--accent-rgb), 0.75));
+}
+
+.tws-arrow-head {
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 9px solid rgba(var(--accent-rgb), 0.75);
+}
+
+.tws-arrow-label {
+  color: rgba(var(--accent-rgb), 0.65);
+  font-size: 0.2em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Right: VM container */
+.tws-vm {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--accent-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.tws-vm-label {
+  flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.14), rgba(var(--accent-rgb), 0.06));
+  border-bottom: 1px solid var(--accent-line);
+  padding: 7px 18px;
+  font-size: 0.26em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(var(--accent-rgb), 0.8);
+}
+
+.tws-vm-disks {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Boot and data disk panels */
+.tws-disk {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 28px 24px;
+  gap: 12px;
+}
+
+.tws-disk-boot {
+  background: linear-gradient(180deg, rgba(245, 166, 35, 0.07), rgba(255,255,255,0.01));
+}
+
+.tws-disk-data {
+  background: linear-gradient(180deg, rgba(76, 218, 122, 0.07), rgba(255,255,255,0.01));
+}
+
+.tws-vm-divider {
+  flex: 0 0 1px;
+  background: var(--accent-line);
+  align-self: stretch;
+  margin: 16px 0;
+}
+
+/* Shared emblem icon */
+.tws-emblem {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  background-color: rgba(var(--accent-rgb), 0.12);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 62% 62%;
+  flex-shrink: 0;
+}
+
+.tws-emblem-forgejo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='16' cy='44' r='7' fill='white'/%3E%3Ccircle cx='16' cy='16' r='7' fill='white'/%3E%3Ccircle cx='44' cy='16' r='7' fill='white'/%3E%3Cline x1='16' y1='37' x2='16' y2='23' stroke='white' stroke-width='4'/%3E%3Cpath d='M16,30 Q22,16 44,16' stroke='white' stroke-width='4' fill='none'/%3E%3C/svg%3E");
+}
+
+.tws-emblem-boot {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpath d='M30,8 A22,22 0 1,1 8,30' stroke='white' stroke-width='5' fill='none' stroke-linecap='round'/%3E%3Cpolygon points='4,28 12,28 8,38' fill='white'/%3E%3C/svg%3E");
+}
+
+.tws-emblem-data {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cellipse cx='30' cy='14' rx='20' ry='7' fill='white'/%3E%3Crect x='10' y='14' width='40' height='14' fill='white' opacity='.7'/%3E%3Cellipse cx='30' cy='28' rx='20' ry='7' fill='white' opacity='.7'/%3E%3Crect x='10' y='28' width='40' height='14' fill='white' opacity='.45'/%3E%3Cellipse cx='30' cy='42' rx='20' ry='7' fill='white' opacity='.45'/%3E%3C/svg%3E");
+}
+
+/* Typography inside cards */
+.tws-title {
+  color: var(--text);
+  font-size: 0.4em;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.tws-desc {
+  color: var(--muted);
+  font-size: 0.28em;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 600;
+}
+
+.tws-note {
+  color: var(--muted);
+  font-size: 0.24em;
+  line-height: 1.55;
+  margin: 0;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Status badges */
+.tws-badge {
+  display: inline-block;
+  font-size: 0.24em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 13px;
+  border-radius: 20px;
+}
+
+.tws-badge-source {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: rgba(var(--accent-rgb), 0.9);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+}
+
+.tws-badge-ephemeral {
+  background: rgba(245, 166, 35, 0.14);
+  color: #f5a623;
+  border: 1px solid rgba(245, 166, 35, 0.28);
+}
+
+.tws-badge-persistent {
+  background: rgba(76, 218, 122, 0.12);
+  color: #4cda7a;
+  border: 1px solid rgba(76, 218, 122, 0.24);
 }
 
 .bucket-diagram div {

@@ -1,11 +1,53 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / Data Preservation</div>
   <h2>Three-way Data Split</h2>
-  <div class="data-split">
-    <div><h3>Forgejo</h3><p>Code and configuration source of truth.</p></div>
-    <div><h3>Boot Disk</h3><p>Ephemeral OS layer, destroyed and recreated by Terraform.</p></div>
-    <div><h3>Data Disk</h3><p>Persistent application and user data, preserved across rebuilds.</p></div>
+
+  <div class="tws-diagram">
+
+    <!-- Left: Forgejo — external source of truth -->
+    <div class="tws-source-card">
+      <div class="tws-emblem tws-emblem-forgejo"></div>
+      <h3 class="tws-title">Forgejo</h3>
+      <p class="tws-desc">Code and configuration — the source all rebuilds start from</p>
+      <span class="tws-badge tws-badge-source">Source of Truth</span>
+    </div>
+
+    <!-- Arrow connector -->
+    <div class="tws-arrow">
+      <div class="tws-arrow-track">
+        <div class="tws-arrow-shaft"></div>
+        <div class="tws-arrow-head"></div>
+      </div>
+      <span class="tws-arrow-label">triggers rebuild</span>
+    </div>
+
+    <!-- Right: VM container with two disk panels -->
+    <div class="tws-vm">
+      <div class="tws-vm-label">Virtual Machine</div>
+      <div class="tws-vm-disks">
+
+        <div class="tws-disk tws-disk-boot">
+          <div class="tws-emblem tws-emblem-boot"></div>
+          <h3 class="tws-title">Boot Disk</h3>
+          <p class="tws-desc">Ephemeral OS layer</p>
+          <span class="tws-badge tws-badge-ephemeral">↻ Recreated</span>
+          <p class="tws-note">Destroyed and reprovisioned by Terraform on every pipeline run</p>
+        </div>
+
+        <div class="tws-vm-divider"></div>
+
+        <div class="tws-disk tws-disk-data">
+          <div class="tws-emblem tws-emblem-data"></div>
+          <h3 class="tws-title">Data Disk</h3>
+          <p class="tws-desc">Persistent application data</p>
+          <span class="tws-badge tws-badge-persistent">✓ Preserved</span>
+          <p class="tws-note">Survives all rebuilds — application state and user data remain intact</p>
+        </div>
+
+      </div>
+    </div>
+
   </div>
-  <p class="lead compact">This design allows the OS layer to be rebuilt without losing the data stored on the persistent disk.</p>
+
   <div class="speaker">Speaker: Liam Callahan</div>
 </section>
