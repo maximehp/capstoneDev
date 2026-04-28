@@ -559,27 +559,91 @@ body[data-theme="development"] {
 }
 
 .rack-diagram {
-  border: 1px solid var(--line);
-  background: #081321;
-  border-radius: 8px;
-  padding: 14px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(180deg, #081321, #07121f);
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: grid;
+  gap: 10px;
+  overflow: hidden;
+}
+
+
+.rack-section {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.rack-section-head {
+  color: #81d5ff;
+  font-size: 0.28em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  margin: 0;
+}
+
+.rack-section.network,
+.rack-section.proxmox,
+.rack-section.storage,
+.rack-section.sandbox,
+.rack-section.dedicated {
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.08);
+  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.18);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.rack-section-head {
+  color: var(--current-accent, var(--rose));
 }
 
 .rack-unit {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.14), rgba(255, 255, 255, 0.05));
-  border-radius: 6px;
-  margin: 10px 0;
-  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border-radius: 8px;
+  margin: 0;
+  padding: 12px 12px;
   color: #eef8ff;
-  font-size: 0.34em;
+  font-size: 0.32em;
   font-weight: 700;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  width: 100%;
+  min-width: 0;
+  word-break: break-word;
 }
 
-.rack-unit.accent { border-color: var(--accent-strong); }
-.rack-unit.storage { border-color: var(--accent-line); }
+.rack-unit.accent { border-color: rgba(var(--current-accent-rgb, 69, 216, 255), 0.55); }
+.rack-unit.storage { border-color: rgba(117, 240, 160, 0.46); }
 .rack-unit.muted { color: var(--muted); }
+
+.rack-unit.cluster-item {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .rack-diagram {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .rack-unit {
+    font-size: 0.3em;
+    min-height: 44px;
+    padding: 10px 10px;
+  }
+}
 
 .card-grid {
   display: grid;

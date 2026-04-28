@@ -6,19 +6,32 @@
       <ul class="tight-list">
         <li>Inherited a rack environment at the start of the semester.</li>
         <li>Core networking provided by two Layer 3 switches named Bessie.</li>
-        <li>Proxmox cluster used Amy and Farnsworth as controllers with seven compute hosts: Fry, Leela, Bender, Hermes, Zoidberg, Scruffy, and Nibbler.</li>
+        <li>Proxmox cluster used Amy and Farnsworth as controllers alongside seven compute hosts: Fry, Leela, Bender, Hermes, Zoidberg, Scruffy, and Nibbler.</li>
         <li>Kif operated separately as a dedicated build and development node.</li>
         <li>Three TrueNAS systems - HypnoToad, Calculon, and Mom - provided pipeline storage.</li>
         <li>VMID ranges were assigned per group to prevent provisioning conflicts.</li>
       </ul>
     </div>
     <div class="rack-diagram">
-      <div class="rack-unit accent">Bessie L3 Switches</div>
-      <div class="rack-unit">Amy / Farnsworth Controllers</div>
-      <div class="rack-unit">7 Compute Hosts</div>
-      <div class="rack-unit storage">3 TrueNAS Units</div>
-      <div class="rack-unit muted">Kif Build Node + KVM + Domain Controller</div>
-    </div>
+      <div class="rack-section network">
+        <div class="rack-section-head">Network</div>
+        <div class="rack-unit accent">Bessie L3 Switches</div>
+      </div>
+      <div class="rack-section sandbox">
+        <div class="rack-section-head">Sandbox Cluster</div>
+        <div class="rack-unit build-node">Kif & Zapp</div>
+      </div>
+
+      <div class="rack-section proxmox">
+        <div class="rack-section-head">Proxmox Cluster</div>
+        <div class="rack-unit cluster-item">Amy / Farnsworth Controllers</div>
+        <div class="rack-unit cluster-item">7 Compute Hosts</div>
+      </div>
+
+      <div class="rack-section storage">
+        <div class="rack-section-head">Storage</div>
+        <div class="rack-unit storage">3 TrueNAS Units</div>
+      </div>
   </div>
   <div class="speaker">Speaker: Liam Callahan</div>
 </section>
