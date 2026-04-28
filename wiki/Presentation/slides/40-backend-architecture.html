@@ -1,0 +1,18 @@
+<section>
+  <div class="slide-kicker">Development / Backend + System</div>
+  <h2>Backend Architecture</h2>
+  <div class="backend-map">
+    <div class="backend-node web">Django Web</div>
+    <div class="backend-node db">PostgreSQL</div>
+    <div class="backend-node worker">Packer Worker</div>
+    <div class="backend-node fs">Shared Filesystem</div>
+    <div class="backend-node ext">AD / Proxmox / NAS</div>
+  </div>
+  <ul class="two-column-list">
+    <li>Django 6 monolith with a single core application.</li>
+    <li>Web process handles requests while packer-worker handles long-running builds.</li>
+    <li>Shared database stores system state and job tracking.</li>
+    <li>Shared filesystem stores job artifacts, logs, and ISO files.</li>
+  </ul>
+  <div class="speaker">Speaker: Maxime Hendryx-Parker</div>
+</section>

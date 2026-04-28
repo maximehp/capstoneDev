@@ -1,0 +1,11 @@
+<section>
+  <div class="slide-kicker">Infrastructure - IaC / Data Preservation</div>
+  <h2>Three-way Data Split</h2>
+  <div class="data-split">
+    <div><h3>Forgejo</h3><p>Code and configuration source of truth.</p></div>
+    <div><h3>Boot Disk</h3><p>Ephemeral OS layer, destroyed and recreated by Terraform.</p></div>
+    <div><h3>Data Disk</h3><p>Persistent application and user data, preserved across rebuilds.</p></div>
+  </div>
+  <p class="lead compact">This design allows the OS layer to be rebuilt without losing the data stored on the persistent disk.</p>
+  <div class="speaker">Speaker: Liam Callahan</div>
+</section>

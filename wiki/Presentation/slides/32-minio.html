@@ -1,0 +1,19 @@
+<section>
+  <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
+  <h2>MinIO</h2>
+  <div class="split-layout">
+    <ul class="tight-list">
+      <li>MinIO is a self-hosted S3-compatible object store running on TrueNAS.</li>
+      <li>Stores Terraform state files as the remote backend.</li>
+      <li>Stores <code>vm_info.json</code> for Ansible to consume after provisioning.</li>
+      <li>Decouples Terraform and Ansible so they do not need to run in the same job.</li>
+    </ul>
+    <div class="bucket-diagram">
+      <div>MinIO Bucket</div>
+      <span>terraform.tfstate</span>
+      <span>vm_info.json</span>
+      <span>Pipeline artifacts</span>
+    </div>
+  </div>
+  <div class="speaker">Speaker: Liam Callahan</div>
+</section>

@@ -1,0 +1,20 @@
+<section>
+  <div class="slide-kicker">Development / Frontend + UI</div>
+  <h2>Frontend Architecture</h2>
+  <div class="split-layout">
+    <ul class="tight-list">
+      <li>Server-rendered Django templates are the source of truth for page HTML.</li>
+      <li>Frontend uses vanilla JavaScript and CSS with no framework.</li>
+      <li>Partial navigation uses fetch requests with <code>X-Requested-With</code> headers.</li>
+      <li>Page updates replace <code>#app-content</code> and page-specific assets dynamically.</li>
+      <li>Theme system supports light, dark, and system modes.</li>
+    </ul>
+    <div class="browser-diagram">
+      <div>Browser</div>
+      <div>Django Templates</div>
+      <div>Partial Fetch</div>
+      <div>DOM Update</div>
+    </div>
+  </div>
+  <div class="speaker">Speaker: Maxime Hendryx-Parker</div>
+</section>

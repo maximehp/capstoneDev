@@ -1,0 +1,18 @@
+<section>
+  <div class="slide-kicker">Development / Backend + API</div>
+  <h2>API Flow & Execution</h2>
+  <div class="sequence">
+    <span>Frontend</span>
+    <span>JSON API + CSRF</span>
+    <span>Database Job</span>
+    <span>Worker</span>
+    <span>Proxmox Clone + Start</span>
+  </div>
+  <ul class="tight-list">
+    <li>REST-style JSON API powers frontend interactions.</li>
+    <li>Template creation validates input and queues an async build job.</li>
+    <li>API returns HTTP 202 while the worker processes the build in the background.</li>
+    <li>Status endpoint provides live build progress updates.</li>
+  </ul>
+  <div class="speaker">Speaker: Maxime Hendryx-Parker</div>
+</section>

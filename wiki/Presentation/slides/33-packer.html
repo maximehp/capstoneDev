@@ -1,0 +1,18 @@
+<section>
+  <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
+  <h2>Packer</h2>
+  <div class="pipeline">
+    <span>ISO + boot commands</span>
+    <span>Packer SSH key</span>
+    <span>Provision common agents</span>
+    <span>Inject Ansible key</span>
+    <span>Golden template</span>
+  </div>
+  <ul class="tight-list">
+    <li>Builds a pre-configured VM template cloned by later stages.</li>
+    <li>Uses a CDROM during build to run boot commands and inject the Packer SSH key.</li>
+    <li>Removes the Packer key and leaves the Ansible key for finished VMs.</li>
+    <li>Bakes in qemu-guest-agent, Docker, and common software.</li>
+  </ul>
+  <div class="speaker">Speaker: Liam Callahan</div>
+</section>

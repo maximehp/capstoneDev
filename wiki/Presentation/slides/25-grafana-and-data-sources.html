@@ -1,0 +1,18 @@
+<section>
+  <div class="slide-kicker">Monitoring / Grafana</div>
+  <h2>Grafana & Data Sources</h2>
+  <div class="split-layout">
+    <ul class="tight-list">
+      <li>Grafana visualizes raw data from exporters and data sources.</li>
+      <li>Installed on Ubuntu Server 24.04.3 on a VM located on Amy.</li>
+      <li>Accessible at <code>http://172.27.85.4:3000</code> when the service is running.</li>
+      <li>Prometheus acts as the primary metrics source; OpenSearch was considered as an indexed data source option.</li>
+    </ul>
+    <div class="command-card">
+      <code>systemctl start grafana-server</code>
+      <code>systemctl status grafana-server</code>
+      <code>systemctl restart grafana-server</code>
+    </div>
+  </div>
+  <div class="speaker">Speaker: Julius Lillard</div>
+</section>
