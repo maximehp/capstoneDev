@@ -177,7 +177,7 @@ function updateSpeakerOverlay() {
   speakerOverlay.textContent = speaker?.textContent || "";
   document.body.dataset.theme = themeClass?.replace("theme-", "") || "blue";
   document.body.classList.toggle("title-background-active", currentSlide?.classList.contains("title-slide"));
-  document.body.classList.toggle("overview-background-active", currentSlide?.classList.contains("overview-slide"));
+  document.body.classList.toggle("overview-background-active", currentSlide?.classList.contains("overview-slide") || currentSlide?.classList.contains("vanta-fade-slide"));
   document.body.classList.toggle("infrastructure-title-active", currentSlide?.classList.contains("infra"));
 }
 

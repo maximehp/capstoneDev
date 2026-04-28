@@ -1,19 +1,64 @@
-<section>
+<section class="vanta-fade-slide architecture-slide">
   <div class="slide-kicker">System Architecture</div>
   <h2>How the Pieces Connect</h2>
-  <div class="architecture-map">
-    <div class="arch-node core">Proxmox Cluster<br /><small>Amy, Farnsworth, compute nodes</small></div>
-    <div class="arch-node storage">TrueNAS Storage<br /><small>HypnoToad, Calculon, Mom</small></div>
-    <div class="arch-node network">Network Fabric<br /><small>Bessie L3 switches, VLANs, /21</small></div>
-    <div class="arch-node security">Security Stack<br /><small>Wazuh, Graylog, MISP, Shuffle, OPNsense</small></div>
-    <div class="arch-node monitor">Monitoring<br /><small>Nagios, Prometheus, Grafana</small></div>
-    <div class="arch-node iac">IaC Pipeline<br /><small>Forgejo, runners, Packer, Terraform, Ansible</small></div>
-    <div class="arch-node app">Django Web App<br /><small>Templates, builds, VM provisioning</small></div>
-    <div class="arch-line line-1"></div>
-    <div class="arch-line line-2"></div>
-    <div class="arch-line line-3"></div>
-    <div class="arch-line line-4"></div>
-    <div class="arch-line line-5"></div>
+  <div class="architecture-map" aria-label="Layered system architecture diagram">
+    <div class="architecture-flow">
+      <div class="architecture-tier">
+        <div class="tier-label">User-facing orchestration</div>
+        <div class="tier-nodes single">
+          <div class="architecture-card app">
+            <strong>Django Web App</strong>
+            <span>Templates, builds, VM provisioning</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="architecture-tier">
+        <div class="tier-label">Automation, security, observability</div>
+        <div class="tier-nodes three">
+          <div class="architecture-card automation">
+            <strong>IaC Pipeline</strong>
+            <span>Forgejo, runners, Packer, Terraform, Ansible</span>
+          </div>
+          <div class="architecture-card security">
+            <strong>Security Stack</strong>
+            <span>Wazuh, Graylog, MISP, Shuffle, OPNsense</span>
+          </div>
+          <div class="architecture-card monitor">
+            <strong>Monitoring</strong>
+            <span>Nagios, Prometheus, Grafana</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="architecture-tier">
+        <div class="tier-label">Network and data plane</div>
+        <div class="tier-nodes two">
+          <div class="architecture-card network">
+            <strong>Network Fabric</strong>
+            <span>Bessie L3 switches, VLANs, /21</span>
+          </div>
+          <div class="architecture-card storage">
+            <strong>TrueNAS Storage</strong>
+            <span>HypnoToad, Calculon, Mom</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="architecture-tier">
+        <div class="tier-label">Compute foundation</div>
+        <div class="tier-nodes single">
+          <div class="architecture-card core">
+            <strong>Proxmox Cluster</strong>
+            <span>Amy, Farnsworth, compute nodes</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-callout request">template and VM requests</div>
+      <div class="flow-callout build">builds, provisions, observes</div>
+      <div class="flow-callout data">lab traffic, ISO media, VM data</div>
+    </div>
   </div>
   <div class="speaker">Opening speaker: team lead or panel moderator</div>
 </section>
