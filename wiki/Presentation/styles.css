@@ -239,6 +239,34 @@ body[data-theme="development"] {
   height: 100% !important;
 }
 
+#infrastructure-vanta-background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200vw;
+  height: 200vh;
+  z-index: -1;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 700ms ease;
+}
+
+[data-theme="infrastructure"] #infrastructure-vanta-background {
+  opacity: 0.3;
+}
+
+[data-theme="infrastructure"].infrastructure-title-active #infrastructure-vanta-background {
+  opacity: 1;
+}
+
+#infrastructure-vanta-background canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .title-slide {
   position: relative;
   display: flex !important;
@@ -544,6 +572,10 @@ body[data-theme="development"] {
 
 .section-break {
   background: radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.26), transparent 36%), var(--bg);
+}
+
+.section-break.infra {
+  background: transparent;
 }
 
 .tight-list {

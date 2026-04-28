@@ -103,6 +103,7 @@ deck.initialize();
 window.deck = deck;
 
 let titleVanta;
+let infrastructureVanta;
 
 function initTitleBackground() {
   if (titleVanta) {
@@ -134,6 +135,38 @@ function initTitleBackground() {
   titleVanta.resize?.();
 }
 
+function initInfrastructureBackground() {
+  if (infrastructureVanta) {
+    return;
+  }
+
+  const infrastructureBackground = document.getElementById("infrastructure-vanta-background");
+
+  if (!infrastructureBackground || !window.VANTA?.BIRDS || !window.THREE) {
+    return;
+  }
+
+  infrastructureVanta = window.VANTA.BIRDS({
+    el: infrastructureBackground,
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    colorMode: "variance",
+    wingSpan: 25.00,
+    speedLimit: 2.00,
+    separation: 67.00,
+    alignment: 35.00,
+    cohesion: 17.00,
+    quantity: 3.00
+  });
+
+  infrastructureVanta.resize?.();
+}
+
 const speakerOverlay = document.getElementById("speaker-overlay");
 
 function updateSpeakerOverlay() {
@@ -145,17 +178,23 @@ function updateSpeakerOverlay() {
   document.body.dataset.theme = themeClass?.replace("theme-", "") || "blue";
   document.body.classList.toggle("title-background-active", currentSlide?.classList.contains("title-slide"));
   document.body.classList.toggle("overview-background-active", currentSlide?.classList.contains("overview-slide"));
+  document.body.classList.toggle("infrastructure-title-active", currentSlide?.classList.contains("infra"));
 }
 
 deck.on("ready", () => {
   updateSpeakerOverlay();
   initTitleBackground();
+  initInfrastructureBackground();
 });
 deck.on("slidechanged", updateSpeakerOverlay);
-deck.on("resize", () => titleVanta?.resize?.());
+deck.on("resize", () => {
+  titleVanta?.resize?.();
+  infrastructureVanta?.resize?.();
+});
 updateSpeakerOverlay();
 requestAnimationFrame(() => {
   initTitleBackground();
+  initInfrastructureBackground();
   updateSpeakerOverlay();
   titleVanta?.resize?.();
 });
