@@ -1,12 +1,81 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
   <h2>IaC: Full Pipeline</h2>
-  <div class="timeline">
-    <div><strong>1</strong><span>Packer builds golden image</span></div>
-    <div><strong>2</strong><span>Terraform provisions VMs</span></div>
-    <div><strong>3</strong><span>Ansible configures roles</span></div>
-    <div><strong>4</strong><span>deploy-all orchestrates sequence</span></div>
+  <div class="iac-body">
+
+    <p class="iac-lead">One trigger rebuilds the entire environment — from a clean state to fully configured VMs.</p>
+
+    <div class="iac-diagram-v">
+
+      <!-- MinIO anchored bottom-left, rows 7–9 -->
+      <div class="iac-minio" style="grid-column:1;grid-row:7/10;--iac-delay:3.6s">
+        <div class="iac-minio-header">MinIO</div>
+        <div class="iac-minio-files">
+          <div class="iac-minio-file">
+            <code>terraform.tfstate</code>
+            <small>Remote state backend</small>
+          </div>
+          <div class="iac-minio-file">
+            <code>vm_info.json</code>
+            <small>VM inventory for Ansible</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terraform → MinIO write connector -->
+      <div class="iac-conn-h iac-conn-h-write" style="grid-column:2;grid-row:7">
+        <span class="iac-label">writes</span>
+        <span class="iac-dot iac-dot-minio-rev" style="--iac-delay:3.2s"></span>
+      </div>
+
+      <!-- MinIO → Ansible read connector -->
+      <div class="iac-conn-h iac-conn-h-read" style="grid-column:2;grid-row:9">
+        <span class="iac-label">reads</span>
+        <span class="iac-dot iac-dot-minio" style="--iac-delay:4.1s"></span>
+      </div>
+
+      <div class="iac-step iac-step-trigger" style="grid-column:3;grid-row:1;--iac-delay:0s">
+        <strong>Forgejo</strong>
+        <span>Push or schedule triggers the runner</span>
+      </div>
+
+      <div class="iac-conn-v" style="grid-column:3;grid-row:2">
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:0.5s"></span>
+      </div>
+
+      <div class="iac-step" style="grid-column:3;grid-row:3;--iac-delay:0.9s">
+        <strong>Act Runner</strong>
+        <span>Executes the CI/CD workflow job</span>
+      </div>
+
+      <div class="iac-conn-v" style="grid-column:3;grid-row:4">
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:1.4s"></span>
+      </div>
+
+      <div class="iac-step" style="grid-column:3;grid-row:5;--iac-delay:1.8s">
+        <strong>Packer</strong>
+        <span>Builds the golden VM template</span>
+      </div>
+
+      <div class="iac-conn-v" style="grid-column:3;grid-row:6">
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:2.3s"></span>
+      </div>
+
+      <div class="iac-step" style="grid-column:3;grid-row:7;--iac-delay:2.7s">
+        <strong>Terraform</strong>
+        <span>Clones template and provisions VMs</span>
+      </div>
+
+      <div class="iac-conn-v" style="grid-column:3;grid-row:8">
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:3.9s"></span>
+      </div>
+
+      <div class="iac-step" style="grid-column:3;grid-row:9;--iac-delay:4.5s">
+        <strong>Ansible</strong>
+        <span>Applies configuration and roles</span>
+      </div>
+
+    </div>
   </div>
-  <p class="lead compact">The goal is one trigger that rebuilds the environment from a clean state to fully configured VMs.</p>
   <div class="speaker">Speaker: Liam Callahan</div>
 </section>

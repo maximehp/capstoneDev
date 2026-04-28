@@ -1,17 +1,29 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / CI-CD</div>
   <h2>Forgejo & Runners</h2>
-  <div class="split-layout">
+  <div class="split-layout forgejo-split">
     <ul class="tight-list">
       <li>Forgejo acts as the self-hosted Git source of truth.</li>
       <li>Act Runners execute workflows triggered by Forgejo events.</li>
       <li>Secrets and variables are injected at runtime through Forgejo secret management.</li>
       <li>ChirpLabs was designed as a shared environment with team isolation in repos, NAS datasets, secrets, and variables.</li>
     </ul>
-    <div class="source-worker">
-      <div>Forgejo<br /><small>Source of truth</small></div>
-      <div>Act Runners<br /><small>Workflow execution</small></div>
-      <div>Secrets + Variables<br /><small>Runtime injection</small></div>
+    <div class="forgejo-overview">
+      <div class="forgejo-card">
+        <div class="forgejo-emblem forgejo-emblem-git"></div>
+        <h3>Forgejo</h3>
+        <p>Self-hosted Git platform serving as the source of truth for all repositories and CI/CD triggers.</p>
+      </div>
+      <div class="forgejo-card">
+        <div class="forgejo-emblem forgejo-emblem-runner"></div>
+        <h3>Act Runners</h3>
+        <p>Container-based workflow executors that run CI/CD jobs triggered by Forgejo events.</p>
+      </div>
+      <div class="forgejo-card">
+        <div class="forgejo-emblem forgejo-emblem-secrets"></div>
+        <h3>Secrets & Variables</h3>
+        <p>Secure runtime injection of encrypted secrets and environment variables for workflows.</p>
+      </div>
     </div>
   </div>
   <div class="speaker">Speaker: Liam Callahan</div>

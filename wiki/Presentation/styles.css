@@ -1155,6 +1155,566 @@ body[data-theme="development"] {
   }
 }
 
+/* Align split-layout columns to the top for the forgejo slide */
+.forgejo-split {
+  align-items: start;
+}
+
+/* Stack cards vertically in the right column */
+.forgejo-overview {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* Horizontal card: icon left, title + description right */
+.forgejo-card {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "icon title"
+    "icon desc";
+  column-gap: 16px;
+  row-gap: 4px;
+  background: linear-gradient(160deg, rgba(var(--accent-rgb, 255, 111, 125), 0.09), rgba(255, 255, 255, 0.025));
+  border: 1px solid rgba(var(--accent-rgb, 255, 111, 125), 0.26);
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+/* Icon container */
+.forgejo-emblem {
+  grid-area: icon;
+  align-self: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  position: relative;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--accent-rgb, 255, 111, 125), 0.28);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb, 255, 111, 125), 0.2);
+}
+
+/* Git/Repository Emblem - git branch icon */
+.forgejo-emblem-git {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='20' cy='46' r='7' fill='white'/%3E%3Ccircle cx='20' cy='14' r='7' fill='white'/%3E%3Ccircle cx='40' cy='14' r='7' fill='white'/%3E%3Cline x1='20' y1='39' x2='20' y2='21' stroke='white' stroke-width='3.5'/%3E%3Cpath d='M20,32 Q30,20 40,21' stroke='white' stroke-width='3.5' fill='none'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(var(--accent-rgb, 255, 111, 125), 0.3), rgba(var(--accent-rgb, 255, 111, 125), 0.14));
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 75% 75%, 100% 100%;
+}
+
+.forgejo-emblem-git::before,
+.forgejo-emblem-git::after {
+  display: none;
+}
+
+/* Runner/Execute Emblem - play button icon */
+.forgejo-emblem-runner {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Cpolygon points='16,10 16,50 50,30' fill='white'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(var(--accent-rgb, 255, 111, 125), 0.3), rgba(var(--accent-rgb, 255, 111, 125), 0.14));
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 75% 75%, 100% 100%;
+}
+
+.forgejo-emblem-runner::before,
+.forgejo-emblem-runner::after {
+  display: none;
+}
+
+/* Secrets/Lock Emblem - padlock icon */
+.forgejo-emblem-secrets {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect x='12' y='28' width='36' height='24' rx='4' fill='white'/%3E%3Cpath d='M18,28 V18 C18,8 42,8 42,18 V28' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(var(--accent-rgb, 255, 111, 125), 0.3), rgba(var(--accent-rgb, 255, 111, 125), 0.14));
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, center;
+  background-size: 75% 75%, 100% 100%;
+}
+
+.forgejo-emblem-secrets::before,
+.forgejo-emblem-secrets::after {
+  display: none;
+}
+
+/* Card title uses the section accent color */
+.forgejo-card h3 {
+  grid-area: title;
+  align-self: end;
+  color: var(--accent);
+  font-size: 0.54em;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* Card description uses the standard muted color */
+.forgejo-card p {
+  grid-area: desc;
+  align-self: start;
+  color: var(--muted);
+  font-size: 0.36em;
+  line-height: 1.4;
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (max-width: 920px) {
+  .forgejo-overview {
+    gap: 10px;
+  }
+
+  .forgejo-card {
+    grid-template-columns: 36px 1fr;
+    column-gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .forgejo-emblem {
+    width: 36px;
+    height: 36px;
+  }
+
+  .forgejo-card h3 {
+    font-size: 0.48em;
+  }
+
+  .forgejo-card p {
+    font-size: 0.32em;
+  }
+}
+
+
+/* ── IaC Full Pipeline Diagram ─────────────────────────────────────────── */
+
+.iac-diagram {
+  display: grid;
+  grid-template-columns: 1fr 28px 1fr 28px 1fr 28px 1fr 28px 1fr;
+  row-gap: 6px;
+  column-gap: 0;
+  margin: 0 0 4px;
+}
+
+/* Pipeline step card */
+.iac-step {
+  position: relative;
+  border: 1px solid var(--accent-line);
+  border-top: 2px solid rgba(var(--accent-rgb), 0.35);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.025));
+  border-radius: 8px;
+  padding: 18px 12px 14px;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  animation: iac-step-pulse 6s ease-out infinite;
+  animation-delay: var(--iac-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.iac-step strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.38em;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.iac-step span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.26em;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+/* Forgejo trigger: brighter border + glowing dot to mark it as the entry point */
+.iac-step-trigger {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  border-top-color: rgba(var(--accent-rgb), 0.75);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.16), rgba(255, 255, 255, 0.03));
+}
+
+.iac-step-trigger::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* Horizontal arrow between steps */
+.iac-arrow-h {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.iac-arrow-h::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  transform: translateY(-50%);
+  background: linear-gradient(to right, rgba(var(--accent-rgb), 0.22), rgba(var(--accent-rgb), 0.52));
+}
+
+.iac-arrow-h::after {
+  content: none;
+}
+
+/* Vertical connector base */
+.iac-connector {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+}
+
+/* Label text floats over the connector line */
+.iac-connector .iac-label,
+.iac-conn-h .iac-label {
+  position: relative;
+  z-index: 1;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  padding: 2px 8px;
+  border-radius: 20px;
+  color: rgba(var(--accent-rgb), 0.9);
+  font-size: 0.23em;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+/* Horizontal connector labels fit a narrower column */
+.iac-conn-h .iac-label {
+  font-size: 0.2em;
+  padding: 1px 5px;
+  letter-spacing: 0.06em;
+}
+
+/* Downward line: Terraform → MinIO (writes) */
+.iac-conn-write::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.6));
+}
+
+.iac-conn-write::after {
+  content: none;
+}
+
+/* Upward line: MinIO → Ansible (reads) */
+.iac-conn-read::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.6));
+}
+
+.iac-conn-read::after {
+  content: none;
+}
+
+/* MinIO storage panel */
+.iac-minio {
+  border: 1px solid var(--accent-strong);
+  background: linear-gradient(160deg, rgba(var(--accent-rgb), 0.12), rgba(255, 255, 255, 0.025));
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: iac-minio-pulse 6s ease-out infinite;
+  animation-delay: var(--iac-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.iac-minio-header {
+  color: var(--accent);
+  font-size: 0.34em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.iac-minio-files {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.iac-minio-file {
+  border: 1px solid var(--accent-line);
+  background: rgba(var(--accent-rgb), 0.07);
+  border-radius: 6px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+/* Override global .reveal code so it reads as a label, not an inline snippet */
+.iac-minio-file code {
+  display: block;
+  color: var(--accent);
+  font-size: 0.26em;
+  font-weight: 700;
+  margin-bottom: 3px;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.iac-minio-file small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.22em;
+  line-height: 1.3;
+  font-weight: 500;
+}
+
+/* ── IaC Diagram – vertical layout ─────────────────────────────────────── */
+
+/* Slide body: summary text left, vertical diagram right */
+.iac-slide-body {
+  display: grid;
+  grid-template-columns: 1fr 1.8fr;
+  gap: 32px;
+  align-items: start;
+  margin: 4px 0 0;
+}
+
+/* Diagram sits at the right edge; text fills from left to the steps column */
+.iac-body {
+  position: relative;
+  min-height: 510px;
+}
+
+.iac-lead {
+  display: block;
+  /* 340px = steps column width; 20px = cushion before Forgejo box */
+  width: calc(100% - 340px - 20px);
+  padding-right: 0;
+  color: #eaf5ff;
+  font-size: 0.46em;
+  line-height: 1.75;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Vertical pipeline grid: MinIO panel | connectors | steps */
+.iac-diagram-v {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: grid;
+  grid-template-columns: 210px 56px 340px;
+  grid-template-rows: auto 28px auto 28px auto 28px auto 28px auto;
+  row-gap: 0;
+  column-gap: 0;
+}
+
+/* Tighter step card in the vertical layout */
+.iac-diagram-v .iac-step {
+  padding: 12px 10px 10px;
+}
+
+/* MinIO file items stacked vertically to fit the 210px column */
+.iac-diagram-v .iac-minio-files {
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+/* Vertical connector between consecutive pipeline steps */
+.iac-conn-v {
+  position: relative;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.iac-conn-v::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, rgba(var(--accent-rgb), 0.28), rgba(var(--accent-rgb), 0.5));
+}
+
+/* Horizontal connector between step column and MinIO panel */
+.iac-conn-h {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iac-conn-h::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+/* Terraform → MinIO: dot travels right → left; brighter end on the MinIO (left) side */
+.iac-conn-h-write::before {
+  background: linear-gradient(to left, rgba(var(--accent-rgb), 0.25), rgba(var(--accent-rgb), 0.55));
+}
+
+/* MinIO → Ansible: dot travels left → right; brighter start on the MinIO (left) side */
+.iac-conn-h-read::before {
+  background: linear-gradient(to right, rgba(var(--accent-rgb), 0.55), rgba(var(--accent-rgb), 0.25));
+}
+
+/* ── IaC Diagram – traveling dot animations ────────────────────────────── */
+
+@keyframes iac-step-pulse {
+  0%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+  4%   { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+                     0 0 18px rgba(var(--accent-rgb), 0.55),
+                     0 0 36px rgba(var(--accent-rgb), 0.2); }
+  22%  { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+  100% { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03); }
+}
+
+@keyframes iac-minio-pulse {
+  0%   { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+  4%   { box-shadow: 0 0 28px rgba(var(--accent-rgb), 0.5),
+                     0 0 56px rgba(var(--accent-rgb), 0.2),
+                     inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+  22%  { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+  100% { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.04); }
+}
+
+/* Horizontal dot: left → right across the 28px arrow column */
+@keyframes iac-dot-h {
+  0%   { transform: translate(-4px, -50%); opacity: 0; }
+  3%   { transform: translate(0px,  -50%); opacity: 1; }
+  8%   { transform: translate(28px, -50%); opacity: 0; }
+  100% { transform: translate(-4px, -50%); opacity: 0; }
+}
+
+/* Vertical dot: top → bottom (Terraform writes to MinIO) */
+@keyframes iac-dot-v-down {
+  0%   { transform: translate(-50%, 0px);  opacity: 0; }
+  3%   { transform: translate(-50%, 4px);  opacity: 1; }
+  8%   { transform: translate(-50%, 40px); opacity: 0; }
+  100% { transform: translate(-50%, 0px);  opacity: 0; }
+}
+
+/* Vertical dot: bottom → top (MinIO feeds Ansible) */
+@keyframes iac-dot-v-up {
+  0%   { transform: translate(-50%, 40px); opacity: 0; }
+  3%   { transform: translate(-50%, 36px); opacity: 1; }
+  8%   { transform: translate(-50%, 0px);  opacity: 0; }
+  100% { transform: translate(-50%, 40px); opacity: 0; }
+}
+
+/* Traveling dot on horizontal arrows */
+.iac-dot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: iac-dot-h 6s linear infinite;
+  animation-delay: var(--iac-delay, 0s);
+  animation-fill-mode: both;
+}
+
+/* Traveling dot on vertical connectors (base) */
+.iac-dot-v {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation-duration: 6s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay: var(--iac-delay, 0s);
+  animation-fill-mode: both;
+}
+
+.iac-dot-down { animation-name: iac-dot-v-down; }
+.iac-dot-up   { animation-name: iac-dot-v-up; }
+
+/* Short dot for 28px step connectors in the vertical layout */
+@keyframes iac-dot-v-step {
+  0%   { transform: translate(-50%, -4px);  opacity: 0; }
+  3%   { transform: translate(-50%, 0px);   opacity: 1; }
+  8%   { transform: translate(-50%, 25px);  opacity: 0; }
+  100% { transform: translate(-50%, -4px);  opacity: 0; }
+}
+
+/* Right-to-left dot for the MinIO → Ansible reads connector (44px column) */
+@keyframes iac-dot-h-rev {
+  0%   { transform: translate(48px, -50%); opacity: 0; }
+  3%   { transform: translate(44px, -50%); opacity: 1; }
+  8%   { transform: translate(-4px, -50%); opacity: 0; }
+  100% { transform: translate(48px, -50%); opacity: 0; }
+}
+
+.iac-dot-step { animation-name: iac-dot-v-step; }
+.iac-dot-rev  { animation-name: iac-dot-h-rev; }
+
+/* Left-to-right dot for the 56px MinIO connector column (MinIO → Ansible reads) */
+@keyframes iac-dot-h-minio {
+  0%   { transform: translate(-4px, -50%); opacity: 0; }
+  3%   { transform: translate(0px,  -50%); opacity: 1; }
+  8%   { transform: translate(56px, -50%); opacity: 0; }
+  100% { transform: translate(-4px, -50%); opacity: 0; }
+}
+
+/* Right-to-left dot for the 56px MinIO connector column (Terraform → MinIO writes) */
+@keyframes iac-dot-h-minio-rev {
+  0%   { transform: translate(60px, -50%); opacity: 0; }
+  3%   { transform: translate(56px, -50%); opacity: 1; }
+  8%   { transform: translate(-4px, -50%); opacity: 0; }
+  100% { transform: translate(60px, -50%); opacity: 0; }
+}
+
+.iac-dot-minio     { animation-name: iac-dot-h-minio; }
+.iac-dot-minio-rev { animation-name: iac-dot-h-minio-rev; }
+
+/* ── End IaC Diagram ────────────────────────────────────────────────────── */
 
 .card-grid {
   display: grid;
