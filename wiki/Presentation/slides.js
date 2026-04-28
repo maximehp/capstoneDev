@@ -45,6 +45,27 @@ const slideFiles = [
   "slides/44-questions.html"
 ];
 
+function themeForSlide(file) {
+  const slideNumber = Number(file.match(/slides\/(\d+)-/)?.[1]);
+
+  if (slideNumber >= 4 && slideNumber <= 8) return "infrastructure";
+  if (slideNumber >= 9 && slideNumber <= 12) return "networking";
+  if (slideNumber >= 13 && slideNumber <= 20) return "security";
+  if (slideNumber >= 21 && slideNumber <= 27) return "monitoring";
+  if (slideNumber >= 28 && slideNumber <= 36) return "infrastructure";
+  if (slideNumber >= 37 && slideNumber <= 42) return "development";
+
+  return "blue";
+}
+
+function applySlideThemes(root) {
+  const sections = root.querySelectorAll("section");
+
+  sections.forEach((section, index) => {
+    section.classList.add(`theme-${themeForSlide(slideFiles[index])}`);
+  });
+}
+
 async function loadSlides() {
   const root = document.getElementById("slides-root");
   const fragments = await Promise.all(
@@ -58,11 +79,12 @@ async function loadSlides() {
   );
 
   root.innerHTML = fragments.join("\n");
+  applySlideThemes(root);
 }
 
 const deck = new Reveal({
   hash: true,
-  controls: true,
+  controls: false,
   progress: true,
   center: false,
   slideNumber: "c/t",
@@ -80,25 +102,62 @@ await loadSlides();
 deck.initialize();
 window.deck = deck;
 
-const speakerOverlay = document.getElementById("speaker-overlay");
+let titleVanta;
 
-function updateSpeakerOverlay() {
-  const speaker = deck.getCurrentSlide()?.querySelector(".speaker");
-  speakerOverlay.textContent = speaker?.textContent || "";
-}
-
-deck.on("ready", updateSpeakerOverlay);
-deck.on("slidechanged", updateSpeakerOverlay);
-updateSpeakerOverlay();
-
-document.addEventListener("click", (event) => {
-  const blockedSelector = "a, button, input, textarea, select, label, .controls, .progress";
-
-  if (event.target.closest(blockedSelector)) {
+function initTitleBackground() {
+  if (titleVanta) {
     return;
   }
 
-  deck.next();
+  const titleBackground = document.getElementById("title-vanta-background");
+
+  if (!titleBackground || !window.VANTA?.TRUNK || !window.p5) {
+    return;
+  }
+
+  titleVanta = window.VANTA.TRUNK({
+    el: titleBackground,
+    p5: window.p5,
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.0,
+    minWidth: 200.0,
+    scale: 1.0,
+    scaleMobile: 1.0,
+    color: 0x176f93,
+    backgroundColor: 0x06101c,
+    spacing: 12.0,
+    chaos: 1.8,
+  });
+
+  titleVanta.resize?.();
+}
+
+const speakerOverlay = document.getElementById("speaker-overlay");
+
+function updateSpeakerOverlay() {
+  const currentSlide = deck.getCurrentSlide();
+  const speaker = currentSlide?.querySelector(".speaker");
+  const themeClass = [...(currentSlide?.classList || [])].find((className) => className.startsWith("theme-"));
+
+  speakerOverlay.textContent = speaker?.textContent || "";
+  document.body.dataset.theme = themeClass?.replace("theme-", "") || "blue";
+  document.body.classList.toggle("title-background-active", currentSlide?.classList.contains("title-slide"));
+  document.body.classList.toggle("overview-background-active", currentSlide?.classList.contains("overview-slide"));
+}
+
+deck.on("ready", () => {
+  updateSpeakerOverlay();
+  initTitleBackground();
+});
+deck.on("slidechanged", updateSpeakerOverlay);
+deck.on("resize", () => titleVanta?.resize?.());
+updateSpeakerOverlay();
+requestAnimationFrame(() => {
+  initTitleBackground();
+  updateSpeakerOverlay();
+  titleVanta?.resize?.();
 });
 
 document.addEventListener("keydown", (event) => {
