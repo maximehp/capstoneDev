@@ -2356,6 +2356,177 @@ body[data-theme="development"] {
   border: 1px solid rgba(76, 218, 122, 0.24);
 }
 
+/* ── MinIO slide (32) ───────────────────────────────────────── */
+
+.minio-split {
+  align-items: stretch;
+  grid-template-columns: 1fr 420px;
+  gap: 28px;
+}
+
+.minio-split .tight-list {
+  align-self: center;
+}
+
+.minio-store-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(var(--accent-rgb), 0.04);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.minio-store-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.18);
+}
+
+.minio-store-emblem {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cellipse cx='32' cy='14' rx='20' ry='7' fill='none' stroke='%2374c8f5' stroke-width='3'/%3E%3Cpath d='M12 14 v12 q0 7 20 7 q20 0 20-7 V14' fill='none' stroke='%2374c8f5' stroke-width='3'/%3E%3Cpath d='M12 26 v12 q0 7 20 7 q20 0 20-7 V26' fill='none' stroke='%2374c8f5' stroke-width='3'/%3E%3Cpath d='M12 38 v12 q0 7 20 7 q20 0 20-7 V38' fill='none' stroke='%2374c8f5' stroke-width='3'/%3E%3C/svg%3E");
+}
+
+.minio-store-title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.minio-store-name {
+  font-size: 0.52em;
+  font-weight: 700;
+  color: #eaf5ff;
+  letter-spacing: 0.03em;
+}
+
+.minio-store-badge {
+  font-size: 0.33em;
+  font-weight: 600;
+  color: #74c8f5;
+  background: rgba(116, 200, 245, 0.1);
+  border: 1px solid rgba(116, 200, 245, 0.25);
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.minio-bucket-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.minio-bucket-hdr {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.4em;
+  font-weight: 700;
+  color: #b8d8f0;
+  letter-spacing: 0.02em;
+}
+
+.minio-bucket-emblem {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6H4l2 12h12l2-12z' fill='none' stroke='%2374c8f5' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M4 6l2-2h12l2 2' fill='none' stroke='%2374c8f5' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.minio-bucket-objects {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.minio-obj {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.minio-obj-muted {
+  opacity: 0.5;
+}
+
+.minio-obj-icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.minio-obj-icon-file {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z' fill='none' stroke='%2374c8f5' stroke-width='2' stroke-linejoin='round'/%3E%3Cpolyline points='14 2 14 8 20 8' fill='none' stroke='%2374c8f5' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.minio-obj-icon-folder {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' fill='none' stroke='%2374c8f5' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.minio-obj code {
+  flex: 1;
+  font-size: 0.36em;
+  color: #c8e8ff;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.minio-obj-tag {
+  flex: 0 0 auto;
+  font-size: 0.3em;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(116, 200, 245, 0.1);
+  color: #74c8f5;
+  border: 1px solid rgba(116, 200, 245, 0.25);
+}
+
+.minio-obj-tag-green {
+  background: rgba(76, 218, 122, 0.1);
+  color: #4cda7a;
+  border: 1px solid rgba(76, 218, 122, 0.25);
+}
+
+.minio-obj-tag-muted {
+  background: rgba(160, 180, 200, 0.08);
+  color: #8aa4bc;
+  border: 1px solid rgba(160, 180, 200, 0.18);
+}
+
 .bucket-diagram div {
   border: 1px solid var(--accent-strong);
   background: var(--accent-soft);

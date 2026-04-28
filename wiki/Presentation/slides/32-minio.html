@@ -1,18 +1,53 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
   <h2>MinIO</h2>
-  <div class="split-layout">
+  <div class="split-layout minio-split">
     <ul class="tight-list">
       <li>MinIO is a self-hosted S3-compatible object store running on TrueNAS.</li>
       <li>Stores Terraform state files as the remote backend.</li>
       <li>Stores <code>vm_info.json</code> for Ansible to consume after provisioning.</li>
       <li>Decouples Terraform and Ansible so they do not need to run in the same job.</li>
     </ul>
-    <div class="bucket-diagram">
-      <div>MinIO Bucket</div>
-      <span>terraform.tfstate</span>
-      <span>vm_info.json</span>
-      <span>Pipeline artifacts</span>
+    <div class="minio-store-diagram">
+
+      <!-- MinIO server identity -->
+      <div class="minio-store-header">
+        <div class="minio-store-emblem"></div>
+        <div class="minio-store-title">
+          <span class="minio-store-name">MinIO</span>
+          <span class="minio-store-badge">S3-Compatible</span>
+        </div>
+      </div>
+
+      <!-- Bucket containing pipeline objects -->
+      <div class="minio-bucket-card">
+        <div class="minio-bucket-hdr">
+          <div class="minio-bucket-emblem"></div>
+          <span>iac-pipeline</span>
+        </div>
+        <div class="minio-bucket-objects">
+
+          <div class="minio-obj">
+            <div class="minio-obj-icon minio-obj-icon-file"></div>
+            <code>terraform.tfstate</code>
+            <span class="minio-obj-tag">State</span>
+          </div>
+
+          <div class="minio-obj">
+            <div class="minio-obj-icon minio-obj-icon-file"></div>
+            <code>vm_info.json</code>
+            <span class="minio-obj-tag minio-obj-tag-green">Inventory</span>
+          </div>
+
+          <div class="minio-obj minio-obj-muted">
+            <div class="minio-obj-icon minio-obj-icon-folder"></div>
+            <code>artifacts/</code>
+            <span class="minio-obj-tag minio-obj-tag-muted">Build outputs</span>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
   <div class="speaker">Speaker: Liam Callahan</div>
