@@ -578,6 +578,10 @@ body[data-theme="development"] {
   background: transparent;
 }
 
+.section-break.iac {
+  background: transparent;
+}
+
 .tight-list {
   display: grid;
   gap: 9px;
@@ -586,8 +590,8 @@ body[data-theme="development"] {
 .two-column-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 30px;
-  margin-top: 24px !important;
+  gap: 12px 30px;
+  margin-top: 32px !important;
 }
 
 .rack-diagram {
@@ -664,18 +668,368 @@ body[data-theme="development"] {
   margin: 0;
 }
 
-@media (max-width: 720px) {
-  .rack-diagram {
-    padding: 8px;
-    gap: 8px;
+.replication-diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin: 20px 0 16px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.replication-node {
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.1);
+  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.22);
+  border-radius: 20px;
+  padding: 16px;
+  min-width: 0;
+  max-width: 100%;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.replication-node-head {
+  color: var(--current-accent, var(--rose));
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+
+.replication-node-subhead {
+  color: #ccecff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.replication-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  color: #e6f6ff;
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.replication-list.compact {
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.replication-list li {
+  padding-left: 0;
+  overflow-wrap: break-word;
+}
+
+.replication-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015));
+  border-radius: 16px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.replication-card-title {
+  color: var(--current-accent, var(--rose));
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 10px;
+  overflow-wrap: break-word;
+}
+
+.replication-card-description {
+  color: #eef8ff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.replication-flow {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.replication-flow-pill {
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.16);
+  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.26);
+  border-radius: 999px;
+  color: var(--current-accent, var(--rose));
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 14px 16px;
+  max-width: 160px;
+  overflow-wrap: break-word;
+}
+
+.replication-flow-line {
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(var(--current-accent-rgb, 255, 111, 125), 0), rgba(var(--current-accent-rgb, 255, 111, 125), 0.75), rgba(var(--current-accent-rgb, 255, 111, 125), 0));
+  border-radius: 999px;
+  position: relative;
+  min-width: 100px;
+}
+
+.replication-flow-line::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+  border: 6px solid transparent;
+  border-left-color: rgba(var(--current-accent-rgb, 255, 111, 125), 0.9);
+}
+
+.replication-flow-notes {
+  color: #d7edf8;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  max-width: 160px;
+  overflow-wrap: break-word;
+  font-weight: 600;
+}
+
+.replication-bottom {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.replication-external {
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.1);
+  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.22);
+  border-radius: 18px;
+  padding: 16px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.external-head {
+  color: var(--current-accent, var(--rose));
+  font-weight: 800;
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+  overflow-wrap: break-word;
+}
+
+.external-sub {
+  color: #d7edf8;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+}
+
+.external-connector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: #eef8ff;
+  font-size: 0.88rem;
+  font-weight: 800;
+  width: fit-content;
+  min-width: 100px;
+  overflow: hidden;
+}
+
+.external-connector::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.9);
+  position: relative;
+}
+
+.external-connector::before {
+  content: "";
+  color: var(--current-accent, var(--rose));
+  font-weight: 900;
+}
+
+@media (max-width: 920px) {
+  .replication-diagram {
+    grid-template-columns: 1fr;
   }
 
-  .rack-unit {
-    font-size: 0.3em;
-    min-height: 44px;
-    padding: 10px 10px;
+  .replication-bottom {
+    grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 720px) {
+  .replication-node-head {
+    font-size: 1rem;
+  }
+
+  .replication-node-subhead,
+  .replication-card-description,
+  .external-head,
+  .external-sub {
+    font-size: 0.9rem;
+  }
+
+  .replication-list,
+  .replication-list.compact,
+  .replication-flow-notes {
+    font-size: 0.9rem;
+  }
+
+  .replication-flow-pill,
+  .external-connector {
+    padding: 12px 14px;
+  }
+}
+
+.pbs-diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin: 20px 0 20px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.pbs-node {
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.1);
+  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.22);
+  border-radius: 20px;
+  padding: 16px;
+  min-width: 0;
+  max-width: 100%;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.pbs-node-head {
+  color: var(--current-accent, var(--rose));
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+
+.pbs-node-subhead {
+  color: #ccecff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.pbs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  color: #e6f6ff;
+  font-size: 1.2rem;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.pbs-list li {
+  padding-left: 0;
+  overflow-wrap: break-word;
+}
+
+.pbs-flow {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.pbs-flow-pill {
+  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.16);
+  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.26);
+  border-radius: 999px;
+  color: var(--current-accent, var(--rose));
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 14px 16px;
+  max-width: 160px;
+  overflow-wrap: break-word;
+}
+
+.pbs-flow-line {
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(var(--current-accent-rgb, 255, 111, 125), 0), rgba(var(--current-accent-rgb, 255, 111, 125), 0.75), rgba(var(--current-accent-rgb, 255, 111, 125), 0));
+  border-radius: 999px;
+  position: relative;
+  min-width: 100px;
+}
+
+.pbs-flow-line::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+  border: 6px solid transparent;
+  border-left-color: rgba(var(--current-accent-rgb, 255, 111, 125), 0.9);
+}
+
+.pbs-flow-notes {
+  color: #d7edf8;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  max-width: 160px;
+  overflow-wrap: break-word;
+  font-weight: 600;
+}
+
+@media (max-width: 920px) {
+  .pbs-diagram {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .pbs-node-head {
+    font-size: 0.95rem;
+  }
+
+  .pbs-node-subhead,
+  .pbs-flow-notes {
+    font-size: 0.85rem;
+  }
+
+  .pbs-list {
+    font-size: 1.1rem;
+  }
+
+  .pbs-flow-pill {
+    padding: 12px 14px;
+  }
+}
+
 
 .card-grid {
   display: grid;

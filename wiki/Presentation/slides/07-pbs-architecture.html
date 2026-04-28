@@ -1,12 +1,32 @@
 <section>
   <div class="slide-kicker">Infrastructure / NAS</div>
   <h2>PBS Architecture</h2>
-  <div class="flow-row">
-    <div class="flow-step">Proxmox Cluster</div>
-    <div class="flow-step">Recurring Backup Task</div>
-    <div class="flow-step">ChirpPBS VM on MomNAS</div>
-    <div class="flow-step">Datastore + Pruning</div>
+  <div class="pbs-diagram">
+    <div class="pbs-node proxmox-cluster">
+      <div class="pbs-node-head">Proxmox VE Cluster</div>
+      <div class="pbs-node-subhead">VMs & LXCs</div>
+      <ul class="pbs-list">
+        <li>Recurring backup tasks</li>
+        <li>Scheduled snapshots</li>
+      </ul>
+    </div>
+
+    <div class="pbs-flow">
+      <div class="pbs-flow-pill">Proxmox Backup</div>
+      <div class="pbs-flow-line"></div>
+      <div class="pbs-flow-notes">Incremental, deduplicated, compressed backups</div>
+    </div>
+
+    <div class="pbs-node pbs-vm">
+      <div class="pbs-node-head">ChirpPBS VM</div>
+      <div class="pbs-node-subhead">Proxmox Backup Server</div>
+      <ul class="pbs-list">
+        <li>Hosted on MomNAS</li>
+        <li>Datastore with pruning</li>
+      </ul>
+    </div>
   </div>
+
   <ul class="two-column-list">
     <li>Created a new Proxmox Backup Server datastore.</li>
     <li>Created the ChirpPBS VM inside MomNAS.</li>

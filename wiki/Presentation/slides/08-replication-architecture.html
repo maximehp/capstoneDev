@@ -1,14 +1,33 @@
 <section>
   <div class="slide-kicker">Infrastructure / NAS</div>
   <h2>Replication Architecture</h2>
-  <div class="process-lane">
-    <span>Snapshot cron jobs</span>
-    <span>Pruning policy</span>
-    <span>Dedicated SSH user</span>
-    <span>Replication task</span>
-    <span>Mirrored dataset</span>
-  </div>
   <p class="lead compact">Replication gives the NAS layer recoverability without letting snapshots grow unchecked.</p>
+
+  <div class="replication-diagram">
+    <div class="replication-node primary-nas">
+      <div class="replication-node-head">MainNAS (MomNAS)</div>
+      <div class="replication-node-subhead">TrueNAS — Primary NAS</div>
+      <ul class="replication-list">
+        <li><strong>Datasets:</strong> backups, media, vm-data, etc.</li>
+      </ul>
+    </div>
+
+    <div class="replication-flow">
+      <div class="replication-flow-pill">ZFS Replication over SSH</div>
+      <div class="replication-flow-line"></div>
+      <div class="replication-flow-notes">Snapshot-based, incremental, encrypted</div>
+    </div>
+
+    <div class="replication-node target-nas">
+      <div class="replication-node-head">Replicant (CalculonNAS)</div>
+      <div class="replication-node-subhead">TrueNAS — Replication Target</div>
+      <ul class="replication-list">
+        <li>Mirrors all primary datasets</li>
+        <li>Disaster recovery & failover ready</li>
+      </ul>
+    </div>
+  </div>
+
   <div class="card-grid two">
     <article class="info-card">
       <h3>Reliability</h3>
