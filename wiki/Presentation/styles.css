@@ -55,17 +55,6 @@ body[data-theme="development"] {
   --current-accent-rgb: 117, 240, 160;
 }
 
-/* Increase speaker notes font size */
-.reveal .speaker-notes {
-  font-size: 28px;
-  line-height: 1.4;
-}
-
-/* Presenter view (separate window) */
-.speaker-notes {
-  font-size: 28px !important;
-}
-
 .reveal {
   position: relative;
   z-index: 1;
