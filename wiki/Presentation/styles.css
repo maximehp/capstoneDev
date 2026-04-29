@@ -1646,25 +1646,28 @@ body[data-theme="development"] {
 
 /* Horizontal dot: left → right across the 28px arrow column */
 @keyframes iac-dot-h {
-  0%   { transform: translate(-4px, -50%); opacity: 0; }
-  3%   { transform: translate(0px,  -50%); opacity: 1; }
-  8%   { transform: translate(28px, -50%); opacity: 0; }
-  100% { transform: translate(-4px, -50%); opacity: 0; }
+  0%   { transform: translate(0px,  -50%); opacity: 0; }
+  2%   { transform: translate(0px,  -50%); opacity: 1; }
+  18%  { transform: translate(28px, -50%); opacity: 1; }
+  20%  { transform: translate(28px, -50%); opacity: 0; }
+  100% { transform: translate(0px,  -50%); opacity: 0; }
 }
 
 /* Vertical dot: top → bottom (Terraform writes to MinIO) */
 @keyframes iac-dot-v-down {
   0%   { transform: translate(-50%, 0px);  opacity: 0; }
-  3%   { transform: translate(-50%, 4px);  opacity: 1; }
-  8%   { transform: translate(-50%, 40px); opacity: 0; }
+  2%   { transform: translate(-50%, 0px);  opacity: 1; }
+  18%  { transform: translate(-50%, 40px); opacity: 1; }
+  20%  { transform: translate(-50%, 40px); opacity: 0; }
   100% { transform: translate(-50%, 0px);  opacity: 0; }
 }
 
 /* Vertical dot: bottom → top (MinIO feeds Ansible) */
 @keyframes iac-dot-v-up {
   0%   { transform: translate(-50%, 40px); opacity: 0; }
-  3%   { transform: translate(-50%, 36px); opacity: 1; }
-  8%   { transform: translate(-50%, 0px);  opacity: 0; }
+  2%   { transform: translate(-50%, 40px); opacity: 1; }
+  18%  { transform: translate(-50%, 0px);  opacity: 1; }
+  20%  { transform: translate(-50%, 0px);  opacity: 0; }
   100% { transform: translate(-50%, 40px); opacity: 0; }
 }
 
@@ -1707,20 +1710,22 @@ body[data-theme="development"] {
 .iac-dot-down { animation-name: iac-dot-v-down; }
 .iac-dot-up   { animation-name: iac-dot-v-up; }
 
-/* Short dot for 28px step connectors in the vertical layout */
+/* Short dot for 26px step connectors in the vertical layout */
 @keyframes iac-dot-v-step {
-  0%   { transform: translate(-50%, -4px);  opacity: 0; }
-  3%   { transform: translate(-50%, 0px);   opacity: 1; }
-  8%   { transform: translate(-50%, 25px);  opacity: 0; }
-  100% { transform: translate(-50%, -4px);  opacity: 0; }
+  0%   { transform: translate(-50%, 0px);   opacity: 0; }
+  2%   { transform: translate(-50%, 0px);   opacity: 1; }
+  18%  { transform: translate(-50%, 20px);  opacity: 1; }
+  20%  { transform: translate(-50%, 20px);  opacity: 0; }
+  100% { transform: translate(-50%, 0px);   opacity: 0; }
 }
 
 /* Right-to-left dot for the MinIO → Ansible reads connector (44px column) */
 @keyframes iac-dot-h-rev {
-  0%   { transform: translate(48px, -50%); opacity: 0; }
-  3%   { transform: translate(44px, -50%); opacity: 1; }
-  8%   { transform: translate(-4px, -50%); opacity: 0; }
-  100% { transform: translate(48px, -50%); opacity: 0; }
+  0%   { transform: translate(44px, -50%); opacity: 0; }
+  2%   { transform: translate(44px, -50%); opacity: 1; }
+  18%  { transform: translate(0px,  -50%); opacity: 1; }
+  20%  { transform: translate(0px,  -50%); opacity: 0; }
+  100% { transform: translate(44px, -50%); opacity: 0; }
 }
 
 .iac-dot-step { animation-name: iac-dot-v-step; }
@@ -1728,18 +1733,20 @@ body[data-theme="development"] {
 
 /* Left-to-right dot for the 56px MinIO connector column (MinIO → Ansible reads) */
 @keyframes iac-dot-h-minio {
-  0%   { transform: translate(-4px, -50%); opacity: 0; }
-  3%   { transform: translate(0px,  -50%); opacity: 1; }
-  8%   { transform: translate(56px, -50%); opacity: 0; }
-  100% { transform: translate(-4px, -50%); opacity: 0; }
+  0%   { transform: translate(0px,  -50%); opacity: 0; }
+  2%   { transform: translate(0px,  -50%); opacity: 1; }
+  18%  { transform: translate(56px, -50%); opacity: 1; }
+  20%  { transform: translate(56px, -50%); opacity: 0; }
+  100% { transform: translate(0px,  -50%); opacity: 0; }
 }
 
 /* Right-to-left dot for the 56px MinIO connector column (Terraform → MinIO writes) */
 @keyframes iac-dot-h-minio-rev {
-  0%   { transform: translate(60px, -50%); opacity: 0; }
-  3%   { transform: translate(56px, -50%); opacity: 1; }
-  8%   { transform: translate(-4px, -50%); opacity: 0; }
-  100% { transform: translate(60px, -50%); opacity: 0; }
+  0%   { transform: translate(56px, -50%); opacity: 0; }
+  2%   { transform: translate(56px, -50%); opacity: 1; }
+  18%  { transform: translate(0px,  -50%); opacity: 1; }
+  20%  { transform: translate(0px,  -50%); opacity: 0; }
+  100% { transform: translate(56px, -50%); opacity: 0; }
 }
 
 .iac-dot-minio     { animation-name: iac-dot-h-minio; }
@@ -1798,6 +1805,8 @@ body[data-theme="development"] {
   animation: iac-step-pulse var(--anim-duration, 6s) ease-out infinite;
   animation-delay: var(--anim-delay, 0s);
   animation-fill-mode: both;
+  position: relative;
+  z-index: 1;
 }
 
 .anim-step-trigger {
@@ -2981,10 +2990,11 @@ body[data-theme="development"] {
 }
 
 @keyframes tf-dot-h {
-  0%    { opacity: 0; transform: translateX(-2px); }
-  3%    { opacity: 1; transform: translateX(0); }
-  8%    { opacity: 0; transform: translateX(40px); }
-  100%  { opacity: 0; transform: translateX(-2px); }
+  0%    { opacity: 0; transform: translateX(0); }
+  2%    { opacity: 1; transform: translateX(0); }
+  18%   { opacity: 1; transform: translateX(44px); }
+  20%   { opacity: 0; transform: translateX(44px); }
+  100%  { opacity: 0; transform: translateX(0); }
 }
 
 /* ── Fork / skip / rejoin: solid horizontal through-line ─────── */
@@ -3119,17 +3129,19 @@ body[data-theme="development"] {
 }
 
 @keyframes tf-dot-v-up {
-  0%    { opacity: 0; transform: translateY(4px); }
-  3%    { opacity: 1; transform: translateY(0); }
-  8%    { opacity: 0; transform: translateY(-32px); }
-  100%  { opacity: 0; transform: translateY(4px); }
+  0%    { opacity: 0; transform: translateY(0); }
+  2%    { opacity: 1; transform: translateY(0); }
+  18%   { opacity: 1; transform: translateY(-36px); }
+  20%   { opacity: 0; transform: translateY(-36px); }
+  100%  { opacity: 0; transform: translateY(0); }
 }
 
 @keyframes tf-dot-v-dn {
-  0%    { opacity: 0; transform: translateY(-4px); }
-  3%    { opacity: 1; transform: translateY(0); }
-  8%    { opacity: 0; transform: translateY(32px); }
-  100%  { opacity: 0; transform: translateY(-4px); }
+  0%    { opacity: 0; transform: translateY(0); }
+  2%    { opacity: 1; transform: translateY(0); }
+  18%   { opacity: 1; transform: translateY(36px); }
+  20%   { opacity: 0; transform: translateY(36px); }
+  100%  { opacity: 0; transform: translateY(0); }
 }
 
 /* ── Conditional destroy — dashed border, amber label ─────────── */
@@ -3239,6 +3251,26 @@ body[data-theme="development"] {
   transform: translateY(-0.5px);
   background: rgba(var(--accent-rgb), 0.45);
 }
+.ans-h-dot {
+  position: absolute;
+  left: 0;
+  top: calc(50% - 3.5px);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  animation: ans-dot-right var(--anim-duration, 8s) linear infinite;
+  animation-delay: var(--anim-delay, 0s);
+  animation-fill-mode: both;
+  z-index: 0;
+}
+@keyframes ans-dot-right {
+  0%   { opacity: 0; transform: translateX(0); }
+  2%   { opacity: 1; transform: translateX(0); }
+  18%  { opacity: 1; transform: translateX(36px); }
+  20%  { opacity: 0; transform: translateX(36px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
 
 /* ── Runner content padding ──────────────────────────────────── */
 .ans-runner.anim-step .anim-step-content {
@@ -3287,13 +3319,14 @@ body[data-theme="development"] {
   animation: ans-dot-branch var(--anim-duration, 8s) linear infinite;
   animation-delay: var(--anim-delay, 0s);
   animation-fill-mode: both;
-  z-index: 2;
+  z-index: 0;
 }
 
 @keyframes ans-dot-branch {
   0%   { opacity: 0; transform: translateX(0); }
-  3%   { opacity: 1; transform: translateX(4px); }
-  8%   { opacity: 0; transform: translateX(36px); }
+  2%   { opacity: 1; transform: translateX(0); }
+  18%  { opacity: 1; transform: translateX(36px); }
+  20%  { opacity: 0; transform: translateX(36px); }
   100% { opacity: 0; transform: translateX(0); }
 }
 
@@ -3414,4 +3447,44 @@ body[data-theme="development"] {
     top: auto;
     bottom: -4px;
   }
+}
+
+/* ── JS Pipeline Animation System ───────────────────────────────────────────── */
+
+/* Suppress all CSS dot spans and box keyframes when JS takes over */
+.js-animated .anim-dot,
+.js-animated .ans-branch-dot,
+.js-animated .ans-h-dot,
+.js-animated .tf-hdot,
+.js-animated .tf-vdot,
+.js-animated .iac-dot,
+.js-animated .iac-dot-v { display: none !important; }
+
+.js-animated .anim-step,
+.js-animated .iac-step,
+.js-animated .iac-minio,
+.js-animated .ans-minio-card { animation: none !important; }
+
+/* Smooth glow transitions so JS-lit state fades in/out cleanly */
+.anim-step,
+.iac-step,
+.iac-minio,
+.ans-minio-card {
+  transition: box-shadow 0.25s ease-out, border-color 0.25s ease-out;
+}
+
+/* Cyan glow — matches iac-step-pulse peak at 4% */
+.lit {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 18px rgba(var(--accent-rgb), 0.55),
+    0 0 36px rgba(var(--accent-rgb), 0.2) !important;
+}
+
+/* Gold glow — matches anim-gold-pulse peak at 4% */
+.lit-gold {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 18px rgba(245, 200, 66, 0.55),
+    0 0 36px rgba(245, 200, 66, 0.18) !important;
 }
