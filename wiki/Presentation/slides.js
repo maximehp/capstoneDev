@@ -260,7 +260,7 @@ function vantaOptions(section, el) {
       options: {
         ...common,
         highlightColor: colors.orange,
-        midtoneColor: 0x5C4590,
+        midtoneColor: 0x6C5570,
         lowlightColor: 0x4B2060,
         baseColor: colors.background,
         blurFactor: 0.36,
