@@ -103,12 +103,8 @@ await loadSlides();
 deck.initialize();
 window.deck = deck;
 
-let titleVanta;
-let infrastructureVanta;
-let networkingVanta;
-let securityVanta;
-let monitoringVanta;
-let developmentVanta;
+let activeVanta;
+let activeVantaSection;
 
 const colors = {
   background: 0x06101c,
@@ -120,49 +116,20 @@ const colors = {
   security: 0x6e7aff,
 };
 
-function initTitleBackground() {
-  if (titleVanta) {
-    return;
+function clearVantaBackground() {
+  activeVanta?.destroy?.();
+  activeVanta = undefined;
+  activeVantaSection = undefined;
+
+  const background = document.getElementById("vanta-background");
+  if (background) {
+    background.innerHTML = "";
   }
-
-  const titleBackground = document.getElementById("title-vanta-background");
-
-  if (!titleBackground || !window.VANTA?.TRUNK || !window.p5) {
-    return;
-  }
-
-  titleVanta = window.VANTA.TRUNK({
-    el: titleBackground,
-    p5: window.p5,
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.0,
-    minWidth: 200.0,
-    scale: 1.0,
-    scaleMobile: 1.0,
-    color: 0x176f93,
-    backgroundColor: colors.background,
-    spacing: 12.0,
-    chaos: 1.8,
-  });
-
-  titleVanta.resize?.();
 }
 
-function initInfrastructureBackground() {
-  if (infrastructureVanta) {
-    return;
-  }
-
-  const infrastructureBackground = document.getElementById("infrastructure-vanta-background");
-
-  if (!infrastructureBackground || !window.VANTA?.BIRDS || !window.THREE) {
-    return;
-  }
-
-  infrastructureVanta = window.VANTA.BIRDS({
-    el: infrastructureBackground,
+function vantaOptions(section, el) {
+  const common = {
+    el,
     mouseControls: true,
     touchControls: true,
     gyroControls: false,
@@ -170,158 +137,137 @@ function initInfrastructureBackground() {
     minWidth: 200.00,
     scale: 1.00,
     scaleMobile: 1.00,
-    backgroundColor: colors.background,
-    color1: colors.rose,
-    color2: colors.cyan,
-    colorMode: "variance",
-    wingSpan: 25.00,
-    speedLimit: 2.00,
-    separation: 67.00,
-    alignment: 35.00,
-    cohesion: 17.00,
-    quantity: 3.00
-  });
+  };
 
-  infrastructureVanta.resize?.();
+  if (section === "trunk") {
+    if (!window.VANTA?.TRUNK || !window.p5) return undefined;
+
+    return {
+      factory: window.VANTA.TRUNK,
+      options: {
+        ...common,
+        p5: window.p5,
+        color: 0x176f93,
+        backgroundColor: colors.background,
+        spacing: 12.0,
+        chaos: 1.8,
+      },
+    };
+  }
+
+  if (!window.THREE) {
+    return undefined;
+  }
+
+  if (section === "infrastructure" && window.VANTA?.BIRDS) {
+    return {
+      factory: window.VANTA.BIRDS,
+      options: {
+        ...common,
+        backgroundColor: colors.background,
+        color1: colors.rose,
+        color2: colors.cyan,
+        colorMode: "variance",
+        wingSpan: 25.00,
+        speedLimit: 2.00,
+        separation: 67.00,
+        alignment: 35.00,
+        cohesion: 17.00,
+        quantity: 3.00,
+      },
+    };
+  }
+
+  if (section === "networking" && window.VANTA?.NET) {
+    return {
+      factory: window.VANTA.NET,
+      options: {
+        ...common,
+        color: colors.purple,
+        backgroundColor: colors.background,
+        points: 11.00,
+        maxDistance: 21.00,
+        spacing: 17.00,
+      },
+    };
+  }
+
+  if (section === "security" && window.VANTA?.GLOBE) {
+    return {
+      factory: window.VANTA.GLOBE,
+      options: {
+        ...common,
+        color: colors.security,
+        color2: colors.cyan,
+        backgroundColor: colors.background,
+        size: 1.05,
+        scale: 0.9,
+        scaleMobile: 0.9,
+      },
+    };
+  }
+
+  if (section === "monitoring" && window.VANTA?.FOG) {
+    return {
+      factory: window.VANTA.FOG,
+      options: {
+        ...common,
+        highlightColor: colors.orange,
+        midtoneColor: 0x15324a,
+        lowlightColor: 0x1d102f,
+        baseColor: colors.background,
+        blurFactor: 0.62,
+        speed: 1.1,
+        zoom: 0.82,
+      },
+    };
+  }
+
+  if (section === "development" && window.VANTA?.WAVES) {
+    return {
+      factory: window.VANTA.WAVES,
+      options: {
+        ...common,
+        color: 0x123f35,
+        shininess: 28.00,
+        waveHeight: 14.00,
+        waveSpeed: 0.35,
+        zoom: 0.82,
+      },
+    };
+  }
+
+  return undefined;
 }
 
-function initNetworkingBackground() {
-  if (networkingVanta) {
+function updateVantaBackground(section) {
+  const background = document.getElementById("vanta-background");
+
+  if (!background || activeVantaSection === section) {
+    activeVanta?.resize?.();
     return;
   }
 
-  const networkingBackground = document.getElementById("networking-vanta-background");
+  clearVantaBackground();
 
-  if (!networkingBackground || !window.VANTA?.NET || !window.THREE) {
+  const config = vantaOptions(section, background);
+  if (!config) {
     return;
   }
 
-  networkingVanta = window.VANTA.NET({
-    el: networkingBackground,
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.00,
-    minWidth: 200.00,
-    scale: 1.00,
-    scaleMobile: 1.00,
-    color: colors.purple,
-    backgroundColor: colors.background,
-    points: 11.00,
-    maxDistance: 21.00,
-    spacing: 17.00
-  });
+  activeVanta = config.factory(config.options);
+  activeVantaSection = section;
 
-  networkingVanta.resize?.();
+  if (section === "security") {
+    activeVanta.cont?.position?.set(0, -20, 0);
+    activeVanta.cont2?.position?.set(-26, 12, 0);
+  }
+
+  activeVanta.resize?.();
 }
 
-function initSecurityBackground() {
-  if (securityVanta) {
-    return;
-  }
-
-  const securityBackground = document.getElementById("security-vanta-background");
-
-  if (!securityBackground || !window.VANTA?.GLOBE || !window.THREE) {
-    return;
-  }
-
-  securityVanta = window.VANTA.GLOBE({
-    el: securityBackground,
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.00,
-    minWidth: 200.00,
-    scale: 1.00,
-    scaleMobile: 1.00,
-    color: colors.security,
-    color2: colors.cyan,
-    backgroundColor: colors.background,
-    size: 1.15
-  });
-
-  securityVanta.resize?.();
-}
-
-function initMonitoringBackground() {
-  if (monitoringVanta) {
-    return;
-  }
-
-  const monitoringBackground = document.getElementById("monitoring-vanta-background");
-
-  if (!monitoringBackground || !window.VANTA?.FOG || !window.THREE) {
-    return;
-  }
-
-  monitoringVanta = window.VANTA.FOG({
-    el: monitoringBackground,
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.00,
-    minWidth: 200.00,
-    scale: 1.00,
-    scaleMobile: 1.00,
-    highlightColor: colors.orange,
-    midtoneColor: 0x15324a,
-    lowlightColor: 0x1d102f,
-    baseColor: colors.background,
-    blurFactor: 0.62,
-    speed: 1.1,
-    zoom: 0.82
-  });
-
-  monitoringVanta.resize?.();
-}
-
-function initDevelopmentBackground() {
-  if (developmentVanta) {
-    return;
-  }
-
-  const developmentBackground = document.getElementById("development-vanta-background");
-
-  if (!developmentBackground || !window.VANTA?.WAVES || !window.THREE) {
-    return;
-  }
-
-  developmentVanta = window.VANTA.WAVES({
-    el: developmentBackground,
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.00,
-    minWidth: 200.00,
-    scale: 1.00,
-    scaleMobile: 1.00,
-    color: 0x123f35,
-    shininess: 28.00,
-    waveHeight: 14.00,
-    waveSpeed: 0.75,
-    zoom: 0.82
-  });
-
-  developmentVanta.resize?.();
-}
-
-function initVantaBackgrounds() {
-  initTitleBackground();
-  initInfrastructureBackground();
-  initNetworkingBackground();
-  initSecurityBackground();
-  initMonitoringBackground();
-  initDevelopmentBackground();
-}
-
-function resizeVantaBackgrounds() {
-  titleVanta?.resize?.();
-  infrastructureVanta?.resize?.();
-  networkingVanta?.resize?.();
-  securityVanta?.resize?.();
-  monitoringVanta?.resize?.();
-  developmentVanta?.resize?.();
+function resizeVantaBackground() {
+  activeVanta?.resize?.();
 }
 
 function vantaForSlide(slide, theme) {
@@ -366,6 +312,7 @@ function updateSpeakerOverlay() {
   speakerOverlay.textContent = speaker?.textContent || "";
   document.body.dataset.theme = theme;
   document.body.dataset.vanta = vantaSection;
+  updateVantaBackground(vantaSection);
   document.body.classList.toggle("title-background-active", currentSlide?.classList.contains("title-slide"));
   document.body.classList.toggle(
     "trunk-background-active",
@@ -379,15 +326,13 @@ function updateSpeakerOverlay() {
 
 deck.on("ready", () => {
   updateSpeakerOverlay();
-  initVantaBackgrounds();
 });
 deck.on("slidechanged", updateSpeakerOverlay);
-deck.on("resize", resizeVantaBackgrounds);
+deck.on("resize", resizeVantaBackground);
 updateSpeakerOverlay();
 requestAnimationFrame(() => {
-  initVantaBackgrounds();
   updateSpeakerOverlay();
-  resizeVantaBackgrounds();
+  resizeVantaBackground();
 });
 
 document.addEventListener("keydown", (event) => {
