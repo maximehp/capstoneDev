@@ -907,7 +907,7 @@ class DatabaseSettingsTests(TestCase):
             config = _database_settings(Path("project-root"))
 
         self.assertEqual(config["ENGINE"], "django.db.backends.sqlite3")
-        self.assertTrue(str(config["NAME"]).endswith("project-root\\db.sqlite3"))
+        self.assertTrue(str(config["NAME"]).endswith(str(Path("project-root") / "db.sqlite3")))
 
     def test_parses_postgres_database_url(self):
         with patch.dict(

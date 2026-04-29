@@ -2144,6 +2144,78 @@ body[data-theme="development"] {
   color: var(--accent);
 }
 
+.troubleshooting-map {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.troubleshooting-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr);
+  align-items: center;
+}
+
+.troubleshooting-box {
+  min-height: 98px;
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.052);
+}
+
+.troubleshooting-box strong {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--text);
+  font-size: 0.29em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.troubleshooting-box span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.29em;
+  line-height: 1.3;
+}
+
+.solution-box {
+  border-color: rgba(var(--accent-rgb), 0.58);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.14), rgba(255, 255, 255, 0.04));
+}
+
+.solution-box strong {
+  color: var(--accent);
+}
+
+.troubleshooting-line {
+  position: relative;
+  height: 2px;
+  background: var(--accent-strong);
+}
+
+.troubleshooting-line::before,
+.troubleshooting-line::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
+
+.troubleshooting-line::before {
+  left: -4px;
+}
+
+.troubleshooting-line::after {
+  right: -4px;
+}
+
 .network-diagram,
 .browser-diagram {
   display: grid;
@@ -3315,9 +3387,31 @@ body[data-theme="development"] {
   .connectivity-flow,
   .sdn-bond-grid,
   .issue-solution-grid,
+  .troubleshooting-pair,
   .status-board,
   .outcome-grid,
   .two-column-list {
     grid-template-columns: 1fr;
+  }
+
+  .troubleshooting-line {
+    width: 2px;
+    height: 18px;
+    justify-self: center;
+  }
+
+  .troubleshooting-line::before,
+  .troubleshooting-line::after {
+    left: 50%;
+    transform: translate(-50%, 0);
+  }
+
+  .troubleshooting-line::before {
+    top: -4px;
+  }
+
+  .troubleshooting-line::after {
+    top: auto;
+    bottom: -4px;
   }
 }

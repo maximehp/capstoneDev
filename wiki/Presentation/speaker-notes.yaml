@@ -108,27 +108,22 @@ slides:
 
   slides/11-connectivity.html:
     title: "Connectivity"
-    speaker: "Unassigned"
+    speaker: "Romeo Casiano"
     notes: ""
 
   slides/12-proxmox-sdn-setup.html:
     title: "Proxmox Setup and Configuration"
-    speaker: "Unassigned"
+    speaker: "Romeo Casiano"
     notes: ""
 
-  slides/12-networking-troubleshooting-services.html:
-    title: "Restoring Switch and Service Stability"
-    speaker: "Unassigned"
-    notes: ""
-
-  slides/12-networking-troubleshooting-vms.html:
-    title: "Fixing VM Connectivity and Addressing"
-    speaker: "Unassigned"
+  slides/12-networking-troubleshooting.html:
+    title: "Networking Troubleshooting"
+    speaker: "Romeo Casiano"
     notes: ""
 
   slides/12-networking-recommendations.html:
     title: "What's Still Needed"
-    speaker: "Unassigned"
+    speaker: "Romeo Casiano"
     notes: ""
 
   slides/13-security.html:
