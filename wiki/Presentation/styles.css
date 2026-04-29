@@ -213,16 +213,23 @@ body[data-theme="development"] {
 
 .vanta-background {
   position: fixed;
-  left: 50%;
-  top: 50%;
-  width: 100vw;
-  height: 100vh;
-  transform: translate(-50%, -50%);
+  left: 0;
+  top: 0;
+  width: 200vw;
+  height: 200vh;
   z-index: 0;
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
   transition: opacity 700ms ease;
+}
+
+[data-vanta="security"] #vanta-background {
+  left: 50%;
+  top: 50%;
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%);
 }
 
 .vanta-background canvas {

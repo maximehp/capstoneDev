@@ -1,0 +1,236 @@
+slides:
+  slides/01-capstone-in-cit-applied-cybersecurity.html:
+    title: "Capstone in CIT/Applied Cybersecurity"
+    speaker: "Opening speaker"
+    notes: |-
+      Introduce this as a multi-team capstone: hardware, network, security, observability, automation, and application development all converged into one lab platform.
+
+  slides/02-what-we-built.html:
+    title: "What We Built"
+    speaker: "Maxime Hendryx-Parker"
+    notes: |-
+      Frame the project as one integrated lab platform, not a set of disconnected tools.
+
+  slides/03-how-the-pieces-connect.html:
+    title: "How the Pieces Connect"
+    speaker: "Team lead or panel moderator"
+    notes: |-
+      Walk top to bottom: app orchestration, automation/security/monitoring, network/storage, then Proxmox compute.
+
+  slides/04-infrastructure.html:
+    title: "Infrastructure"
+    speaker: "Infrastructure team"
+    notes: |-
+      Transition from overview into the physical and virtual foundation.
+
+  slides/05-base-infrastructure.html:
+    title: "Base Infrastructure"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/06-nas-hardware.html:
+    title: "NAS Hardware"
+    speaker: "Eli Thompson"
+    notes: ""
+
+  slides/07-pbs-architecture.html:
+    title: "PBS Architecture"
+    speaker: "Eli Thompson"
+    notes: ""
+
+  slides/08-replication-architecture.html:
+    title: "Replication Architecture"
+    speaker: "Eli Thompson"
+    notes: ""
+
+  slides/28-iac-ci-cd.html:
+    title: "IaC / CI-CD"
+    speaker: "Liam Callahan"
+    notes: |-
+      Transition from base infrastructure into repeatable service delivery.
+
+  slides/29-forgejo-and-runners.html:
+    title: "Forgejo & Runners"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/30-iac-full-pipeline.html:
+    title: "IaC: Full Pipeline"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/31-three-way-data-split.html:
+    title: "Three-way Data Split"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/32-minio.html:
+    title: "MinIO"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/33-packer.html:
+    title: "Packer"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/34-terraform.html:
+    title: "Terraform"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/35-ansible.html:
+    title: "Ansible"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/36-what-s-still-needed.html:
+    title: "What's Still Needed"
+    speaker: "Liam Callahan"
+    notes: ""
+
+  slides/09-networking.html:
+    title: "Networking"
+    speaker: "Networking team"
+    notes: |-
+      Transition into addressing, segmentation, and connectivity.
+
+  slides/10-subnetting.html:
+    title: "Subnetting"
+    speaker: "Drew Barkdull"
+    notes: ""
+
+  slides/11-connectivity.html:
+    title: "Connectivity"
+    speaker: "Networking team member to assign"
+    notes: ""
+
+  slides/12-proxmox-sdn-setup.html:
+    title: "Proxmox SDN Setup"
+    speaker: "Networking team member to assign"
+    notes: ""
+
+  slides/13-security.html:
+    title: "Security"
+    speaker: "Security team"
+    notes: |-
+      Transition into detection, enrichment, firewalling, and scanning.
+
+  slides/14-siem-overview.html:
+    title: "SIEM Overview"
+    speaker: "Chad Becker"
+    notes: ""
+
+  slides/15-log-ingestion-wazuh.html:
+    title: "Log Ingestion: Wazuh"
+    speaker: "Chad Becker"
+    notes: ""
+
+  slides/16-log-analysis-graylog.html:
+    title: "Log Analysis: Graylog"
+    speaker: "Chad Becker"
+    notes: ""
+
+  slides/17-automation-shuffle.html:
+    title: "Automation: Shuffle"
+    speaker: "Chad Becker"
+    notes: ""
+
+  slides/18-intelligence-enrichment-misp.html:
+    title: "Intelligence Enrichment: MISP"
+    speaker: "Baylen Small"
+    notes: ""
+
+  slides/19-virtual-firewall-with-opnsense.html:
+    title: "Virtual Firewall with OPNsense"
+    speaker: "Nikolas Bradley"
+    notes: ""
+
+  slides/20-vulnerability-scanning-with-kali-linux.html:
+    title: "Vulnerability Scanning with Kali Linux"
+    speaker: "Baylen Small"
+    notes: ""
+
+  slides/21-monitoring.html:
+    title: "Monitoring"
+    speaker: "Monitoring team"
+    notes: |-
+      Transition into health checks, metrics, dashboards, and alerting.
+
+  slides/22-nagios-and-agents.html:
+    title: "Nagios & Agents"
+    speaker: "Phillip Brooks"
+    notes: ""
+
+  slides/23-prometheus.html:
+    title: "Prometheus"
+    speaker: "Julius Lillard"
+    notes: ""
+
+  slides/24-exporters-and-connections.html:
+    title: "Exporters & Connections"
+    speaker: "Julius Lillard"
+    notes: ""
+
+  slides/25-grafana-and-data-sources.html:
+    title: "Grafana & Data Sources"
+    speaker: "Julius Lillard"
+    notes: ""
+
+  slides/26-dashboards-metrics-and-alerts.html:
+    title: "Dashboards, Metrics & Alerts"
+    speaker: "Julius Lillard"
+    notes: ""
+
+  slides/27-potential-future-improvements.html:
+    title: "Potential Future Improvements"
+    speaker: "Julius Lillard"
+    notes: ""
+
+  slides/37-web-development.html:
+    title: "Web Development"
+    speaker: "Maxime Hendryx-Parker"
+    notes: |-
+      Transition into the Django app and user-facing workflow.
+
+  slides/38-frontend-architecture.html:
+    title: "Frontend Architecture"
+    speaker: "Maxime Hendryx-Parker"
+    notes: ""
+
+  slides/39-user-flow-and-interaction.html:
+    title: "User Flow & Interaction"
+    speaker: "Maxime Hendryx-Parker"
+    notes: ""
+
+  slides/40-backend-architecture.html:
+    title: "Backend Architecture"
+    speaker: "Maxime Hendryx-Parker"
+    notes: ""
+
+  slides/41-api-flow-and-execution.html:
+    title: "API Flow & Execution"
+    speaker: "Maxime Hendryx-Parker"
+    notes: ""
+
+  slides/42-data-model-and-job-system.html:
+    title: "Data Model & Job System"
+    speaker: "Maxime Hendryx-Parker"
+    notes: ""
+
+  slides/43-conclusion.html:
+    title: "Conclusion"
+    speaker: "Closing speaker"
+    notes: |-
+      Signal that the remaining slides connect the teams back to the final platform outcome.
+
+  slides/43-from-shared-hardware-to-rebuildable-services.html:
+    title: "From Shared Hardware to Rebuildable Services"
+    speaker: "Closing speaker"
+    notes: ""
+
+  slides/44-questions.html:
+    title: "Questions?"
+    speaker: "Closing speaker"
+    notes: |-
+      Thank the panel, faculty, and contributors. Invite questions.

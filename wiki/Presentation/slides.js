@@ -64,23 +64,69 @@ function applySlideThemes(root) {
 
   sections.forEach((section, index) => {
     section.classList.add(`theme-${themeForSlide(slideFiles[index])}`);
+    section.dataset.slideFile = slideFiles[index];
+  });
+}
+
+async function loadSpeakerNotes() {
+  try {
+    const response = await fetch("speaker-notes.yaml", { cache: "no-store" });
+    if (!response.ok || !window.jsyaml) {
+      return {};
+    }
+
+    return window.jsyaml.load(await response.text())?.slides || {};
+  } catch {
+    return {};
+  }
+}
+
+function applySpeakerNotes(root, notesBySlide) {
+  const sections = root.querySelectorAll("section");
+
+  sections.forEach((section, index) => {
+    const slideFile = slideFiles[index];
+    const noteConfig = notesBySlide[slideFile];
+
+    if (!noteConfig) {
+      return;
+    }
+
+    if (noteConfig.speaker && !section.querySelector(".speaker")) {
+      const speaker = document.createElement("div");
+      speaker.className = "speaker";
+      speaker.textContent = `Speaker: ${noteConfig.speaker}`;
+      section.appendChild(speaker);
+    }
+
+    if (typeof noteConfig.notes === "string") {
+      let notes = section.querySelector("aside.notes");
+      if (!notes) {
+        notes = document.createElement("aside");
+        notes.className = "notes";
+        section.appendChild(notes);
+      }
+      notes.textContent = noteConfig.notes.trim();
+    }
   });
 }
 
 async function loadSlides() {
   const root = document.getElementById("slides-root");
-  const fragments = await Promise.all(
-    slideFiles.map(async (file) => {
+  const [fragments, speakerNotes] = await Promise.all([
+    Promise.all(slideFiles.map(async (file) => {
       const response = await fetch(file);
       if (!response.ok) {
         throw new Error("Unable to load " + file + ": " + response.status);
       }
       return response.text();
-    })
-  );
+    })),
+    loadSpeakerNotes(),
+  ]);
 
   root.innerHTML = fragments.join("\n");
   applySlideThemes(root);
+  applySpeakerNotes(root, speakerNotes);
 }
 
 const deck = new Reveal({
@@ -231,7 +277,7 @@ function vantaOptions(section, el) {
         color: 0x123f35,
         shininess: 28.00,
         waveHeight: 14.00,
-        waveSpeed: 0.35,
+        waveSpeed: 0.20,
         zoom: 0.82,
       },
     };
@@ -302,6 +348,30 @@ function vantaForSlide(slide, theme) {
 
 const speakerOverlay = document.getElementById("speaker-overlay");
 
+function slideState(currentSlide) {
+  const indices = deck.getIndices(currentSlide);
+  const speaker = currentSlide?.querySelector(".speaker")?.textContent || "";
+  const notes = currentSlide?.querySelector("aside.notes")?.innerHTML || "";
+
+  return {
+    index: indices.h,
+    total: slideFiles.length,
+    file: currentSlide?.dataset.slideFile || slideFiles[indices.h] || "",
+    title: currentSlide?.querySelector("h1, h2")?.textContent?.trim() || "",
+    speaker,
+    notes,
+  };
+}
+
+function publishSpeakerState(currentSlide) {
+  fetch("speaker/state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(slideState(currentSlide)),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 function updateSpeakerOverlay() {
   const currentSlide = deck.getCurrentSlide();
   const speaker = currentSlide?.querySelector(".speaker");
@@ -322,6 +392,7 @@ function updateSpeakerOverlay() {
       currentSlide?.classList.contains("closing-slide")
   );
   document.body.classList.toggle("section-vanta-title-active", currentSlide?.classList.contains("section-break"));
+  publishSpeakerState(currentSlide);
 }
 
 deck.on("ready", () => {
