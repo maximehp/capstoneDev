@@ -6,11 +6,11 @@
   --muted: #b8c6d8;
   --cyan: #45d8ff;
   --green: #75f0a0;
-  --orange: #ffad5f;
+  --orange: #ff886e;
   --rose: #ff6f7d;
   --blue: #45d8ff;
   --purple: #b48cff;
-  --yellow: #ffd66e;
+  --security: #6e7aff;
   --accent: var(--cyan);
   --accent-rgb: 69, 216, 255;
   --accent-soft: rgba(var(--accent-rgb), 0.1);
@@ -41,13 +41,13 @@ body[data-theme="networking"] {
 }
 
 body[data-theme="security"] {
-  --current-accent: var(--orange);
-  --current-accent-rgb: 255, 173, 95;
+  --current-accent: var(--security);
+  --current-accent-rgb: 110, 122, 255;
 }
 
 body[data-theme="monitoring"] {
-  --current-accent: var(--yellow);
-  --current-accent-rgb: 255, 214, 110;
+  --current-accent: var(--orange);
+  --current-accent-rgb: 255, 136, 110;
 }
 
 body[data-theme="development"] {
@@ -95,13 +95,13 @@ body[data-theme="development"] {
 }
 
 .reveal section.theme-security {
-  --accent: var(--orange);
-  --accent-rgb: 255, 173, 95;
+  --accent: var(--security);
+  --accent-rgb: 110, 122, 255;
 }
 
 .reveal section.theme-monitoring {
-  --accent: var(--yellow);
-  --accent-rgb: 255, 214, 110;
+  --accent: var(--orange);
+  --accent-rgb: 255, 136, 110;
 }
 
 .reveal section.theme-development {
@@ -648,7 +648,7 @@ body[data-theme="development"] {
 
 .architecture-card.app { --card-accent: var(--cyan); }
 .architecture-card.automation { --card-accent: var(--purple); }
-.architecture-card.security { --card-accent: var(--yellow); }
+.architecture-card.security { --card-accent: var(--security); }
 .architecture-card.monitor { --card-accent: var(--orange); }
 .architecture-card.network { --card-accent: var(--green); }
 .architecture-card.storage { --card-accent: var(--cyan); }
