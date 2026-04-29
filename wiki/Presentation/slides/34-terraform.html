@@ -1,16 +1,87 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
   <h2>Terraform</h2>
-  <div class="card-grid two">
-    <article class="info-card">
-      <h3>Provision</h3>
-      <p>Clones VMs from the Packer-built golden template and routes OS builds through OS-specific modules.</p>
-    </article>
-    <article class="info-card">
-      <h3>Export</h3>
-      <p>Writes Terraform state and <code>vm_info.json</code> to MinIO so later stages know VM IPs, names, and roles.</p>
-    </article>
+  <div class="tf-body">
+
+    <div class="tf-flow">
+
+      <!-- ── Row 1: conditional destroy bypass ─────────────────── -->
+      <div class="tf-bp-l"></div>
+      <div class="anim-step tf-step-conditional tf-destroy" style="--anim-delay:1.2s;--anim-duration:9s">
+        <div class="anim-step-content">
+          <strong>terraform destroy</strong>
+          <span class="tf-conditional-label">if destroy_first | destroy_all</span>
+        </div>
+        <div class="anim-step-emblem tf-emblem-destroy"></div>
+      </div>
+      <div class="tf-bp-r"></div>
+
+      <!-- ── Row 2: vertical connectors ─────────────────────────── -->
+      <div class="tf-vconn tf-vconn-l">
+        <span class="tf-vdot tf-vdot-up" style="--anim-delay:0.4s;--anim-duration:9s"></span>
+      </div>
+      <div class="tf-vconn tf-vconn-r">
+        <span class="tf-vdot tf-vdot-dn" style="--anim-delay:1.8s;--anim-duration:9s"></span>
+      </div>
+
+      <!-- ── Row 3: main rail ────────────────────────────────────── -->
+      <div class="anim-step anim-step-trigger tf-main-init" style="--anim-delay:0s;--anim-duration:9s">
+        <div class="anim-step-content">
+          <strong>terraform init</strong>
+        </div>
+        <div class="anim-step-emblem tf-emblem-init"></div>
+      </div>
+
+      <div class="tf-fork"></div>
+      <div class="tf-skip"></div>
+      <div class="tf-rejoin"></div>
+
+      <div class="anim-step tf-main-plan" style="--anim-delay:2.6s;--anim-duration:9s">
+        <div class="anim-step-content">
+          <strong>terraform plan</strong>
+        </div>
+        <div class="anim-step-emblem tf-emblem-plan"></div>
+      </div>
+
+      <div class="tf-hconn tf-hconn-1">
+        <span class="tf-hdot" style="--anim-delay:3.0s;--anim-duration:9s"></span>
+      </div>
+
+      <div class="anim-step tf-main-apply" style="--anim-delay:3.2s;--anim-duration:9s">
+        <div class="anim-step-content">
+          <strong>terraform apply</strong>
+          <div class="tf-disk-pills">
+            <span class="tf-pill tf-pill-boot">Boot Disk ↻</span>
+            <span class="tf-pill tf-pill-data">Data Disk ✓</span>
+          </div>
+        </div>
+        <div class="anim-step-emblem tf-emblem-apply"></div>
+      </div>
+
+      <div class="tf-hconn tf-hconn-2">
+        <span class="tf-hdot tf-hdot-gold" style="--anim-delay:4.0s;--anim-duration:9s"></span>
+      </div>
+
+      <div class="anim-step anim-step-gold tf-main-write" style="--anim-delay:4.7s;--anim-duration:9s">
+        <div class="anim-step-content">
+          <strong>Write to MinIO</strong>
+          <div class="tf-disk-pills">
+            <span class="tf-pill tf-pill-boot">terraform.tfstate</span>
+            <span class="tf-pill tf-pill-data">vm_info.json</span>
+          </div>
+        </div>
+        <div class="anim-step-emblem tf-emblem-minio"></div>
+      </div>
+
+    </div>
+
+    <ul class="tight-list tf-fact-list">
+      <li>Provider <code>bpg/proxmox</code> pre-installed on runner via bind mount — API token stored as Forgejo secret.</li>
+      <li>MinIO is both the state backend (<code>use_path_style = true</code>) and the output target for <code>vm_info.json</code>.</li>
+      <li>Data disks exist outside Terraform state — <code>null_resource</code> attaches on apply, detaches before destroy.</li>
+      <li>Forgejo passes numbers as strings — wrap all numeric fields in <code>tonumber()</code> or Terraform throws a type error.</li>
+    </ul>
+
   </div>
-  <p class="lead compact">The data disk is handled through a null_resource so it survives destroy and rebuild cycles.</p>
   <div class="speaker">Speaker: Liam Callahan</div>
 </section>
