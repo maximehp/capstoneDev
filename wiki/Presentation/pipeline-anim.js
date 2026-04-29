@@ -1,11 +1,12 @@
 // pipeline-anim.js — JS pipeline diagram animator using RAF
 
 const DOT_R          = 5;    // dot radius px
-const LEG_MS         = 460;  // ms per connector segment
+const DOT_SPEED      = 100;  // px per second — every leg moves at the same visual speed
 const PAUSE          = 220;  // ms pause after a box lights up
 const INIT_PAUSE     = 420;  // ms pause on the first box
 const LOOP_PAUSE     = 1500; // ms pause before restarting the loop
 const BRANCH_STAGGER = 190;  // ms stagger between Ansible fan-out branches
+const TRANSITION_MS  = 1500;  // ms to wait for the Reveal.js slide transition to finish
 
 // ── Overlay ───────────────────────────────────────────────────────────────────
 
@@ -83,10 +84,13 @@ function travelLeg(dot, from, to, durationMs, signal) {
   });
 }
 
-// Walk dot along a series of waypoints, one leg at a time
+// Walk dot along a series of waypoints at constant speed (DOT_SPEED px/s)
 async function travel(dot, waypoints, signal) {
   for (let i = 0; i < waypoints.length - 1; i++) {
-    await travelLeg(dot, waypoints[i], waypoints[i + 1], LEG_MS, signal);
+    const a = waypoints[i], b = waypoints[i + 1];
+    const dist = Math.hypot(b.x - a.x, b.y - a.y);
+    const dur  = Math.max(30, dist / DOT_SPEED * 1000);
+    await travelLeg(dot, a, b, dur, signal);
   }
 }
 
@@ -128,8 +132,6 @@ async function terraformOnce(slide, signal) {
 
   const init    = flow.querySelector('.tf-main-init');
   const destroy = flow.querySelector('.tf-destroy');
-  const vconnL  = flow.querySelector('.tf-vconn-l');
-  const vconnR  = flow.querySelector('.tf-vconn-r');
   const plan    = flow.querySelector('.tf-main-plan');
   const apply   = flow.querySelector('.tf-main-apply');
   const write   = flow.querySelector('.tf-main-write');
@@ -140,30 +142,32 @@ async function terraformOnce(slide, signal) {
   lit(init);
   await sleep(INIT_PAUSE, signal);
 
-  if (destroy && vconnL && vconnR) {
-    // Up path: init top → right to vconn-l center x → up to destroy y → into destroy
-    const initTop  = pt(init,    'top');
-    const vLx      = pt(vconnL,  'center').x;
-    const destC    = pt(destroy, 'center');
-    const corner1  = { x: vLx, y: initTop.y };
-    const corner2  = { x: vLx, y: destC.y };
-    const destLeft = { x: pt(destroy, 'left').x, y: destC.y };
+  const fork   = flow.querySelector('.tf-fork');
+  const bpL    = flow.querySelector('.tf-bp-l');
+  const bpR    = flow.querySelector('.tf-bp-r');
+  const rejoin = flow.querySelector('.tf-rejoin');
 
-    const dot1 = makeDot(initTop);
-    await travel(dot1, [initTop, corner1, corner2, destLeft], signal);
+  if (destroy && fork && bpL && bpR && rejoin) {
+    // Up path: init right → fork center (row-3 corner) → bp-l center (row-1 corner) → destroy left
+    const dot1 = makeDot(pt(init, 'right'));
+    await travel(dot1, [
+      pt(init,    'right'),
+      pt(fork,    'center'),
+      pt(bpL,     'center'),
+      pt(destroy, 'left'),
+    ], signal);
     dot1.remove();
     lit(destroy);
     await sleep(PAUSE, signal);
 
-    // Down path: destroy right → right to vconn-r center x → down to plan y → into plan
-    const destRight = pt(destroy, 'right');
-    const vRx       = pt(vconnR,  'center').x;
-    const planLeft  = pt(plan,    'left');
-    const corner3   = { x: vRx, y: destRight.y };
-    const corner4   = { x: vRx, y: planLeft.y };
-
-    const dot2 = makeDot(destRight);
-    await travel(dot2, [destRight, corner3, corner4, planLeft], signal);
+    // Down path: destroy right → bp-r center (row-1 corner) → rejoin center (row-3 corner) → plan left
+    const dot2 = makeDot(pt(destroy, 'right'));
+    await travel(dot2, [
+      pt(destroy, 'right'),
+      pt(bpR,     'center'),
+      pt(rejoin,  'center'),
+      pt(plan,    'left'),
+    ], signal);
     dot2.remove();
   } else {
     const from = pt(init, 'right');
@@ -214,17 +218,17 @@ async function ansibleOnce(slide, signal) {
   lit(runner);
   await sleep(PAUSE, signal);
 
-  // Fan out to all roles simultaneously with per-branch stagger
-  const runnerRight = pt(runner, 'right');
+  // Fan out to all roles — each dot exits the runner at the branch's own y level (purely horizontal)
+  const runnerRightX = pt(runner, 'right').x;
 
   await Promise.all(branches.map(async (branch, i) => {
     await sleep(i * BRANCH_STAGGER, signal);
     const step = branch.querySelector('.anim-step');
     if (!step) return;
-    const to     = pt(step, 'left');
-    const corner = { x: to.x, y: runnerRight.y };
-    const dot    = makeDot({ x: runnerRight.x, y: runnerRight.y });
-    await travel(dot, [runnerRight, corner, to], signal);
+    const to   = pt(step, 'left');
+    const from = { x: runnerRightX, y: to.y }; // same y as the branch, so path is horizontal
+    const dot  = makeDot(from);
+    await travel(dot, [from, to], signal);
     dot.remove();
     lit(step);
   }));
@@ -323,6 +327,8 @@ async function runLoop(fn, slide) {
   ctrl = c;
   slide.classList.add('js-animated');
   try {
+    // Wait for the Reveal.js slide transition to finish before measuring DOM positions
+    await sleep(TRANSITION_MS, c.signal);
     while (!c.signal.aborted) {
       unlitAll(slide);
       await fn(slide, c.signal);
