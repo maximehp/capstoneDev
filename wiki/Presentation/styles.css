@@ -207,11 +207,11 @@ body[data-theme="development"] {
   background: #06101c;
 }
 
-.overview-background-active {
+.trunk-background-active {
   background: #03070d;
 }
 
-#title-vanta-background {
+.vanta-background {
   position: fixed;
   left: 0;
   top: 0;
@@ -224,47 +224,46 @@ body[data-theme="development"] {
   transition: opacity 700ms ease;
 }
 
+.vanta-background canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+[data-vanta="trunk"] #title-vanta-background,
+[data-vanta="infrastructure"] #infrastructure-vanta-background,
+[data-vanta="networking"] #networking-vanta-background,
+[data-vanta="security"] #security-vanta-background,
+[data-vanta="monitoring"] #monitoring-vanta-background,
+[data-vanta="development"] #development-vanta-background {
+  opacity: 0.34;
+}
+
 .title-background-active #title-vanta-background {
   opacity: 0.78;
 }
 
-.overview-background-active #title-vanta-background {
-  opacity: 0.34;
+.section-vanta-title-active[data-vanta="infrastructure"] #infrastructure-vanta-background,
+.section-vanta-title-active[data-vanta="networking"] #networking-vanta-background,
+.section-vanta-title-active[data-vanta="security"] #security-vanta-background,
+.section-vanta-title-active[data-vanta="monitoring"] #monitoring-vanta-background,
+.section-vanta-title-active[data-vanta="development"] #development-vanta-background,
+.section-vanta-title-active[data-vanta="trunk"] #title-vanta-background {
+  opacity: 0.95;
 }
 
-#title-vanta-background canvas {
-  position: absolute !important;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
+.trunk-background-active[data-vanta="trunk"] #title-vanta-background {
+  opacity: 0.42;
 }
 
-#infrastructure-vanta-background {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 200vw;
-  height: 200vh;
-  z-index: -1;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-  transition: opacity 700ms ease;
+.section-vanta-title-active[data-vanta="trunk"] #title-vanta-background {
+  opacity: 0.95;
 }
 
-[data-theme="infrastructure"] #infrastructure-vanta-background {
-  opacity: 0.3;
-}
-
-[data-theme="infrastructure"].infrastructure-title-active #infrastructure-vanta-background {
-  opacity: 1;
-}
-
-#infrastructure-vanta-background canvas {
-  position: absolute !important;
-  inset: 0;
-  width: 100% !important;
-  height: 100% !important;
+.closing-slide.conclusion-slide,
+.conclusion-slide {
+  background: transparent;
 }
 
 .title-slide {
@@ -699,11 +698,13 @@ body[data-theme="development"] {
   background: radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.26), transparent 36%), var(--bg);
 }
 
-.section-break.infra {
-  background: transparent;
-}
-
-.section-break.iac {
+.section-break.infra,
+.section-break.iac,
+.section-break.network,
+.section-break.security,
+.section-break.monitoring,
+.section-break.dev,
+.section-break.conclusion {
   background: transparent;
 }
 

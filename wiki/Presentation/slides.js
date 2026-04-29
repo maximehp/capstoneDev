@@ -41,6 +41,7 @@ const slideFiles = [
   "slides/40-backend-architecture.html",
   "slides/41-api-flow-and-execution.html",
   "slides/42-data-model-and-job-system.html",
+  "slides/43-conclusion.html",
   "slides/43-from-shared-hardware-to-rebuildable-services.html",
   "slides/44-questions.html"
 ];
@@ -104,6 +105,20 @@ window.deck = deck;
 
 let titleVanta;
 let infrastructureVanta;
+let networkingVanta;
+let securityVanta;
+let monitoringVanta;
+let developmentVanta;
+
+const colors = {
+  background: 0x06101c,
+  cyan: 0x45d8ff,
+  green: 0x75f0a0,
+  orange: 0xff886e,
+  rose: 0xff6f7d,
+  purple: 0xb48cff,
+  security: 0x6e7aff,
+};
 
 function initTitleBackground() {
   if (titleVanta) {
@@ -127,7 +142,7 @@ function initTitleBackground() {
     scale: 1.0,
     scaleMobile: 1.0,
     color: 0x176f93,
-    backgroundColor: 0x06101c,
+    backgroundColor: colors.background,
     spacing: 12.0,
     chaos: 1.8,
   });
@@ -155,6 +170,9 @@ function initInfrastructureBackground() {
     minWidth: 200.00,
     scale: 1.00,
     scaleMobile: 1.00,
+    backgroundColor: colors.background,
+    color1: colors.rose,
+    color2: colors.cyan,
     colorMode: "variance",
     wingSpan: 25.00,
     speedLimit: 2.00,
@@ -167,36 +185,209 @@ function initInfrastructureBackground() {
   infrastructureVanta.resize?.();
 }
 
+function initNetworkingBackground() {
+  if (networkingVanta) {
+    return;
+  }
+
+  const networkingBackground = document.getElementById("networking-vanta-background");
+
+  if (!networkingBackground || !window.VANTA?.NET || !window.THREE) {
+    return;
+  }
+
+  networkingVanta = window.VANTA.NET({
+    el: networkingBackground,
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    color: colors.purple,
+    backgroundColor: colors.background,
+    points: 11.00,
+    maxDistance: 21.00,
+    spacing: 17.00
+  });
+
+  networkingVanta.resize?.();
+}
+
+function initSecurityBackground() {
+  if (securityVanta) {
+    return;
+  }
+
+  const securityBackground = document.getElementById("security-vanta-background");
+
+  if (!securityBackground || !window.VANTA?.GLOBE || !window.THREE) {
+    return;
+  }
+
+  securityVanta = window.VANTA.GLOBE({
+    el: securityBackground,
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    color: colors.security,
+    color2: colors.cyan,
+    backgroundColor: colors.background,
+    size: 1.15
+  });
+
+  securityVanta.resize?.();
+}
+
+function initMonitoringBackground() {
+  if (monitoringVanta) {
+    return;
+  }
+
+  const monitoringBackground = document.getElementById("monitoring-vanta-background");
+
+  if (!monitoringBackground || !window.VANTA?.FOG || !window.THREE) {
+    return;
+  }
+
+  monitoringVanta = window.VANTA.FOG({
+    el: monitoringBackground,
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    highlightColor: colors.orange,
+    midtoneColor: 0x15324a,
+    lowlightColor: 0x1d102f,
+    baseColor: colors.background,
+    blurFactor: 0.62,
+    speed: 1.1,
+    zoom: 0.82
+  });
+
+  monitoringVanta.resize?.();
+}
+
+function initDevelopmentBackground() {
+  if (developmentVanta) {
+    return;
+  }
+
+  const developmentBackground = document.getElementById("development-vanta-background");
+
+  if (!developmentBackground || !window.VANTA?.WAVES || !window.THREE) {
+    return;
+  }
+
+  developmentVanta = window.VANTA.WAVES({
+    el: developmentBackground,
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    color: 0x123f35,
+    shininess: 28.00,
+    waveHeight: 14.00,
+    waveSpeed: 0.75,
+    zoom: 0.82
+  });
+
+  developmentVanta.resize?.();
+}
+
+function initVantaBackgrounds() {
+  initTitleBackground();
+  initInfrastructureBackground();
+  initNetworkingBackground();
+  initSecurityBackground();
+  initMonitoringBackground();
+  initDevelopmentBackground();
+}
+
+function resizeVantaBackgrounds() {
+  titleVanta?.resize?.();
+  infrastructureVanta?.resize?.();
+  networkingVanta?.resize?.();
+  securityVanta?.resize?.();
+  monitoringVanta?.resize?.();
+  developmentVanta?.resize?.();
+}
+
+function vantaForSlide(slide, theme) {
+  if (!slide) {
+    return "trunk";
+  }
+
+  if (
+    slide.classList.contains("title-slide") ||
+    slide.classList.contains("overview-slide") ||
+    slide.classList.contains("vanta-fade-slide") ||
+    slide.classList.contains("conclusion-slide") ||
+    slide.classList.contains("closing-slide")
+  ) {
+    return "trunk";
+  }
+
+  if (slide.classList.contains("network")) return "networking";
+  if (slide.classList.contains("security")) return "security";
+  if (slide.classList.contains("monitoring")) return "monitoring";
+  if (slide.classList.contains("dev")) return "development";
+  if (slide.classList.contains("infra") || slide.classList.contains("iac")) return "infrastructure";
+
+  if (theme === "networking") return "networking";
+  if (theme === "security") return "security";
+  if (theme === "monitoring") return "monitoring";
+  if (theme === "development") return "development";
+  if (theme === "infrastructure") return "infrastructure";
+
+  return "trunk";
+}
+
 const speakerOverlay = document.getElementById("speaker-overlay");
 
 function updateSpeakerOverlay() {
   const currentSlide = deck.getCurrentSlide();
   const speaker = currentSlide?.querySelector(".speaker");
   const themeClass = [...(currentSlide?.classList || [])].find((className) => className.startsWith("theme-"));
+  const theme = themeClass?.replace("theme-", "") || "blue";
+  const vantaSection = vantaForSlide(currentSlide, theme);
 
   speakerOverlay.textContent = speaker?.textContent || "";
-  document.body.dataset.theme = themeClass?.replace("theme-", "") || "blue";
+  document.body.dataset.theme = theme;
+  document.body.dataset.vanta = vantaSection;
   document.body.classList.toggle("title-background-active", currentSlide?.classList.contains("title-slide"));
-  document.body.classList.toggle("overview-background-active", currentSlide?.classList.contains("overview-slide") || currentSlide?.classList.contains("vanta-fade-slide"));
-  document.body.classList.toggle("infrastructure-title-active", currentSlide?.classList.contains("infra"));
+  document.body.classList.toggle(
+    "trunk-background-active",
+    currentSlide?.classList.contains("overview-slide") ||
+      currentSlide?.classList.contains("vanta-fade-slide") ||
+      currentSlide?.classList.contains("conclusion-slide") ||
+      currentSlide?.classList.contains("closing-slide")
+  );
+  document.body.classList.toggle("section-vanta-title-active", currentSlide?.classList.contains("section-break"));
 }
 
 deck.on("ready", () => {
   updateSpeakerOverlay();
-  initTitleBackground();
-  initInfrastructureBackground();
+  initVantaBackgrounds();
 });
 deck.on("slidechanged", updateSpeakerOverlay);
-deck.on("resize", () => {
-  titleVanta?.resize?.();
-  infrastructureVanta?.resize?.();
-});
+deck.on("resize", resizeVantaBackgrounds);
 updateSpeakerOverlay();
 requestAnimationFrame(() => {
-  initTitleBackground();
-  initInfrastructureBackground();
+  initVantaBackgrounds();
   updateSpeakerOverlay();
-  titleVanta?.resize?.();
+  resizeVantaBackgrounds();
 });
 
 document.addEventListener("keydown", (event) => {
