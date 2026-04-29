@@ -3032,6 +3032,129 @@ body[data-theme="development"] {
 
 /* ── End Terraform Diagram ──────────────────────────────────── */
 
+/* ── Ansible Fan-out Diagram (slide 35) ─────────────────────── */
+
+.ans-body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* 5-col layout: MinIO | h-gap | Runner | spine | roles */
+.ans-fan {
+  display: grid;
+  grid-template-columns: 1fr 36px 1fr 40px 1.5fr;
+  grid-template-rows: repeat(5, 50px);
+  gap: 6px 0;
+}
+
+/* ── Explicit placement ──────────────────────────────────────── */
+.ans-minio-card { grid-column: 1; grid-row: 2 / span 3; }
+.ans-h-conn     { grid-column: 2; grid-row: 2 / span 3; position: relative; overflow: visible; }
+.ans-runner     { grid-column: 3; grid-row: 1 / span 5; }
+.ans-spine      { grid-column: 4; grid-row: 1 / span 5; position: relative; }
+.ans-tr-common  { grid-column: 5; grid-row: 1; }
+.ans-tr-grafana { grid-column: 5; grid-row: 2; }
+.ans-tr-nagios  { grid-column: 5; grid-row: 3; }
+.ans-tr-security{ grid-column: 5; grid-row: 4; }
+.ans-tr-webdev  { grid-column: 5; grid-row: 5; }
+
+/* ── MinIO card ──────────────────────────────────────────────── */
+.ans-minio-card .anim-step-content {
+  padding: 10px 14px;
+}
+
+/* ── Horizontal connector (MinIO → Runner) ───────────────────── */
+.ans-h-conn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 4px;
+  height: 1px;
+  transform: translateY(-0.5px);
+  background: rgba(var(--accent-rgb), 0.45);
+}
+
+/* ── Runner content padding ──────────────────────────────────── */
+.ans-runner.anim-step .anim-step-content {
+  padding: 20px 18px;
+}
+.ans-runner.anim-step-trigger::before {
+  top: 16px;
+  left: 14px;
+}
+
+/* ── Branch wrappers: horizontal lines only, no vertical spine ─ */
+.ans-branch-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+.ans-branch-wrap > .anim-step {
+  flex: 1;
+  min-width: 0;
+}
+.ans-branch-wrap .anim-step-content {
+  min-width: 0;
+  overflow: hidden;
+  padding: 8px 14px;
+}
+.ans-branch-wrap::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  width: 36px;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-0.5px);
+  background: rgba(var(--accent-rgb), 0.45);
+}
+
+/* ── Branch travelling dots ──────────────────────────────────── */
+.ans-branch-dot {
+  position: absolute;
+  left: -36px;
+  top: calc(50% - 3.5px);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  animation: ans-dot-branch var(--anim-duration, 8s) linear infinite;
+  animation-delay: var(--anim-delay, 0s);
+  animation-fill-mode: both;
+  z-index: 2;
+}
+
+@keyframes ans-dot-branch {
+  0%   { opacity: 0; transform: translateX(0); }
+  3%   { opacity: 1; transform: translateX(4px); }
+  8%   { opacity: 0; transform: translateX(36px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+/* ── SVG emblems ─────────────────────────────────────────────── */
+.ans-emblem-ansible {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='10' width='48' height='44' rx='4' fill='none' stroke='white' stroke-width='3'/%3E%3Cline x1='8' y1='20' x2='56' y2='20' stroke='white' stroke-width='2' opacity='0.5'/%3E%3Cpolygon points='22,28 22,46 44,37' fill='white'/%3E%3C/svg%3E");
+}
+.ans-emblem-common {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='white' stroke-width='3.5'/%3E%3Cpath d='M32 8v10M32 46v10M8 32h10M46 32h10M16.7 16.7l7 7M40.3 40.3l7 7M16.7 47.3l7-7M40.3 23.7l7-7' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.ans-emblem-grafana {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='34' width='12' height='18' rx='1' fill='white'/%3E%3Crect x='26' y='22' width='12' height='30' rx='1' fill='white'/%3E%3Crect x='44' y='12' width='12' height='40' rx='1' fill='white'/%3E%3Cline x1='6' y1='54' x2='58' y2='54' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.ans-emblem-nagios {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpolyline points='4,32 16,32 22,14 30,50 38,22 44,40 52,32 60,32' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.ans-emblem-security {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6 L54 16 L54 34 Q54 52 32 60 Q10 52 10 34 L10 16 Z' fill='none' stroke='white' stroke-width='3'/%3E%3Cpolyline points='22,32 28,38 42,24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.ans-emblem-webdev {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpolyline points='26,18 10,32 26,46' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpolyline points='38,18 54,32 38,46' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='36' y1='14' x2='28' y2='50' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* ── End Ansible Diagram ─────────────────────────────────────── */
+
 .bucket-diagram div {
   border: 1px solid var(--accent-strong);
   background: var(--accent-soft);
