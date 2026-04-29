@@ -3,19 +3,19 @@
   <h2>Subnetting</h2>
   <div class="compare-grid">
     <div class="compare-card before">
-      <h3>Before</h3>
+      <h3>Original Design</h3>
       <span class="big-code">/24</span>
-      <p>Smaller address space and five original VLAN groups.</p>
+      <p>Smaller overall address space with six original VLAN groups.</p>
     </div>
     <div class="compare-card after">
-      <h3>After</h3>
+      <h3>Updated Design</h3>
       <span class="big-code">/21</span>
-      <p>Larger IP range, six working VLAN groups, and switchport trunks prepared for future expansion.</p>
+      <p>Larger IP range with seven working VLAN groups for more effective segmentation.</p>
     </div>
   </div>
   <ul class="tight-list">
-    <li>Improved the original subnet design to support a larger lab environment.</li>
-    <li>Updated switch configurations to match the new subnet and VLAN structure.</li>
-    <li>Expanded trunk allowances so additional VLANs can be added later.</li>
+    <li>Improved the original subnet design so the lab has room to scale.</li>
+    <li>Updated switch configurations to match the new subnet and VLAN layout.</li>
+    <li>Expanded switchport trunks to allow additional VLANs for future network growth.</li>
   </ul>
 </section>

@@ -95,6 +95,12 @@ slides:
     notes: |-
       Transition into addressing, segmentation, and connectivity.
 
+  slides/09-networking-overview.html:
+    title: "Networking Overview"
+    speaker: "Romeo Casiano"
+    notes: |-
+      Preview the networking section: subnet expansion, VLAN segmentation, Proxmox SDN, troubleshooting, and future hardening.
+
   slides/10-subnetting.html:
     title: "Subnetting"
     speaker: "Drew Barkdull"
@@ -106,7 +112,22 @@ slides:
     notes: ""
 
   slides/12-proxmox-sdn-setup.html:
-    title: "Proxmox SDN Setup"
+    title: "Proxmox Setup and Configuration"
+    speaker: "Unassigned"
+    notes: ""
+
+  slides/12-networking-troubleshooting-services.html:
+    title: "Restoring Switch and Service Stability"
+    speaker: "Unassigned"
+    notes: ""
+
+  slides/12-networking-troubleshooting-vms.html:
+    title: "Fixing VM Connectivity and Addressing"
+    speaker: "Unassigned"
+    notes: ""
+
+  slides/12-networking-recommendations.html:
+    title: "What's Still Needed"
     speaker: "Unassigned"
     notes: ""
 
@@ -151,6 +172,11 @@ slides:
     speaker: "Baylen Small"
     notes: ""
 
+  slides/20-security-whats-still-needed.html:
+    title: "What's Still Needed"
+    speaker: "Baylen Small"
+    notes: ""
+
   slides/21-monitoring.html:
     title: "Monitoring"
     speaker: "Julius Lillard"
@@ -183,7 +209,7 @@ slides:
     notes: ""
 
   slides/27-potential-future-improvements.html:
-    title: "Potential Future Improvements"
+    title: "What's Still Needed"
     speaker: "Julius Lillard"
     notes: ""
 
@@ -193,28 +219,34 @@ slides:
     notes: |-
       Transition into the Django app and user-facing workflow.
 
+  slides/37-development-summary.html:
+    title: "What Web Development Built"
+    speaker: "Maxime Hendryx-Parker"
+    notes: |-
+      Summarize the app in user-facing terms before going into the frontend and backend pieces.
+
   slides/38-frontend-architecture.html:
-    title: "Frontend Architecture"
+    title: "How the Website Feels Fast"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
   slides/39-user-flow-and-interaction.html:
-    title: "User Flow & Interaction"
+    title: "The Main User Journey"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
   slides/40-backend-architecture.html:
-    title: "Backend Architecture"
+    title: "What Happens Behind the Scenes"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
   slides/41-api-flow-and-execution.html:
-    title: "API Flow & Execution"
+    title: "How Long Tasks Stay Manageable"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
-  slides/42-data-model-and-job-system.html:
-    title: "Data Model & Job System"
+  slides/42-development-whats-still-needed.html:
+    title: "What's Still Needed"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 

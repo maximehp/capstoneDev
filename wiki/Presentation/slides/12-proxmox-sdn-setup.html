@@ -1,20 +1,24 @@
 <section>
   <div class="slide-kicker">Networking / SDN</div>
-  <h2>Proxmox SDN Setup</h2>
-  <div class="split-layout">
+  <h2>Proxmox Setup and Configuration</h2>
+  <div class="split-layout sdn-layout">
     <div>
-      <p class="lead compact">Proxmox networking was extended with Open vSwitch components for enterprise-style connectivity.</p>
+      <p class="lead compact">Proxmox networking was extended with Open vSwitch bonds and bridges so VMs could land in the correct subnet group.</p>
       <ul class="tight-list">
-        <li>Created an OVS bond to combine physical connectivity.</li>
-        <li>Created an OVS bridge as the virtual switching layer for workloads.</li>
-        <li>Prepared the cluster networking model for VLAN-aware VM placement.</li>
+        <li>Selected bond modes based on the role of each network path.</li>
+        <li>Entered static IP addresses for each virtual machine.</li>
+        <li>Used VLAN tags on VMs for proper subnet connectivity.</li>
       </ul>
     </div>
-    <div class="network-diagram">
-      <div>Physical NICs</div>
-      <div>OVS Bond</div>
-      <div>OVS Bridge</div>
-      <div>VM VLAN Networks</div>
+    <div class="sdn-bond-grid">
+      <div>
+        <strong>Enterprise Connectivity</strong>
+        <span>OVS bond using LACP <code>balance-slb</code> with an OVS bridge.</span>
+      </div>
+      <div>
+        <strong>Student Lab Network</strong>
+        <span>OVS bond using <code>active-backup</code> with an OVS bridge.</span>
+      </div>
     </div>
   </div>
 </section>

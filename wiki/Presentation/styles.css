@@ -2052,6 +2052,98 @@ body[data-theme="development"] {
   gap: 14px;
 }
 
+.network-overview-grid,
+.connectivity-flow,
+.sdn-bond-grid,
+.issue-solution-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.network-overview-grid {
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 28px;
+}
+
+.network-overview-grid div,
+.sdn-bond-grid div,
+.issue-solution-grid div {
+  border: 1px solid var(--accent-line);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.12), rgba(255, 255, 255, 0.035));
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.network-overview-grid strong,
+.sdn-bond-grid strong,
+.issue-solution-grid strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.36em;
+  line-height: 1.18;
+  margin-bottom: 8px;
+}
+
+.network-overview-grid span,
+.sdn-bond-grid span,
+.issue-solution-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.3em;
+  line-height: 1.35;
+}
+
+.connectivity-flow {
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 34px;
+}
+
+.connectivity-flow span {
+  position: relative;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  color: #f0fbff;
+  font-size: 0.3em;
+  font-weight: 800;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.connectivity-flow span:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: -17px;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background: var(--accent-strong);
+}
+
+.sdn-layout {
+  grid-template-columns: 0.95fr 1.05fr;
+}
+
+.sdn-bond-grid {
+  grid-template-columns: 1fr;
+}
+
+.issue-solution-grid {
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 18px;
+}
+
+.issue-solution-grid div {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.issue-solution-grid strong:nth-of-type(2) {
+  margin-top: 18px;
+  color: var(--accent);
+}
+
 .network-diagram,
 .browser-diagram {
   display: grid;
@@ -3219,6 +3311,10 @@ body[data-theme="development"] {
   .mission-layout,
   .split-layout,
   .compare-grid,
+  .network-overview-grid,
+  .connectivity-flow,
+  .sdn-bond-grid,
+  .issue-solution-grid,
   .status-board,
   .outcome-grid,
   .two-column-list {

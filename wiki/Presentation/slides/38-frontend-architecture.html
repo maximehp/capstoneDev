@@ -1,19 +1,18 @@
 <section>
   <div class="slide-kicker">Development / Frontend + UI</div>
-  <h2>Frontend Architecture</h2>
+  <h2>How the Website Feels Fast</h2>
   <div class="split-layout">
     <ul class="tight-list">
-      <li>Server-rendered Django templates are the source of truth for page HTML.</li>
-      <li>Frontend uses vanilla JavaScript and CSS with no framework.</li>
-      <li>Partial navigation uses fetch requests with <code>X-Requested-With</code> headers.</li>
-      <li>Page updates replace <code>#app-content</code> and page-specific assets dynamically.</li>
-      <li>Theme system supports light, dark, and system modes.</li>
+      <li>Django still renders the real pages, so the app works from a simple server-side foundation.</li>
+      <li>Vanilla JavaScript adds smoother navigation, modal behavior, and live updates.</li>
+      <li>Only the main page content is swapped during in-app navigation, so moving around feels quicker.</li>
+      <li>The same layout supports light, dark, and system theme preferences.</li>
     </ul>
     <div class="browser-diagram">
-      <div>Browser</div>
-      <div>Django Templates</div>
-      <div>Partial Fetch</div>
-      <div>DOM Update</div>
+      <div>User clicks a page</div>
+      <div>Django renders it</div>
+      <div>Browser swaps content</div>
+      <div>Page scripts restart</div>
     </div>
   </div>
 </section>

@@ -1,17 +1,17 @@
 <section>
   <div class="slide-kicker">Development / Backend + API</div>
-  <h2>API Flow & Execution</h2>
+  <h2>How Long Tasks Stay Manageable</h2>
   <div class="sequence">
     <span>Frontend</span>
-    <span>JSON API + CSRF</span>
-    <span>Database Job</span>
+    <span>Safe API Request</span>
+    <span>Queued Job</span>
     <span>Worker</span>
-    <span>Proxmox Clone + Start</span>
+    <span>Proxmox Action</span>
   </div>
   <ul class="tight-list">
-    <li>REST-style JSON API powers frontend interactions.</li>
-    <li>Template creation validates input and queues an async build job.</li>
-    <li>API returns HTTP 202 while the worker processes the build in the background.</li>
-    <li>Status endpoint provides live build progress updates.</li>
+    <li>JSON endpoints power login, ISO checks, software checks, template creation, build status, and VM starts.</li>
+    <li>Template creation validates the request, saves the job, and returns quickly.</li>
+    <li>The worker later claims the job, stages ISOs, generates files, and runs Packer.</li>
+    <li>VM provisioning validates the selected template, asks Proxmox to clone/configure/start the VM, and records the result.</li>
   </ul>
 </section>

@@ -1,6 +1,6 @@
 <section>
   <div class="slide-kicker">Development / Backend + System</div>
-  <h2>Backend Architecture</h2>
+  <h2>What Happens Behind the Scenes</h2>
   <div class="backend-map">
     <div class="backend-node web">Django Web</div>
     <div class="backend-node db">PostgreSQL</div>
@@ -9,9 +9,9 @@
     <div class="backend-node ext">AD / Proxmox / NAS</div>
   </div>
   <ul class="two-column-list">
-    <li>Django 6 monolith with a single core application.</li>
-    <li>Web process handles requests while packer-worker handles long-running builds.</li>
-    <li>Shared database stores system state and job tracking.</li>
-    <li>Shared filesystem stores job artifacts, logs, and ISO files.</li>
+    <li>Django handles login, pages, forms, API requests, and validation.</li>
+    <li>The database remembers users, templates, build jobs, and provisioned VMs.</li>
+    <li>The Packer worker handles long template builds outside the web request.</li>
+    <li>The shared filesystem keeps generated build files, logs, staged ISOs, and job results.</li>
   </ul>
 </section>
