@@ -603,27 +603,8 @@ body[data-theme="development"] {
   line-height: 1.26;
 }
 
-.architecture-node::after {
-  content: "";
-  position: absolute;
-  left: 14px;
-  top: 14px;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--node-accent, var(--accent));
-  box-shadow: 0 0 12px var(--node-accent, var(--accent));
-}
-
-.architecture-node-app { --node-accent: var(--cyan); }
-.architecture-node-automation { --node-accent: var(--purple); }
-.architecture-node-security { --node-accent: var(--security); }
-.architecture-node-monitor { --node-accent: var(--orange); }
-.architecture-node-network { --node-accent: var(--green); }
-.architecture-node-storage { --node-accent: var(--cyan); }
-
-.architecture-node-core {
-  --node-accent: #f5c842;
+.architecture-node.anim-step-trigger::before {
+  display: none;
 }
 
 .architecture-connector {
@@ -658,12 +639,12 @@ body[data-theme="development"] {
 .architecture-flow-dot {
   opacity: 0;
   fill: rgb(var(--accent-rgb));
-  filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), 0.95)) drop-shadow(0 0 10px rgba(var(--accent-rgb), 0.4));
+  filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.9)) drop-shadow(0 0 12px rgba(var(--accent-rgb), 0.5));
 }
 
 .architecture-flow-dot-gold {
   fill: #f5c842;
-  filter: drop-shadow(0 0 5px rgba(245, 200, 66, 0.95)) drop-shadow(0 0 10px rgba(245, 200, 66, 0.4));
+  filter: drop-shadow(0 0 6px rgba(245, 200, 66, 0.9)) drop-shadow(0 0 12px rgba(245, 200, 66, 0.5));
 }
 
 .section-break {
