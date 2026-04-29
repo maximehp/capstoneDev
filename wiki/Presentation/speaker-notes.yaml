@@ -1,7 +1,7 @@
 slides:
   slides/01-capstone-in-cit-applied-cybersecurity.html:
     title: "Capstone in CIT/Applied Cybersecurity"
-    speaker: "Opening speaker"
+    speaker: "Dr. David Hua"
     notes: |-
       Introduce this as a multi-team capstone: hardware, network, security, observability, automation, and application development all converged into one lab platform.
 
@@ -13,13 +13,13 @@ slides:
 
   slides/03-how-the-pieces-connect.html:
     title: "How the Pieces Connect"
-    speaker: "Team lead or panel moderator"
+    speaker: "Maxime Hendryx-Parker"
     notes: |-
       Walk top to bottom: app orchestration, automation/security/monitoring, network/storage, then Proxmox compute.
 
   slides/04-infrastructure.html:
     title: "Infrastructure"
-    speaker: "Infrastructure team"
+    speaker: "Liam Callahan"
     notes: |-
       Transition from overview into the physical and virtual foundation.
 
@@ -91,7 +91,7 @@ slides:
 
   slides/09-networking.html:
     title: "Networking"
-    speaker: "Networking team"
+    speaker: "Romeo Casiano"
     notes: |-
       Transition into addressing, segmentation, and connectivity.
 
@@ -102,17 +102,17 @@ slides:
 
   slides/11-connectivity.html:
     title: "Connectivity"
-    speaker: "Networking team member to assign"
+    speaker: "Unassigned"
     notes: ""
 
   slides/12-proxmox-sdn-setup.html:
     title: "Proxmox SDN Setup"
-    speaker: "Networking team member to assign"
+    speaker: "Unassigned"
     notes: ""
 
   slides/13-security.html:
     title: "Security"
-    speaker: "Security team"
+    speaker: "Chad Becker"
     notes: |-
       Transition into detection, enrichment, firewalling, and scanning.
 
@@ -153,7 +153,7 @@ slides:
 
   slides/21-monitoring.html:
     title: "Monitoring"
-    speaker: "Monitoring team"
+    speaker: "Julius Lillard"
     notes: |-
       Transition into health checks, metrics, dashboards, and alerting.
 
@@ -220,17 +220,17 @@ slides:
 
   slides/43-conclusion.html:
     title: "Conclusion"
-    speaker: "Closing speaker"
+    speaker: "Maxime Hendryx-Parker"
     notes: |-
       Signal that the remaining slides connect the teams back to the final platform outcome.
 
   slides/43-from-shared-hardware-to-rebuildable-services.html:
     title: "From Shared Hardware to Rebuildable Services"
-    speaker: "Closing speaker"
+    speaker: "Maxime Hendryx-Parker"
     notes: ""
 
   slides/44-questions.html:
     title: "Questions?"
-    speaker: "Closing speaker"
+    speaker: "Maxime Hendryx-Parker"
     notes: |-
       Thank the panel, faculty, and contributors. Invite questions.

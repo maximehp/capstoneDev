@@ -149,6 +149,7 @@ await loadSlides();
 deck.initialize();
 window.deck = deck;
 
+const isNotesReceiver = /receiver/i.test(window.location.search);
 let activeVanta;
 let activeVantaSection;
 
@@ -262,9 +263,11 @@ function vantaOptions(section, el) {
         midtoneColor: 0x15324a,
         lowlightColor: 0x1d102f,
         baseColor: colors.background,
-        blurFactor: 0.62,
-        speed: 1.1,
-        zoom: 0.82,
+        blurFactor: 0.36,
+        speed: 0.35,
+        zoom: 0.58,
+        scale: 4.00,
+        scaleMobile: 4.00,
       },
     };
   }
@@ -288,6 +291,11 @@ function vantaOptions(section, el) {
 
 function updateVantaBackground(section) {
   const background = document.getElementById("vanta-background");
+
+  if (isNotesReceiver) {
+    clearVantaBackground();
+    return;
+  }
 
   if (!background || activeVantaSection === section) {
     activeVanta?.resize?.();
@@ -347,30 +355,7 @@ function vantaForSlide(slide, theme) {
 }
 
 const speakerOverlay = document.getElementById("speaker-overlay");
-
-function slideState(currentSlide) {
-  const indices = deck.getIndices(currentSlide);
-  const speaker = currentSlide?.querySelector(".speaker")?.textContent || "";
-  const notes = currentSlide?.querySelector("aside.notes")?.innerHTML || "";
-
-  return {
-    index: indices.h,
-    total: slideFiles.length,
-    file: currentSlide?.dataset.slideFile || slideFiles[indices.h] || "",
-    title: currentSlide?.querySelector("h1, h2")?.textContent?.trim() || "",
-    speaker,
-    notes,
-  };
-}
-
-function publishSpeakerState(currentSlide) {
-  fetch("speaker/state", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(slideState(currentSlide)),
-    keepalive: true,
-  }).catch(() => {});
-}
+let notesServerPost = () => {};
 
 function updateSpeakerOverlay() {
   const currentSlide = deck.getCurrentSlide();
@@ -392,11 +377,146 @@ function updateSpeakerOverlay() {
       currentSlide?.classList.contains("closing-slide")
   );
   document.body.classList.toggle("section-vanta-title-active", currentSlide?.classList.contains("section-break"));
-  publishSpeakerState(currentSlide);
+  notesServerPost();
+}
+
+async function loadOptionalScript(src) {
+  const response = await fetch(src, { cache: "no-store" });
+  if (!response.ok) {
+    return false;
+  }
+
+  const url = URL.createObjectURL(new Blob([await response.text()], { type: "text/javascript" }));
+
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = url;
+    script.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(true);
+    };
+    script.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(false);
+    };
+    document.head.appendChild(script);
+  });
+}
+
+function isSpeakerNotesPreview() {
+  return /receiver/i.test(window.location.search);
+}
+
+function hideQr() {
+  document.getElementById("qr")?.remove();
+}
+
+function showQr(location) {
+  if (isSpeakerNotesPreview()) {
+    return;
+  }
+
+  hideQr();
+
+  const container = document.createElement("div");
+  container.id = "qr";
+  container.style = "position:absolute;top:0;left:0;display:grid;background:#fff;color:#111;z-index:999;padding:10px;font-family:sans-serif;font-size:14px;";
+  container.onclick = hideQr;
+
+  const title = document.createElement("span");
+  title.textContent = "Scan to open notes.";
+  const qr = document.createElement("img");
+  qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(location)}`;
+  qr.alt = "Speaker notes QR code";
+  qr.style = "padding:5px";
+  const hint = document.createElement("span");
+  hint.textContent = "Click to close.";
+
+  container.append(title, qr, hint);
+  document.body.appendChild(container);
+}
+
+async function connectRevealNotesServer() {
+  if (isSpeakerNotesPreview()) {
+    return;
+  }
+
+  if (!/notes=true|qr=true/i.test(window.location.search) && window.location.port !== "1947") {
+    return;
+  }
+
+  try {
+    if (!window.io) {
+      const loaded = await loadOptionalScript("/socket.io/socket.io.js");
+      if (!loaded) {
+        return;
+      }
+    }
+  } catch {
+    return;
+  }
+
+  const socket = window.io.connect(window.location.origin);
+  const socketId = Math.random().toString().slice(2);
+  const notesLocation = `${window.location.origin}/notes/${socketId}`;
+
+  console.log(`View slide notes at ${notesLocation}`);
+
+  if (/qr=true/i.test(window.location.search)) {
+    showQr(notesLocation);
+  }
+
+  notesServerPost = () => {
+    const slideElement = deck.getCurrentSlide();
+    const notesElement = slideElement?.querySelector("aside.notes");
+    const messageData = {
+      notes: "",
+      markdown: false,
+      socketId,
+      state: deck.getState(),
+    };
+
+    if (slideElement?.hasAttribute("data-notes")) {
+      messageData.notes = slideElement.getAttribute("data-notes");
+    }
+
+    if (notesElement) {
+      messageData.notes = notesElement.innerHTML;
+      messageData.markdown = typeof notesElement.getAttribute("data-markdown") === "string";
+    }
+
+    socket.emit("statechanged", messageData);
+  };
+
+  socket.on("new-subscriber", (data) => {
+    if (!data?.socketId || data.socketId === socketId) {
+      hideQr();
+      notesServerPost();
+    }
+  });
+
+  socket.on("statechanged-speaker", (data) => {
+    if (data?.state) {
+      deck.setState(data.state);
+    }
+  });
+
+  [
+    "slidechanged",
+    "fragmentshown",
+    "fragmenthidden",
+    "overviewhidden",
+    "overviewshown",
+    "paused",
+    "resumed",
+  ].forEach((eventName) => deck.on(eventName, notesServerPost));
+
+  notesServerPost();
 }
 
 deck.on("ready", () => {
   updateSpeakerOverlay();
+  connectRevealNotesServer();
 });
 deck.on("slidechanged", updateSpeakerOverlay);
 deck.on("resize", resizeVantaBackground);
