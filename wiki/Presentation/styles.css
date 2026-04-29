@@ -313,22 +313,6 @@ body[data-theme="development"] {
   }
 }
 
-.closing-slide::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 42%;
-  height: 100%;
-  background:
-    linear-gradient(rgba(69, 216, 255, 0.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(69, 216, 255, 0.16) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: linear-gradient(90deg, transparent 0%, #000 26%, #000 100%);
-  opacity: 0.78;
-  pointer-events: none;
-}
-
 .title-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

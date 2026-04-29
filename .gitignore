@@ -12,3 +12,4 @@
 .env
 database/packer_templates/*
 !database/packer_templates/.gitignore
+wiki/Presentation/node_modules
