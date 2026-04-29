@@ -3,61 +3,131 @@
   <h2>How the Pieces Connect</h2>
   <div class="architecture-map" aria-label="Layered system architecture diagram">
     <div class="architecture-flow">
-      <div class="architecture-tier">
+      <div class="architecture-tier architecture-tier-top">
         <div class="tier-label">User-facing orchestration</div>
         <div class="tier-nodes single">
-          <div class="architecture-card app">
-            <strong>Django Web App</strong>
-            <span>Templates, builds, VM provisioning</span>
+          <div class="anim-step anim-step-trigger architecture-node architecture-node-app" style="--anim-delay:5.28s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>Django Web App</strong>
+              <span>Templates, builds, VM provisioning</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="architecture-tier">
+      <div class="architecture-connector" aria-hidden="true">
+        <svg viewBox="0 0 900 42" role="presentation" preserveAspectRatio="none">
+          <path class="architecture-line" d="M150 42 V18 H450 V0"></path>
+          <path class="architecture-line" d="M450 42 V0"></path>
+          <path class="architecture-line" d="M750 42 V18 H450 V0"></path>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M150 42 V18 H450 V0" calcMode="linear" keyTimes="0;0.66;0.88;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.66;0.68;0.86;0.88;1"></animate>
+          </circle>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M450 42 V0" calcMode="linear" keyTimes="0;0.66;0.88;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.66;0.68;0.86;0.88;1"></animate>
+          </circle>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M750 42 V18 H450 V0" calcMode="linear" keyTimes="0;0.66;0.88;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.66;0.68;0.86;0.88;1"></animate>
+          </circle>
+        </svg>
+      </div>
+
+      <div class="architecture-tier architecture-tier-services">
         <div class="tier-label">Automation, security, observability</div>
         <div class="tier-nodes three">
-          <div class="architecture-card automation">
-            <strong>IaC Pipeline</strong>
-            <span>Forgejo, runners, Packer, Terraform, Ansible</span>
+          <div class="anim-step architecture-node architecture-node-automation" style="--anim-delay:3.3s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>IaC Pipeline</strong>
+              <span>Forgejo, runners, Packer, Terraform, Ansible</span>
+            </div>
           </div>
-          <div class="architecture-card security">
-            <strong>Security Stack</strong>
-            <span>Wazuh, Graylog, MISP, Shuffle, OPNsense</span>
+          <div class="anim-step architecture-node architecture-node-security" style="--anim-delay:3.3s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>Security Stack</strong>
+              <span>Wazuh, Graylog, MISP, Shuffle, OPNsense</span>
+            </div>
           </div>
-          <div class="architecture-card monitor">
-            <strong>Monitoring</strong>
-            <span>Nagios, Prometheus, Grafana</span>
+          <div class="anim-step architecture-node architecture-node-monitor" style="--anim-delay:3.3s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>Monitoring</strong>
+              <span>Nagios, Prometheus, Grafana</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="architecture-tier">
+      <div class="architecture-connector" aria-hidden="true">
+        <svg viewBox="0 0 900 42" role="presentation" preserveAspectRatio="none">
+          <path class="architecture-line" d="M225 42 V18 H150 V0"></path>
+          <path class="architecture-line" d="M225 42 V18 H450 V0"></path>
+          <path class="architecture-line" d="M675 42 V18 H450 V0"></path>
+          <path class="architecture-line" d="M675 42 V18 H750 V0"></path>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M225 42 V18 H150 V0" calcMode="linear" keyTimes="0;0.33;0.55;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.53;0.55;1"></animate>
+          </circle>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M225 42 V18 H450 V0" calcMode="linear" keyTimes="0;0.33;0.55;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.53;0.55;1"></animate>
+          </circle>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M675 42 V18 H450 V0" calcMode="linear" keyTimes="0;0.33;0.55;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.53;0.55;1"></animate>
+          </circle>
+          <circle class="architecture-flow-dot" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M675 42 V18 H750 V0" calcMode="linear" keyTimes="0;0.33;0.55;1" keyPoints="0;0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;0;1;1;0;0" keyTimes="0;0.33;0.35;0.53;0.55;1"></animate>
+          </circle>
+        </svg>
+      </div>
+
+      <div class="architecture-tier architecture-tier-plane">
         <div class="tier-label">Network and data plane</div>
         <div class="tier-nodes two">
-          <div class="architecture-card network">
-            <strong>Network Fabric</strong>
-            <span>Bessie L3 switches, VLANs, /21</span>
+          <div class="anim-step architecture-node architecture-node-network" style="--anim-delay:1.32s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>Network Fabric</strong>
+              <span>Bessie L3 switches, VLANs, /21</span>
+            </div>
           </div>
-          <div class="architecture-card storage">
-            <strong>TrueNAS Storage</strong>
-            <span>HypnoToad, Calculon, Mom</span>
+          <div class="anim-step architecture-node architecture-node-storage" style="--anim-delay:1.32s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>TrueNAS Storage</strong>
+              <span>HypnoToad, Calculon, Mom</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="architecture-tier">
+      <div class="architecture-connector" aria-hidden="true">
+        <svg viewBox="0 0 900 42" role="presentation" preserveAspectRatio="none">
+          <path class="architecture-line architecture-line-gold" d="M450 42 V18 H225 V0"></path>
+          <path class="architecture-line architecture-line-gold" d="M450 42 V18 H675 V0"></path>
+          <circle class="architecture-flow-dot architecture-flow-dot-gold" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M450 42 V18 H225 V0" calcMode="linear" keyTimes="0;0.22;1" keyPoints="0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;1;1;0;0" keyTimes="0;0.02;0.2;0.22;1"></animate>
+          </circle>
+          <circle class="architecture-flow-dot architecture-flow-dot-gold" r="4">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M450 42 V18 H675 V0" calcMode="linear" keyTimes="0;0.22;1" keyPoints="0;1;1"></animateMotion>
+            <animate attributeName="opacity" dur="6s" repeatCount="indefinite" values="0;1;1;0;0" keyTimes="0;0.02;0.2;0.22;1"></animate>
+          </circle>
+        </svg>
+      </div>
+
+      <div class="architecture-tier architecture-tier-foundation">
         <div class="tier-label">Compute foundation</div>
         <div class="tier-nodes single">
-          <div class="architecture-card core">
-            <strong>Proxmox Cluster</strong>
-            <span>Amy, Farnsworth, compute nodes</span>
+          <div class="anim-step anim-step-gold architecture-node architecture-node-core" style="--anim-delay:0s;--anim-duration:6s">
+            <div class="anim-step-content">
+              <strong>Proxmox Cluster</strong>
+              <span>Amy, Farnsworth, compute nodes</span>
+            </div>
           </div>
         </div>
       </div>
-
-      <div class="flow-callout request">template and VM requests</div>
-      <div class="flow-callout build">builds, provisions, observes</div>
-      <div class="flow-callout data">lab traffic, ISO media, VM data</div>
     </div>
   </div>
 </section>
