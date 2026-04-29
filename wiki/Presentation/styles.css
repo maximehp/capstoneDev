@@ -2746,6 +2746,309 @@ body[data-theme="development"] {
 
 /* ── End Packer Diagram ─────────────────────────────────────── */
 
+/* ── Terraform Provisioning Diagram (slide 34) ──────────────── */
+
+/* flex column: diagram on top, fact list below */
+.tf-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 3-row bypass grid: destroy above, vertical connectors middle, main rail below */
+.tf-flow {
+  display: grid;
+  grid-template-columns: 1fr 44px 1fr 44px 1fr 44px 1fr 44px 1fr;
+  grid-template-rows: 110px 36px 110px;
+  align-items: stretch;
+}
+
+/* Generous padding so text and pills never crowd the border */
+.tf-flow .anim-step-content {
+  padding: 18px 20px;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Push trigger dot below the border-glow zone */
+.tf-flow .anim-step-trigger::before {
+  top: 16px;
+  left: 14px;
+}
+
+/* ── Explicit grid placement ─────────────────────────────────── */
+/* Row 1: bypass lane — above init→plan junction */
+.tf-bp-l    { grid-column: 2; grid-row: 1; position: relative; }
+.tf-destroy { grid-column: 3; grid-row: 1; }
+.tf-bp-r    { grid-column: 4; grid-row: 1; position: relative; }
+
+/* Row 2: vertical connector cells */
+.tf-vconn   { position: relative; }
+.tf-vconn-l { grid-column: 2; grid-row: 2; }
+.tf-vconn-r { grid-column: 4; grid-row: 2; }
+
+/* Row 3: main rail */
+.tf-main-init  { grid-column: 1; grid-row: 3; }
+.tf-fork       { grid-column: 2; grid-row: 3; position: relative; }
+.tf-skip       { grid-column: 3; grid-row: 3; position: relative; }
+.tf-rejoin     { grid-column: 4; grid-row: 3; position: relative; }
+.tf-main-plan  { grid-column: 5; grid-row: 3; }
+.tf-hconn-1    { grid-column: 6; grid-row: 3; }
+.tf-main-apply { grid-column: 7; grid-row: 3; }
+.tf-hconn-2    { grid-column: 8; grid-row: 3; }
+.tf-main-write { grid-column: 9; grid-row: 3; }
+
+/* ── Horizontal connectors (solid) ──────────────────────────── */
+.tf-hconn {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.tf-hconn::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(var(--accent-rgb), 0.45);
+}
+
+/* Travelling horizontal dot */
+.tf-hdot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-top: -3.5px;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  animation: tf-dot-h var(--anim-duration, 9s) linear infinite;
+  animation-delay: var(--anim-delay, 0s);
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+}
+.tf-hdot-gold {
+  background: #f5c842;
+  box-shadow: 0 0 6px rgba(245, 200, 66, 0.9), 0 0 12px rgba(245, 200, 66, 0.5);
+}
+
+@keyframes tf-dot-h {
+  0%    { opacity: 0; transform: translateX(-2px); }
+  3%    { opacity: 1; transform: translateX(0); }
+  8%    { opacity: 0; transform: translateX(40px); }
+  100%  { opacity: 0; transform: translateX(-2px); }
+}
+
+/* ── Fork / skip / rejoin: solid horizontal through-line ─────── */
+.tf-fork::before,
+.tf-skip::before,
+.tf-rejoin::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: rgba(var(--accent-rgb), 0.45);
+}
+
+/* Fork: dashed upward stub toward bypass lane */
+.tf-fork::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 0;
+  width: 1px; height: 50%;
+  margin-left: -0.5px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+
+/* Rejoin: dashed downward stub from bypass lane */
+.tf-rejoin::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 0;
+  width: 1px; height: 50%;
+  margin-left: -0.5px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+
+/* ── Bypass connectors in row 1 (all dashed) ────────────────── */
+/* tf-bp-l: right-half horizontal + bottom-half vertical */
+.tf-bp-l::before {
+  content: '';
+  position: absolute;
+  left: 50%; right: 0; top: 50%;
+  height: 1px;
+  margin-top: -0.5px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+.tf-bp-l::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%; bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+
+/* tf-bp-r: left-half horizontal + bottom-half vertical */
+.tf-bp-r::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 50%; top: 50%;
+  height: 1px;
+  margin-top: -0.5px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+.tf-bp-r::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%; bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+
+/* ── Vertical connector cells in row 2 (dashed full-height) ─── */
+.tf-vconn::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 0; bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.5) 0px, rgba(var(--accent-rgb), 0.5) 4px,
+    transparent 4px, transparent 8px
+  );
+}
+
+/* ── Travelling vertical dots ───────────────────────────────── */
+.tf-vdot {
+  position: absolute;
+  left: 50%;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-left: -3.5px;
+  background: rgb(var(--accent-rgb));
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.9), 0 0 12px rgba(var(--accent-rgb), 0.5);
+  animation-duration: var(--anim-duration, 9s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay: var(--anim-delay, 0s);
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+}
+.tf-vdot-up {
+  bottom: 0;
+  animation-name: tf-dot-v-up;
+}
+.tf-vdot-dn {
+  top: 0;
+  animation-name: tf-dot-v-dn;
+}
+
+@keyframes tf-dot-v-up {
+  0%    { opacity: 0; transform: translateY(4px); }
+  3%    { opacity: 1; transform: translateY(0); }
+  8%    { opacity: 0; transform: translateY(-32px); }
+  100%  { opacity: 0; transform: translateY(4px); }
+}
+
+@keyframes tf-dot-v-dn {
+  0%    { opacity: 0; transform: translateY(-4px); }
+  3%    { opacity: 1; transform: translateY(0); }
+  8%    { opacity: 0; transform: translateY(32px); }
+  100%  { opacity: 0; transform: translateY(-4px); }
+}
+
+/* ── Conditional destroy — dashed border, amber label ─────────── */
+.tf-step-conditional {
+  border: 1px dashed rgba(var(--accent-rgb), 0.32);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.06), rgba(255,255,255,0.01));
+}
+.tf-conditional-label {
+  display: block;
+  font-size: 0.27em;
+  font-weight: 700;
+  color: #f5a623;
+  letter-spacing: 0.02em;
+}
+
+/* ── Apply step disk pills ────────────────────────────────────── */
+.tf-disk-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 2px;
+}
+.tf-pill {
+  font-size: 0.27em;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.tf-pill-boot {
+  background: rgba(var(--accent-rgb), 0.12);
+  color: rgb(var(--accent-rgb));
+  border: 1px solid rgba(var(--accent-rgb), 0.32);
+}
+.tf-pill-data {
+  background: rgba(76, 218, 122, 0.12);
+  color: #4cda7a;
+  border: 1px solid rgba(76, 218, 122, 0.3);
+}
+
+/* ── Fact list (full-width below diagram) ─────────────────────── */
+.tf-fact-list {
+  width: 100%;
+}
+
+/* ── SVG emblem icons ─────────────────────────────────────────── */
+.tf-emblem-init {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 32 A20 20 0 1 1 32 52' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpolyline points='32,52 26,52 26,46' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.tf-emblem-plan {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cline x1='12' y1='20' x2='52' y2='20' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='12' y1='32' x2='52' y2='32' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='12' y1='44' x2='38' y2='44' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.tf-emblem-destroy {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='white' stroke-width='3.5'/%3E%3Cline x1='22' y1='22' x2='42' y2='42' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3Cline x1='42' y1='22' x2='22' y2='42' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.tf-emblem-apply {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='10' width='48' height='16' rx='3' fill='none' stroke='white' stroke-width='3'/%3E%3Crect x='8' y='32' width='48' height='16' rx='3' fill='none' stroke='white' stroke-width='3'/%3E%3Ccircle cx='50' cy='18' r='3' fill='white'/%3E%3Ccircle cx='50' cy='40' r='3' fill='white'/%3E%3C/svg%3E");
+}
+.tf-emblem-minio {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cellipse cx='32' cy='14' rx='20' ry='7' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M12 14 v12 q0 7 20 7 q20 0 20-7 V14' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M12 26 v12 q0 7 20 7 q20 0 20-7 V26' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M12 38 v12 q0 7 20 7 q20 0 20-7 V38' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E");
+}
+
+/* ── End Terraform Diagram ──────────────────────────────────── */
+
 .bucket-diagram div {
   border: 1px solid var(--accent-strong);
   background: var(--accent-soft);
