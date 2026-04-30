@@ -1,14 +1,54 @@
 <section>
   <div class="slide-kicker">Security / SIEM</div>
   <h2>SIEM Overview</h2>
-  <div class="siem-ring">
-    <div class="siem-center">SIEM Stack</div>
-    <span>Log Ingestion</span>
-    <span>Log Analysis</span>
-    <span>Intel Enrichment</span>
-    <span>Backend Storage</span>
-    <span>Automation</span>
-    <span>Visualization</span>
-  </div>
   <p class="lead compact">The stack centralizes security events, normalizes them, enriches alerts with threat intelligence, and triggers automated response workflows.</p>
+
+  <div class="siem-diagram">
+
+    <!-- spokes in clockwise DOM order so animation goes around the ring -->
+    <div class="anim-step siem-spoke siem-tl">
+      <div class="anim-step-content">
+        <strong>Log Ingestion</strong>
+        <span>Graylog &middot; Wazuh</span>
+      </div>
+    </div>
+    <div class="anim-step siem-spoke siem-tr">
+      <div class="anim-step-content">
+        <strong>Log Analysis</strong>
+        <span>Rules &middot; Alerting</span>
+      </div>
+    </div>
+    <div class="anim-step siem-spoke siem-mr">
+      <div class="anim-step-content">
+        <strong>Backend Storage</strong>
+        <span>OpenSearch</span>
+      </div>
+    </div>
+    <div class="anim-step siem-spoke siem-br">
+      <div class="anim-step-content">
+        <strong>Visualization</strong>
+        <span>Wazuh dashboards</span>
+      </div>
+    </div>
+    <div class="anim-step siem-spoke siem-bl">
+      <div class="anim-step-content">
+        <strong>Automation</strong>
+        <span>Shuffle SOAR</span>
+      </div>
+    </div>
+    <div class="anim-step siem-spoke siem-ml">
+      <div class="anim-step-content">
+        <strong>Intel Enrichment</strong>
+        <span>MISP &middot; IOC feeds</span>
+      </div>
+    </div>
+
+    <div class="anim-step anim-step-gold siem-hub">
+      <div class="anim-step-content">
+        <strong>SIEM Stack</strong>
+        <span>Wazuh &nbsp;&middot;&nbsp; Graylog &nbsp;&middot;&nbsp; MISP &nbsp;&middot;&nbsp; Shuffle</span>
+      </div>
+    </div>
+
+  </div>
 </section>

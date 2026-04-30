@@ -19,6 +19,14 @@ overlay.id = 'pipeline-dot-overlay';
 overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:visible;';
 document.body.appendChild(overlay);
 
+// Fixed SVG for static connector lines (below the dot overlay, same coordinate space)
+const linesSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+linesSvg.id = 'pipeline-lines-svg';
+linesSvg.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9998;overflow:visible;';
+document.body.appendChild(linesSvg);
+
+function clearLines() { linesSvg.innerHTML = ''; }
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 const abortErr = () => new DOMException('Aborted', 'AbortError');
@@ -584,6 +592,75 @@ async function monPipelineOnce(slide, signal) {
   await sleep(LOOP_PAUSE, signal);
 }
 
+// ── SIEM hub-and-spoke (slide 25) ────────────────────────────────────────────
+
+// Returns the point where the line from spokeCentre→hubCentre exits the spoke's bounding box.
+function siemSpokeExit(spoke, hub) {
+  const sr = spoke.getBoundingClientRect();
+  const hr = hub.getBoundingClientRect();
+  const sx = (sr.left + sr.right)  / 2,  sy = (sr.top  + sr.bottom) / 2;
+  const hx = (hr.left + hr.right)  / 2,  hy = (hr.top  + hr.bottom) / 2;
+  const dx = hx - sx, dy = hy - sy;
+  const sw = (sr.right - sr.left) / 2, sh = (sr.bottom - sr.top) / 2;
+  const t  = Math.min(sw / (Math.abs(dx) || 1e-6), sh / (Math.abs(dy) || 1e-6));
+  return { x: sx + dx * t, y: sy + dy * t };
+}
+
+// Returns the point where the same line enters the hub's bounding box.
+function siemHubEntry(spoke, hub) {
+  const sr = spoke.getBoundingClientRect();
+  const hr = hub.getBoundingClientRect();
+  const sx = (sr.left + sr.right)  / 2,  sy = (sr.top  + sr.bottom) / 2;
+  const hx = (hr.left + hr.right)  / 2,  hy = (hr.top  + hr.bottom) / 2;
+  const dx = sx - hx, dy = sy - hy;   // direction hub→spoke (outward from hub)
+  const hw = (hr.right - hr.left) / 2, hh = (hr.bottom - hr.top) / 2;
+  const t  = Math.min(hw / (Math.abs(dx) || 1e-6), hh / (Math.abs(dy) || 1e-6));
+  return { x: hx + dx * t, y: hy + dy * t };
+}
+
+function drawSiemLines(slide) {
+  const hub    = slide.querySelector('.siem-hub');
+  const spokes = [...slide.querySelectorAll('.siem-spoke')];
+  if (!hub || spokes.length === 0) return;
+
+  clearLines();
+  const ns = 'http://www.w3.org/2000/svg';
+
+  for (const spoke of spokes) {
+    const from = siemSpokeExit(spoke, hub);
+    const to   = siemHubEntry(spoke, hub);
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', from.x);
+    line.setAttribute('y1', from.y);
+    line.setAttribute('x2', to.x);
+    line.setAttribute('y2', to.y);
+    line.setAttribute('stroke', 'rgba(255,255,255,0.18)');
+    line.setAttribute('stroke-width', '1.5');
+    linesSvg.appendChild(line);
+  }
+}
+
+async function siemOnce(slide, signal) {
+  drawSiemLines(slide);
+  const hub    = slide.querySelector('.siem-hub');
+  const spokes = [...slide.querySelectorAll('.siem-spoke')];
+  if (!hub || spokes.length === 0) return;
+
+  unlitAll(slide);
+  await sleep(INIT_PAUSE, signal);
+
+  for (const spoke of spokes) {
+    lit(spoke);
+    const from = siemSpokeExit(spoke, hub);
+    const to   = siemHubEntry(spoke, hub);
+    const dot  = makeDot(from, true);
+    await travelToward(dot, [from, to], signal, hub, true);
+    await sleep(PAUSE, signal);
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
 // ── Slide handler ─────────────────────────────────────────────────────────────
 
 let ctrl = null;
@@ -592,6 +669,7 @@ function stopAnimation() {
   ctrl?.abort();
   ctrl = null;
   clearOverlay();
+  clearLines();
 }
 
 async function runLoop(fn, slide) {
@@ -627,6 +705,7 @@ function handleSlide(slide) {
   if (slide.querySelector('.api-workflow'))      { runLoop(apiOnce,      slide); return; }
   if (slide.querySelector('.minio-diagram'))      { runLoop(minioOnce,     slide); return; }
   if (slide.querySelector('.mon-pipeline'))      { runLoop(monPipelineOnce, slide); return; }
+  if (slide.querySelector('.siem-diagram'))      { runLoop(siemOnce,        slide); return; }
   stopAnimation();
 }
 
