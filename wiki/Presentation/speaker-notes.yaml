@@ -9,13 +9,18 @@ slides:
     title: "What We Built"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Frame the project as one integrated lab platform, not a set of disconnected tools.
+      Incredible to work on something so passionate about.
+      This semester we've been working on ChirpLabs.
+      Platform for online students to access lab resources anywhere anytime.
+      Now you may be wondering, how did we do this?
 
   slides/03-how-the-pieces-connect.html:
     title: "How the Pieces Connect"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Walk top to bottom: app orchestration, automation/security/monitoring, network/storage, then Proxmox compute.
+      We split ourselves into groups across different layers of the project.
+      Each group had a coordinator that managed members and advocated for their group.
+      To discuss the infrastructure group, here is group coordinator Liam Callahan.
 
   slides/04-infrastructure.html:
     title: "Infrastructure"
