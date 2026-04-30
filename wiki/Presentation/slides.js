@@ -184,7 +184,7 @@ const deck = new Reveal({
   controls: false,
   progress: true,
   center: false,
-  slideNumber: "c/t",
+  slideNumber: false,
   transition: "slide",
   backgroundTransition: "fade",
   width: 1280,
