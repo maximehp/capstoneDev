@@ -46,7 +46,7 @@ const slideFiles = [
   "slides/45-api-flow-and-execution.html",
   "slides/46-development-whats-still-needed.html",
   "slides/47-conclusion.html",
-  "slides/48-from-shared-hardware-to-rebuildable-services.html",
+  "slides/48-our-team.html",
   "slides/49-questions.html"
 ];
 
@@ -149,6 +149,36 @@ async function loadSlides() {
   applySpeakerNotes(root, speakerNotes);
 }
 
+function layoutCreditsSlide() {
+  const slide = document.querySelector("section.credits-slide");
+  const grid = slide?.querySelector(".credits-grid");
+  if (!slide || !grid) {
+    return;
+  }
+
+  const groups = Array.from(grid.querySelectorAll(".credits-group"));
+  const columnCount = 3;
+
+  grid.innerHTML = "";
+
+  const columns = Array.from({ length: columnCount }, () => {
+    const column = document.createElement("div");
+    column.className = "credits-column";
+    grid.appendChild(column);
+    return column;
+  });
+
+  const heights = columns.map(() => 0);
+  for (const group of groups) {
+    let target = 0;
+    for (let i = 1; i < heights.length; i += 1) {
+      if (heights[i] < heights[target]) target = i;
+    }
+    columns[target].appendChild(group);
+    heights[target] += group.scrollHeight + 14;
+  }
+}
+
 const deck = new Reveal({
   hash: true,
   controls: false,
@@ -168,6 +198,12 @@ const deck = new Reveal({
 await loadSlides();
 deck.initialize();
 window.deck = deck;
+requestAnimationFrame(() => layoutCreditsSlide());
+window.addEventListener("resize", () => {
+  layoutCreditsSlide();
+});
+deck.on("ready", () => layoutCreditsSlide());
+deck.on("slidechanged", () => layoutCreditsSlide());
 
 const isNotesReceiver = /receiver/i.test(window.location.search);
 let activeVanta;

@@ -2053,6 +2053,77 @@ body[data-theme="development"] {
 
 /* ── End Shared Animation Primitives ────────────────────────────────────── */
 
+/* ── Frontend Pathway Diagram ───────────────────────────────────────────── */
+
+.frontend-flow-body {
+  position: relative;
+  min-height: 520px;
+}
+
+.frontend-flow-lead {
+  display: block;
+  width: calc(100% - 430px - 56px);
+  margin: 0;
+  color: #eaf5ff;
+  font-size: 0.46em;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.frontend-pathway {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: grid;
+  grid-template-columns: 430px;
+  grid-template-rows: 82px 32px 82px 32px 82px 32px 82px 32px 82px;
+  row-gap: 0;
+  column-gap: 0;
+}
+
+.frontend-pathway .anim-step-content strong {
+  font-size: 0.42em;
+}
+
+.frontend-pathway .anim-step-content span {
+  font-size: 0.29em;
+}
+
+.frontend-pathway .anim-step-emblem {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 0.28em;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.frontend-pathway .anim-step-emblem::before {
+  line-height: 1;
+}
+
+.frontend-emblem-django::before {
+  content: "D";
+}
+
+.frontend-emblem-js::before {
+  content: "JS";
+}
+
+.frontend-emblem-fetch::before {
+  content: "</>";
+}
+
+.frontend-emblem-swap::before {
+  content: "#";
+}
+
+.frontend-emblem-theme::before {
+  content: "A";
+}
+
+/* ── End Frontend Pathway Diagram ───────────────────────────────────────── */
+
 .card-grid {
   display: grid;
   gap: 18px;
@@ -2187,6 +2258,9 @@ body[data-theme="development"] {
   object-fit: cover;
   object-position: top center;
   border-radius: 6px;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
 }
 
 .journey-step figcaption {
@@ -3671,26 +3745,21 @@ body[data-theme="development"] {
 
 .credits-slide {
   display: flex !important;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   overflow: hidden;
 }
 
-.credits-viewport {
-  width: min(920px, 100%);
+.credits-board {
+  width: min(1820px, 100%);
   height: 100%;
-  overflow: hidden;
-  position: relative;
-  margin: 0 auto;
-}
-
-.credits-track {
-  width: 100%;
   display: grid;
-  justify-items: center;
-  gap: 22px;
-  padding: 100vh 0 24vh;
-  animation: credits-roll 42s linear infinite;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  margin: 0 auto;
+  padding: 8px 12px 12px;
+  box-sizing: border-box;
 }
 
 .credits-title {
@@ -3699,94 +3768,52 @@ body[data-theme="development"] {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  margin-bottom: 10px;
+  text-align: center;
+}
+
+.credits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+.credits-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
 .credits-group {
-  width: min(820px, 100%);
+  display: flex;
+  width: 100%;
+  margin: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  padding: 18px 14px 16px;
   text-align: center;
 }
 
 .credits-group h3 {
   color: var(--text);
-  font-size: 0.5em;
-  margin-bottom: 8px;
+  font-size: 0.34em;
+  font-weight: 900;
+  line-height: 1.1;
+  margin: 0 0 8px;
 }
 
 .credits-group p {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.42em;
-  line-height: 1.45;
-}
-
-@keyframes credits-roll {
-  0% {
-    transform: translateY(0);
-  }
-
-  100% {
-    transform: translateY(-200vh);
-  }
-}
-
-@media (max-width: 900px) {
-  .reveal section {
-    padding: 24px 28px;
-  }
-
-  .reveal h1 {
-    font-size: 1.72em;
-  }
-
-  .reveal h2 {
-    font-size: 1.12em;
-  }
-
-  .title-grid,
-  .callout-row,
-  .card-grid.three,
-  .card-grid.two,
-  .mission-layout,
-  .split-layout,
-  .compare-grid,
-  .network-overview-grid,
-  .connectivity-flow,
-  .sdn-bond-grid,
-  .issue-solution-grid,
-  .troubleshooting-pair,
-  .status-board,
-  .outcome-grid,
-  .two-column-list {
-    grid-template-columns: 1fr;
-  }
-
-  .credits-track {
-    gap: 18px;
-    padding-top: 95vh;
-    animation-duration: 34s;
-  }
-
-  .troubleshooting-line {
-    width: 2px;
-    height: 18px;
-    justify-self: center;
-  }
-
-  .troubleshooting-line::before,
-  .troubleshooting-line::after {
-    left: 50%;
-    transform: translate(-50%, 0);
-  }
-
-  .troubleshooting-line::before {
-    top: -4px;
-  }
-
-  .troubleshooting-line::after {
-    top: auto;
-    bottom: -4px;
-  }
+  color: #d6e7f2;
+  font-size: 0.22em;
+  font-weight: 700;
+  line-height: 1.26;
 }
 
 /* ── JS Pipeline Animation System ───────────────────────────────────────────── */
@@ -3811,7 +3838,7 @@ body[data-theme="development"] {
 .iac-minio,
 .ans-minio-card,
 .misp-node {
-  transition: box-shadow 0.25s ease-out, border-color 0.25s ease-out;
+  transition: box-shadow 0.45s ease-in-out, border-color 0.45s ease-in-out;
 }
 
 /* Cyan glow — matches iac-step-pulse peak at 4% */

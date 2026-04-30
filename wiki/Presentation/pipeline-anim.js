@@ -2,10 +2,14 @@
 
 const DOT_R          = 5;    // dot radius px
 const DOT_SPEED      = 100;  // px per second — every leg moves at the same visual speed
-const PAUSE          = 220;  // ms pause after a box lights up
+const DOT_FADE       = 0.32; // portion of each line used to fade in/out
+const DOT_UNDERLAP   = 12;   // px the dot travels beyond each connector edge
+const PAUSE          = 700;  // ms pause after a box lights up
 const INIT_PAUSE     = 420;  // ms pause on the first box
 const LOOP_PAUSE     = 1500; // ms pause before restarting the loop
 const BRANCH_STAGGER = 190;  // ms stagger between Ansible fan-out branches
+const GLOW_HOLD      = 500;  // ms before a lit box begins fading back out
+const GLOW_LEAD      = 0.14; // portion of the last line where the target glow starts early
 const TRANSITION_MS  = 1500;  // ms to wait for the Reveal.js slide transition to finish
 
 // ── Overlay ───────────────────────────────────────────────────────────────────
@@ -41,16 +45,76 @@ function pt(el, side = 'center') {
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
-function makeDot(p, gold = false) {
-  const color = gold ? '#f5c842' : '#45d8ff';
-  const glow  = gold ? 'rgba(245,200,66,0.7)' : 'rgba(69,216,255,0.7)';
+function lineOpacity(t) {
+  const fade = Math.min(DOT_FADE, 0.5);
+  const ease = (x) => x * x * (3 - 2 * x);
+  if (t < fade) return ease(t / fade);
+  if (t > 1 - fade) return ease((1 - t) / fade);
+  return 1;
+}
+
+function underlapSegment(from, to) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const dist = Math.hypot(dx, dy);
+  if (!dist) return { from, to };
+
+  const ux = dx / dist;
+  const uy = dy / dist;
+
+  return {
+    from: { x: from.x - ux * DOT_UNDERLAP, y: from.y - uy * DOT_UNDERLAP },
+    to:   { x: to.x   + ux * DOT_UNDERLAP, y: to.y   + uy * DOT_UNDERLAP },
+  };
+}
+
+function makeSegmentMask(from, to) {
+  const pad = DOT_R + 16;
+  const dx = Math.abs(to.x - from.x);
+  const dy = Math.abs(to.y - from.y);
+  const horizontal = dx >= dy;
+  const left = horizontal ? Math.min(from.x, to.x) : from.x - pad;
+  const top = horizontal ? from.y - pad : Math.min(from.y, to.y);
+  const width = Math.max(1, horizontal ? dx : pad * 2);
+  const height = Math.max(1, horizontal ? pad * 2 : dy);
+  const mask = document.createElement('div');
+
+  mask.style.cssText =
+    `position:fixed;` +
+    `left:${left}px;top:${top}px;` +
+    `width:${width}px;height:${height}px;` +
+    `overflow:hidden;pointer-events:none;`;
+  overlay.appendChild(mask);
+
+  return { mask, left, top };
+}
+
+function activeAccentColors() {
+  const slide = window.deck?.getCurrentSlide?.() || document.querySelector('.reveal .slides section.present');
+  const styles = getComputedStyle(slide || document.documentElement);
+  const color = styles.getPropertyValue('--accent').trim() || '#45d8ff';
+  const rgb = styles.getPropertyValue('--accent-rgb').trim();
+
+  return {
+    color,
+    glow: rgb ? `rgba(${rgb}, 0.7)` : color,
+  };
+}
+
+function makeDot(p, override = false) {
+  const { color, glow } = override === true
+    ? { color: '#f5c842', glow: 'rgba(245,200,66,0.7)' }
+    : typeof override === 'string'
+      ? { color: override, glow: override }
+      : activeAccentColors();
   const d = document.createElement('div');
   d.style.cssText =
-    `position:fixed;` +
+    `position:absolute;` +
     `width:${DOT_R * 2}px;height:${DOT_R * 2}px;border-radius:50%;` +
     `background:${color};` +
     `box-shadow:0 0 7px 3px ${glow};` +
     `left:${p.x - DOT_R}px;top:${p.y - DOT_R}px;` +
+    `opacity:0;` +
     `pointer-events:none;`;
   overlay.appendChild(d);
   return d;
@@ -58,24 +122,38 @@ function makeDot(p, gold = false) {
 
 function clearOverlay() { overlay.innerHTML = ''; }
 
-// Animate dot from `from` to `to` over `durationMs`, respecting abort signal
-function travelLeg(dot, from, to, durationMs, signal) {
+// Animate dot from `from` to `to` inside a real connector-gap mask.
+function travelLeg(dot, maskInfo, from, to, durationMs, signal, onApproach) {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return reject(abortErr());
     const t0 = performance.now();
     let raf;
+    let approached = false;
 
-    const onAbort = () => { cancelAnimationFrame(raf); reject(abortErr()); };
+    const onAbort = () => {
+      cancelAnimationFrame(raf);
+      overlay.appendChild(dot);
+      maskInfo.mask.remove();
+      reject(abortErr());
+    };
     signal?.addEventListener('abort', onAbort, { once: true });
+    maskInfo.mask.appendChild(dot);
 
     function tick(now) {
       const t = Math.min(1, (now - t0) / durationMs);
-      dot.style.left = (lerp(from.x, to.x, t) - DOT_R) + 'px';
-      dot.style.top  = (lerp(from.y, to.y, t) - DOT_R) + 'px';
+      dot.style.left = (lerp(from.x, to.x, t) - maskInfo.left - DOT_R) + 'px';
+      dot.style.top  = (lerp(from.y, to.y, t) - maskInfo.top - DOT_R) + 'px';
+      dot.style.opacity = Math.max(0, lineOpacity(t)).toFixed(3);
+      if (!approached && t >= 1 - GLOW_LEAD) {
+        approached = true;
+        onApproach?.();
+      }
       if (t < 1) {
         raf = requestAnimationFrame(tick);
       } else {
         signal?.removeEventListener('abort', onAbort);
+        overlay.appendChild(dot);
+        maskInfo.mask.remove();
         resolve();
       }
     }
@@ -85,20 +163,48 @@ function travelLeg(dot, from, to, durationMs, signal) {
 }
 
 // Walk dot along a series of waypoints at constant speed (DOT_SPEED px/s)
-async function travel(dot, waypoints, signal) {
+async function travel(dot, waypoints, signal, options = {}) {
   for (let i = 0; i < waypoints.length - 1; i++) {
-    const a = waypoints[i], b = waypoints[i + 1];
-    const dist = Math.hypot(b.x - a.x, b.y - a.y);
+    const a = waypoints[i];
+    const b = waypoints[i + 1];
+    const { from, to } = underlapSegment(a, b);
+    const maskInfo = makeSegmentMask(a, b);
+    const dist = Math.hypot(to.x - from.x, to.y - from.y);
     const dur  = Math.max(30, dist / DOT_SPEED * 1000);
-    await travelLeg(dot, a, b, dur, signal);
+    const onApproach = i === waypoints.length - 2 ? options.onApproach : undefined;
+    await travelLeg(dot, maskInfo, from, to, dur, signal, onApproach);
   }
 }
 
 // ── Glow helpers ──────────────────────────────────────────────────────────────
 
-const lit     = (el, gold = false) => el.classList.add(gold ? 'lit-gold' : 'lit');
-const unlit   = (el) => el.classList.remove('lit', 'lit-gold');
+const glowTimers = new WeakMap();
+
+function lit(el, gold = false) {
+  const className = gold ? 'lit-gold' : 'lit';
+  if (el.classList.contains(className)) return;
+
+  clearTimeout(glowTimers.get(el));
+  el.classList.remove(gold ? 'lit' : 'lit-gold');
+  el.classList.add(className);
+  glowTimers.set(el, setTimeout(() => unlit(el), GLOW_HOLD));
+}
+
+function unlit(el) {
+  clearTimeout(glowTimers.get(el));
+  glowTimers.delete(el);
+  el.classList.remove('lit', 'lit-gold');
+}
+
 const unlitAll = (slide) => slide.querySelectorAll('.lit,.lit-gold').forEach(unlit);
+
+async function travelToward(dot, waypoints, signal, target, gold = false) {
+  await travel(dot, waypoints, signal, {
+    onApproach: () => lit(target, gold),
+  });
+  dot.remove();
+  lit(target, gold);
+}
 
 // ── Packer ────────────────────────────────────────────────────────────────────
 
@@ -260,9 +366,7 @@ async function iacOnce(slide, signal) {
     const from = pt(src, 'bottom');
     const to   = pt(dst, 'top');
     const dot  = makeDot(from);
-    await travel(dot, [from, to], signal);
-    dot.remove();
-    lit(dst);
+    await travelToward(dot, [from, to], signal, dst);
     await sleep(PAUSE, signal);
   }
 
@@ -272,9 +376,7 @@ async function iacOnce(slide, signal) {
 
   const parallel = [(async () => {
     const dot = makeDot(tfBottom);
-    await travel(dot, [tfBottom, ansTop], signal);
-    dot.remove();
-    lit(ansible);
+    await travelToward(dot, [tfBottom, ansTop], signal, ansible);
   })()];
 
   if (minio) {
@@ -288,9 +390,7 @@ async function iacOnce(slide, signal) {
 
     parallel.push((async () => {
       const dot = makeDot(wFrom, true);
-      await travel(dot, [wFrom, wTo], signal);
-      dot.remove();
-      lit(minio, true);
+      await travelToward(dot, [wFrom, wTo], signal, minio, true);
     })());
   }
 
@@ -306,6 +406,27 @@ async function iacOnce(slide, signal) {
     const dot    = makeDot(rFrom, true);
     await travel(dot, [rFrom, rTo], signal);
     dot.remove();
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
+// ── Frontend Pathway ─────────────────────────────────────────────────────────
+
+async function frontendOnce(slide, signal) {
+  const steps = [...slide.querySelectorAll('.frontend-pathway .anim-step')];
+  if (steps.length < 2) return;
+
+  unlitAll(slide);
+  lit(steps[0]);
+  await sleep(INIT_PAUSE, signal);
+
+  for (let i = 0; i < steps.length - 1; i++) {
+    const from = pt(steps[i], 'bottom');
+    const to   = pt(steps[i + 1], 'top');
+    const dot  = makeDot(from);
+    await travelToward(dot, [from, to], signal, steps[i + 1]);
+    await sleep(PAUSE, signal);
   }
 
   await sleep(LOOP_PAUSE, signal);
@@ -475,6 +596,7 @@ function handleSlide(slide) {
   if (slide.querySelector('.tf-flow'))      { runLoop(terraformOnce, slide);        return; }
   if (slide.querySelector('.ans-fan'))      { runLoop(ansibleOnce,   slide);        return; }
   if (slide.querySelector('.iac-diagram-v')){ runLoop(iacOnce,       slide);        return; }
+  if (slide.querySelector('.frontend-pathway')) { runLoop(frontendOnce, slide);      return; }
   if (slide.querySelector('.minio-diagram'))      { runLoop(minioOnce,     slide); return; }
   if (slide.querySelector('.mon-pipeline'))      { runLoop(monPipelineOnce, slide); return; }
   stopAnimation();
