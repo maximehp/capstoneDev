@@ -1,21 +1,14 @@
 <section>
   <div class="slide-kicker">Monitoring / Grafana</div>
   <h2>Grafana: Dashboards &amp; Alerts</h2>
-  <div class="split-layout">
-    <ul class="tight-list">
-      <li>Open-source visualization platform &mdash; turns raw metrics into dashboards, charts, and graphs.</li>
-      <li>Installed on Ubuntu Server 24.04.3 on Amy; accessible at <code>http://172.27.85.4:3000</code>.</li>
-      <li>Prometheus is the primary data source; OpenSearch provides indexed log data from Graylog.</li>
-      <li>Dashboards built with PromQL &mdash; metrics written in query code directly due to builder limitations.</li>
-      <li>Alerts trigger when metrics cross thresholds; availability alerts include a reboot delay to reduce noise.</li>
-      <li>Alert notifications route to Slack.</li>
-    </ul>
-    <div class="dashboard-mock">
-      <div class="chart tall"></div>
-      <div class="chart"></div>
-      <div class="chart orange"></div>
-      <div class="chart green"></div>
-    </div>
+  <p class="mon-lead">Open-source visualization on Amy (172.27.85.4:3000) &mdash; Prometheus drives PromQL dashboards while Slack-routed alerts fire when metrics cross configured thresholds.</p>
+
+  <div class="dashboard-mock dashboard-mock-full">
+    <div class="chart tall"></div>
+    <div class="chart"></div>
+    <div class="chart orange"></div>
+    <div class="chart green"></div>
   </div>
+
   <div class="speaker">Speaker: Julius Lillard</div>
 </section>

@@ -533,46 +533,24 @@ async function minioOnce(slide, signal) {
   await sleep(LOOP_PAUSE, signal);
 }
 
-// ── Monitoring Stack ──────────────────────────────────────────────────────────
+// ── Monitoring Pipeline (slides 34 / 35 / 36) ────────────────────────────────
 
-async function monStackOnce(slide, signal) {
-  const nodes = [...slide.querySelectorAll('.mon-stack-diagram .mon-node')];
-  if (nodes.length < 2) return;
-
-  unlitAll(slide);
-  lit(nodes[0]);
-  await sleep(INIT_PAUSE, signal);
-
-  for (let i = 0; i < nodes.length - 1; i++) {
-    const from = pt(nodes[i],     'right');
-    const to   = pt(nodes[i + 1], 'left');
-    const dot  = makeDot(from);
-    await travel(dot, [from, to], signal);
-    dot.remove();
-    lit(nodes[i + 1]);
-    await sleep(PAUSE, signal);
-  }
-
-  await sleep(LOOP_PAUSE, signal);
-}
-
-// ── Prometheus Flow ───────────────────────────────────────────────────────────
-
-async function promFlowOnce(slide, signal) {
-  const nodes = [...slide.querySelectorAll('.pf-node')];
-  if (nodes.length < 2) return;
+async function monPipelineOnce(slide, signal) {
+  const steps = [...slide.querySelectorAll('.mon-pipeline > .anim-step')];
+  if (steps.length < 2) return;
 
   unlitAll(slide);
-  lit(nodes[0]);
+  lit(steps[0]);
   await sleep(INIT_PAUSE, signal);
 
-  for (let i = 0; i < nodes.length - 1; i++) {
-    const from = pt(nodes[i],     'right');
-    const to   = pt(nodes[i + 1], 'left');
-    const dot  = makeDot(from);
+  for (let i = 0; i < steps.length - 1; i++) {
+    const gold = steps[i + 1].classList.contains('anim-step-gold');
+    const from = pt(steps[i],     'right');
+    const to   = pt(steps[i + 1], 'left');
+    const dot  = makeDot(from, gold);
     await travel(dot, [from, to], signal);
     dot.remove();
-    lit(nodes[i + 1]);
+    lit(steps[i + 1], gold);
     await sleep(PAUSE, signal);
   }
 
@@ -620,8 +598,7 @@ function handleSlide(slide) {
   if (slide.querySelector('.iac-diagram-v')){ runLoop(iacOnce,       slide);        return; }
   if (slide.querySelector('.frontend-pathway')) { runLoop(frontendOnce, slide);      return; }
   if (slide.querySelector('.minio-diagram'))      { runLoop(minioOnce,     slide); return; }
-  if (slide.querySelector('.mon-stack-diagram')) { runLoop(monStackOnce,  slide); return; }
-  if (slide.querySelector('.prom-flow'))         { runLoop(promFlowOnce,  slide); return; }
+  if (slide.querySelector('.mon-pipeline'))      { runLoop(monPipelineOnce, slide); return; }
   stopAnimation();
 }
 

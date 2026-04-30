@@ -5443,3 +5443,106 @@ body[data-theme="development"] {
   border: 4px solid transparent;
   border-left-color: rgba(255,255,255,0.3);
 }
+
+/* ── Monitoring shared pipeline (slides 34 / 35 / 36) ───────────────────────── */
+.mon-pipeline {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 320px;
+  width: 100%;
+}
+
+.mon-pipeline > .anim-step {
+  flex: 1;
+  min-width: 0;
+}
+
+.mon-pipeline .anim-step-content {
+  padding: 22px 18px;
+  gap: 10px;
+}
+
+.mon-pipeline .anim-step-content strong {
+  font-size: 0.52em;
+}
+
+.mon-pipeline .anim-step-content span {
+  font-size: 0.34em;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 5px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.75);
+  align-self: center;
+}
+
+.mon-pipeline .anim-step-emblem {
+  flex: 0 0 56px;
+  background-size: 58% 58%;
+}
+
+.mon-conn {
+  flex: 0 0 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.mon-conn-line {
+  width: 100%;
+  height: 2px;
+  position: relative;
+  background: linear-gradient(90deg,
+    rgba(var(--accent-rgb), 0.25),
+    rgba(var(--accent-rgb), 0.75) 50%,
+    rgba(var(--accent-rgb), 0.25));
+}
+
+.mon-conn-line::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0; height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid rgba(var(--accent-rgb), 0.8);
+}
+
+/* Shield + checkmark (Nagios) */
+.mon-emblem-nagios {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Cpath d='M32 8L54 18v16c0 12-11 22-22 26C20 56 10 46 10 34V18Z' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3Cpolyline points='22 33 29 40 42 26' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Flame (Prometheus) */
+.mon-emblem-prom {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Cpath d='M32 6c0 10-14 16-14 28a14 14 0 0 0 28 0c0-8-5-12-5-12-2 5-5 8-6 9C35 20 32 14 32 6z' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Bar chart (Grafana) */
+.mon-emblem-grafana {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Crect x='10' y='34' width='12' height='22' rx='2' stroke='white' stroke-width='3'/%3E%3Crect x='26' y='22' width='12' height='34' rx='2' stroke='white' stroke-width='3'/%3E%3Crect x='42' y='10' width='12' height='46' rx='2' stroke='white' stroke-width='3'/%3E%3Cline x1='6' y1='56' x2='58' y2='56' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* Monitor with status dots (NCPA agents) */
+.mon-emblem-ncpa {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Crect x='8' y='12' width='48' height='30' rx='4' stroke='white' stroke-width='3'/%3E%3Cline x1='20' y1='52' x2='44' y2='52' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='32' y1='42' x2='32' y2='52' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='20' cy='27' r='3' fill='white'/%3E%3Ccircle cx='32' cy='27' r='3' fill='white'/%3E%3Ccircle cx='44' cy='27' r='3' fill='white'/%3E%3C/svg%3E");
+}
+
+/* Three sources converging (exporters) */
+.mon-emblem-exporter {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Ccircle cx='14' cy='14' r='6' stroke='white' stroke-width='3'/%3E%3Ccircle cx='14' cy='32' r='6' stroke='white' stroke-width='3'/%3E%3Ccircle cx='14' cy='50' r='6' stroke='white' stroke-width='3'/%3E%3Cline x1='20' y1='14' x2='44' y2='32' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='20' y1='32' x2='44' y2='32' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='20' y1='50' x2='44' y2='32' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='32' r='6' stroke='white' stroke-width='3'/%3E%3C/svg%3E");
+}
+
+/* dashboard-mock when used full-width (grafana slide) */
+.dashboard-mock-full {
+  grid-template-rows: 165px 165px;
+  margin-top: 0.8em;
+  margin-bottom: 0;
+}
