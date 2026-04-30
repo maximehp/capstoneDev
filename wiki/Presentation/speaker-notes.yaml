@@ -128,27 +128,22 @@ slides:
     speaker: "Drew Barkdull"
     notes: ""
 
-  slides/21-connectivity.html:
-    title: "Connectivity"
-    speaker: "Romeo Casiano"
-    notes: ""
-
-  slides/22-proxmox-sdn-setup.html:
+  slides/21-proxmox-sdn-setup.html:
     title: "Proxmox Setup and Configuration"
     speaker: "Romeo Casiano"
     notes: ""
 
-  slides/23-networking-troubleshooting.html:
+  slides/22-networking-troubleshooting.html:
     title: "Networking Troubleshooting"
     speaker: "Romeo Casiano"
     notes: ""
 
-  slides/24-networking-recommendations.html:
+  slides/23-networking-recommendations.html:
     title: "What's Still Needed"
     speaker: "Romeo Casiano"
     notes: ""
 
-  slides/25-security.html:
+  slides/24-security.html:
     title: "Security"
     speaker: "Chad Becker"
     notes: |-
@@ -156,7 +151,7 @@ slides:
       - I had the privilege of being the leader of the Security Group
       - Our goals consisted of implementing a SIEM stack, installing the OPNsense firewall at the edge of the network, and performing basic vulnerability scans on all physical hardware hosts
 
-  slides/26-siem-overview.html:
+  slides/25-siem-overview.html:
     title: "SIEM Overview"
     speaker: "Chad Becker"
     notes: |-
@@ -164,7 +159,7 @@ slides:
       - Our SIEM stack mainly focuses on detection and does not contain many automated response elements commonly found in a SIEM stack due to a lack of time
       - Solutions are implemented for Log Ingestion, Log Analysis Intelligence Enrichment, Backend Storage, Automation, and basic visualization
 
-  slides/27-log-ingestion-wazuh.html:
+  slides/26-log-ingestion-wazuh.html:
     title: "Log Ingestion: Wazuh"
     speaker: "Chad Becker"
     notes: |-
@@ -172,7 +167,7 @@ slides:
       - Assigns each log a vulnerability ranking between 0-15
       - Sends logs to Graylog via a Filebeat Pipeline
 
-  slides/28-log-analysis-graylog.html:
+  slides/27-log-analysis-graylog.html:
     title: "Log Analysis: Graylog"
     speaker: "Chad Becker"
     notes: |-
@@ -181,14 +176,14 @@ slides:
       - Due to a lack of time we were unable to integrate Graylog with the desired visualization solution Grafana. Basic dashboards were created to visualize events and fields such as security events overview,  failed authentication attempts, and Wazuh vulnerability rankings
       - Brute force detection (both normal and aggressive) was enabled as a security event
 
-  slides/29-automation-shuffle.html:
+  slides/28-automation-shuffle.html:
     title: "Automation: Shuffle"
     speaker: "Chad Becker"
     notes: |-
       - Establishes workflows between triggers and contact services such as email
       - Generates automated responses to Wazuh alerts and Graylog events via a webhook trigger
 
-  slides/30-intelligence-enrichment-misp.html:
+  slides/29-intelligence-enrichment-misp.html:
     title: "Intelligence Enrichment: MISP"
     speaker: "Baylen Small"
     notes: |-
@@ -196,12 +191,12 @@ slides:
       - The custom MISP Python file is volume mounted on Wazuh manager docker container into the ossec/integrations directory by editing docker-compose.yml. Mounting the Python Script enables version control on the docker host.
       - MISP threat intelligence information is sent to Wazuh. When Wazuh ingests logs from the Wazuh agents, the logs are compared against MISP threat intelligence. Any matches generate a threat notification.
 
-  slides/31-virtual-firewall-with-opnsense.html:
+  slides/30-virtual-firewall-with-opnsense.html:
     title: "Virtual Firewall with OPNsense"
     speaker: "Nikolas Bradley"
     notes: ""
 
-  slides/32-vulnerability-scanning-with-kali-linux.html:
+  slides/31-vulnerability-scanning-with-kali-linux.html:
     title: "Vulnerability Scanning with Kali Linux"
     speaker: "Chad Becker"
     notes: |-
@@ -209,102 +204,97 @@ slides:
       - Scanned all physical hosts on the .80 subnet
       - Generated basic vulnerability reports and recommended mitigation steps
 
-  slides/33-security-whats-still-needed.html:
+  slides/32-security-whats-still-needed.html:
     title: "What's Still Needed"
     speaker: "Chad Becker"
     notes: ""
 
-  slides/34-monitoring.html:
+  slides/33-monitoring.html:
     title: "Monitoring"
     speaker: "Julius Lillard"
     notes: |-
       Transition into health checks, metrics, dashboards, and alerting.
 
-  slides/35-monitoring-stack.html:
+  slides/34-monitoring-stack.html:
     title: "Monitoring Stack"
     speaker: "Julius Lillard"
     notes: ""
 
-  slides/36-nagios-and-agents.html:
+  slides/35-nagios-and-agents.html:
     title: "Nagios & Agents"
     speaker: "Phillip Brooks"
     notes: ""
 
-  slides/37-prometheus.html:
+  slides/36-prometheus.html:
     title: "Prometheus"
     speaker: "Julius Lillard"
     notes: ""
 
-  slides/38-exporters-and-connections.html:
+  slides/37-exporters-and-connections.html:
     title: "Exporters & Connections"
     speaker: "Julius Lillard"
     notes: ""
 
-  slides/39-grafana-and-data-sources.html:
+  slides/38-grafana-and-data-sources.html:
     title: "Grafana & Data Sources"
     speaker: "Julius Lillard"
     notes: ""
 
-  slides/40-dashboards-metrics-and-alerts.html:
-    title: "Dashboards, Metrics & Alerts"
-    speaker: "Julius Lillard"
-    notes: ""
-
-  slides/41-potential-future-improvements.html:
+  slides/39-potential-future-improvements.html:
     title: "What's Still Needed"
     speaker: "Julius Lillard"
     notes: ""
 
-  slides/42-web-development.html:
+  slides/40-web-development.html:
     title: "Web Development"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
       Transition into the Django app and user-facing workflow.
 
-  slides/43-development-summary.html:
+  slides/41-development-summary.html:
     title: "What Web Development Built"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
       Summarize the app in user-facing terms before going into the frontend and backend pieces.
 
-  slides/44-frontend-architecture.html:
+  slides/42-frontend-architecture.html:
     title: "How the Website Feels Fast"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
-  slides/45-user-flow-and-interaction.html:
+  slides/43-user-flow-and-interaction.html:
     title: "The Main User Journey"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
-  slides/46-backend-architecture.html:
+  slides/44-backend-architecture.html:
     title: "PostgreSQL: The Source of Truth"
     speaker: "Eli Thompson"
     notes: |-
       Explain PostgreSQL as the durable coordination layer for the Django web process and the Packer worker.
 
-  slides/47-api-flow-and-execution.html:
+  slides/45-api-flow-and-execution.html:
     title: "How Long Tasks Stay Manageable"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
-  slides/48-development-whats-still-needed.html:
+  slides/46-development-whats-still-needed.html:
     title: "What's Still Needed"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
-  slides/49-conclusion.html:
+  slides/47-conclusion.html:
     title: "Conclusion"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
       Signal that the remaining slides connect the teams back to the final platform outcome.
 
-  slides/50-from-shared-hardware-to-rebuildable-services.html:
+  slides/48-from-shared-hardware-to-rebuildable-services.html:
     title: "From Shared Hardware to Rebuildable Services"
     speaker: "Maxime Hendryx-Parker"
     notes: ""
 
-  slides/51-questions.html:
+  slides/49-questions.html:
     title: "Questions?"
     speaker: "Maxime Hendryx-Parker"
     notes: |-

@@ -19,47 +19,45 @@ const slideFiles = [
   "slides/18-networking.html",
   "slides/19-networking-overview.html",
   "slides/20-subnetting.html",
-  "slides/21-connectivity.html",
-  "slides/22-proxmox-sdn-setup.html",
-  "slides/23-networking-troubleshooting.html",
-  "slides/24-networking-recommendations.html",
-  "slides/25-security.html",
-  "slides/26-siem-overview.html",
-  "slides/27-log-ingestion-wazuh.html",
-  "slides/28-log-analysis-graylog.html",
-  "slides/29-automation-shuffle.html",
-  "slides/30-intelligence-enrichment-misp.html",
-  "slides/31-virtual-firewall-with-opnsense.html",
-  "slides/32-vulnerability-scanning-with-kali-linux.html",
-  "slides/33-security-whats-still-needed.html",
-  "slides/34-monitoring.html",
-  "slides/35-monitoring-stack.html",
-  "slides/36-nagios-and-agents.html",
-  "slides/37-prometheus.html",
-  "slides/38-exporters-and-connections.html",
-  "slides/39-grafana-and-data-sources.html",
-  "slides/40-dashboards-metrics-and-alerts.html",
-  "slides/41-potential-future-improvements.html",
-  "slides/42-web-development.html",
-  "slides/43-development-summary.html",
-  "slides/44-frontend-architecture.html",
-  "slides/45-user-flow-and-interaction.html",
-  "slides/46-backend-architecture.html",
-  "slides/47-api-flow-and-execution.html",
-  "slides/48-development-whats-still-needed.html",
-  "slides/49-conclusion.html",
-  "slides/50-from-shared-hardware-to-rebuildable-services.html",
-  "slides/51-questions.html"
+  "slides/21-proxmox-sdn-setup.html",
+  "slides/22-networking-troubleshooting.html",
+  "slides/23-networking-recommendations.html",
+  "slides/24-security.html",
+  "slides/25-siem-overview.html",
+  "slides/26-log-ingestion-wazuh.html",
+  "slides/27-log-analysis-graylog.html",
+  "slides/28-automation-shuffle.html",
+  "slides/29-intelligence-enrichment-misp.html",
+  "slides/30-virtual-firewall-with-opnsense.html",
+  "slides/31-vulnerability-scanning-with-kali-linux.html",
+  "slides/32-security-whats-still-needed.html",
+  "slides/33-monitoring.html",
+  "slides/34-monitoring-stack.html",
+  "slides/35-nagios-and-agents.html",
+  "slides/36-prometheus.html",
+  "slides/37-exporters-and-connections.html",
+  "slides/38-grafana-and-data-sources.html",
+  "slides/39-potential-future-improvements.html",
+  "slides/40-web-development.html",
+  "slides/41-development-summary.html",
+  "slides/42-frontend-architecture.html",
+  "slides/43-user-flow-and-interaction.html",
+  "slides/44-backend-architecture.html",
+  "slides/45-api-flow-and-execution.html",
+  "slides/46-development-whats-still-needed.html",
+  "slides/47-conclusion.html",
+  "slides/48-from-shared-hardware-to-rebuildable-services.html",
+  "slides/49-questions.html"
 ];
 
 function themeForSlide(file) {
   const slideNumber = Number(file.match(/slides\/(\d+)-/)?.[1]);
 
   if (slideNumber >= 4 && slideNumber <= 17) return "infrastructure";
-  if (slideNumber >= 18 && slideNumber <= 24) return "networking";
-  if (slideNumber >= 25 && slideNumber <= 33) return "security";
-  if (slideNumber >= 34 && slideNumber <= 41) return "monitoring";
-  if (slideNumber >= 42 && slideNumber <= 48) return "development";
+  if (slideNumber >= 18 && slideNumber <= 23) return "networking";
+  if (slideNumber >= 24 && slideNumber <= 32) return "security";
+  if (slideNumber >= 33 && slideNumber <= 39) return "monitoring";
+  if (slideNumber >= 40 && slideNumber <= 46) return "development";
 
   return "blue";
 }
