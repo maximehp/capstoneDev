@@ -294,20 +294,20 @@ slides:
     title: "Web Development"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Now we are moving into the web development side of ChirpLabs.
-      This is the part of the project that turns the infrastructure into something students and faculty can actually use.
-      Our focus was the Django app, the login flow, the template builder, and the VM workflow.
-      First, I will summarize what the web app built for users.
+      Now we are moving into the web development side of ChirpLabs
+      This is where all of the infrastructure work turns into something students and faculty can actually click on and use
+      The focus was the Django app, the login flow, the template builder, and the VM workflow
+      Before getting into how it works, let us start with what it actually gives the user
 
   slides/41-development-summary.html:
     title: "What Web Development Built"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      The web app gives ChirpLabs one central place to start from.
-      Users sign in with Active Directory instead of managing a separate account.
-      Faculty can create templates, watch the build progress, and then users can start VMs from completed templates.
-      The goal was to keep people out of Proxmox unless they actually need to administer the platform.
-      Next, I will show how the frontend keeps that experience feeling fast.
+      The web app gives ChirpLabs one central place to start from
+      Users sign in with Active Directory instead of juggling a separate account
+      Faculty can create templates, watch the build progress, and users can start VMs from completed templates
+      The big idea is that people should not need to live inside Proxmox just to use the lab
+      But if this is going to be the front door to the lab, it also has to feel quick
 
   slides/42-frontend-architecture.html:
     title: "How the Website Feels Fast"
@@ -333,46 +333,53 @@ slides:
     title: "PostgreSQL: The Source of Truth"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      PostgreSQL is the source of truth for the deployed app.
-      Django stores AD-synced users, directory roles, saved ISO and software sources, templates, build jobs, and provisioned VMs.
-      The Packer worker coordinates through the same database by claiming queued jobs, updating stages, and writing results.
-      Shared storage still holds build files, logs, staged ISOs, and archives, but the database records what those files mean.
-      Next, I will show how the API and worker turn a user request into real Proxmox work.
+      Behind the interface, PostgreSQL is the source of truth
+      Django stores the AD-synced users, directory roles, saved ISO and software sources, templates, build jobs, and provisioned VMs
+      The Packer worker also coordinates through the database by claiming queued jobs, updating stages, and writing results
+      Shared storage still holds the build files, logs, staged ISOs, and archives, but the database is what tells the app what everything means
+      Once that state is reliable, the next question is how a click turns into actual Proxmox work
 
 
   slides/45-api-flow-and-execution.html:
     title: "Backend API and Worker Execution"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      The backend exposes JSON endpoints for login, ISO and software checks, template creation, build status, and VM starts.
-      Template creation validates the request, saves the job, and returns quickly so the browser is not stuck waiting on Packer.
-      The worker later claims that job, stages the ISO, generates the Packer files, runs the build, and reports progress.
-      VM provisioning validates the selected template, asks Proxmox to clone, configure, and start the VM, and records the result.
-      Next, I will cover what still needs to be finished on the web development side.
+      The backend has JSON endpoints for login, ISO and software checks, template creation, build status, and VM starts
+      Template creation validates the request, saves the job, and returns quickly so the browser is not stuck waiting on Packer
+      The worker comes in later, claims the job, stages the ISO, generates the Packer files, runs the build, and reports progress
+      VM provisioning validates the selected template, asks Proxmox to clone, configure, and start the VM, and then records the result
+      So the foundation is there, but there are still a few big pieces before this becomes the full lab experience
 
   slides/46-development-whats-still-needed.html:
     title: "What's Still Needed"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      The next major step is the full class lab workflow.
-      That includes class join codes, template assignments, lab timers, and better VM history for users.
-      We also still need browser-based access delivery through Apache, Guacamole, and guacd.
-      On the operations side, the app needs CI/CD, stronger audit logging, analytics, and more live browser testing.
-      Now I will bring the whole project back together with the conclusion.
+      The next major step is the full class lab workflow
+      That means class join codes, template assignments, lab timers, and better VM history for users
+      We also still need browser-based access through Apache, Guacamole, and guacd
+      On the operations side, the app needs CI/CD, stronger audit logging, analytics, and more live browser testing
+      That is what is left for web development, so now let us pull the full project back together
 
   slides/47-conclusion.html:
     title: "Conclusion"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Signal that the remaining slides connect the teams back to the final platform outcome.
+      Across the project, every group was working on a different layer of the same platform
+      Infrastructure gave us the compute and storage foundation
+      Networking made that foundation reachable and segmented
+      Security and monitoring made it easier to defend, observe, and improve
+      And none of that happens without the people behind the work
 
   slides/48-our-team.html:
     title: "Our Team"
     speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    notes: |-
+      Thank you to our amazing team
+      This project truly could not have happened without these people
+      And with that all said
 
   slides/49-questions.html:
     title: "Questions?"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Thank the panel, faculty, and contributors. Invite questions.
+      Does anyone have any questions?
