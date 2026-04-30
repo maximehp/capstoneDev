@@ -36,79 +36,103 @@ slides:
   slides/06-nas-hardware.html:
     title: "NAS Hardware"
     speaker: "Eli Thompson"
-    notes: ""
+    notes: |-
+      - Thank Speaker for letting me speak
+      - from 5 NAS with 2 accessible, to 3 that weren't
+      - Overhaul: 3 NAS servers, main, replication, sandbox
+      - upgrade hd, and ram to suit needs
 
   slides/07-pbs-architecture.html:
     title: "PBS Architecture"
     speaker: "Eli Thompson"
-    notes: ""
+    notes: |-
+      - PBS: another external data protection system
+      - Explain what PBS does: snapshots, replication, and backup
+      - How protected, direct passthrough and Mom dataset
 
   slides/08-replication-architecture.html:
     title: "Replication Architecture"
     speaker: "Eli Thompson"
-    notes: ""
+    notes: |-
+      - Replication: lost... replication. snapshot of all important datasets
+      - Connection of SSH for replication NAS
+      - This way redundacny disaster recovery : two layers
 
   slides/09-iac-ci-cd.html:
     title: "IaC / CI-CD"
     speaker: "Liam Callahan"
     notes: |-
-      Transition from base infrastructure into repeatable service delivery.
+      - IaC = Infrastructure as Code — every VM, container, and service is defined in code
+      - CI/CD = automated pipeline that takes that code and builds, deploys, or destroys infrastructure
+      - Goal: destroy and recreate the entire environment with a single trigger
 
   slides/10-forgejo-and-runners.html:
     title: "Forgejo & Runners"
     speaker: "Liam Callahan"
-    notes: ""
+    notes: |-
+      - Forgejo: self-hosted Git platform, triggers the pipeline on push
+      - Act Runners: self-hosted workers that execute the jobs
+      - Secrets injected at runtime — never stored in the repo
+      - ChirpLabs scoped as one tenant; other teams share the infra without overlap
+
 
   slides/11-iac-full-pipeline.html:
     title: "IaC: Full Pipeline"
     speaker: "Liam Callahan"
-    notes: ""
+    notes: |-
+      - Three workflows: Packer, Terraform, Ansible — each its own job
+      - One orchestration workflow chains all three with a single trigger
+      - Goes from bare Proxmox + ISO to fully configured VMs
+
+
 
   slides/12-three-way-data-split.html:
     title: "Three-way Data Split"
     speaker: "Liam Callahan"
-    notes: ""
+    notes: |-
+      - Forgejo: source of truth for all configuration
+      - Boot disk: ephemeral, wiped and rebuilt every run
+      - Data disk: persists across every rebuild — app data is never lost
+
+
 
   slides/13-minio.html:
     title: "MinIO"
     speaker: "Liam Callahan"
     notes: |-
-      - MinIO is an S3-compatible object storage solution - like AWS S3, but self-hosted
-      - Used to store artifacts from the pipeline  - terraform state files, ansible inventory files
-      - A json is essentially a structured way to store data as text that both we and computers can read and understand - think of a form with fields and values, but in a text format
-      - Allows Terraform and Ansible to be decoupled into 2 seperate jobs in the pipeline, since forgejo doesn't have artifact storage
-
+      - Self-hosted S3-compatible storage (like AWS S3 on our own hardware)
+      - Stores Terraform state and vm_info.json between pipeline jobs
+      - Bridges Terraform and Ansible since Forgejo has no artifact storage
 
   slides/14-packer.html:
     title: "Packer"
     speaker: "Liam Callahan"
     notes: |-
-      - Packer is a tool to create Golden Templates or reference model that all other VMs are built from - this also reduces the time to create VMs since not every one has to go through the boot sequence
-      - Packer first spins up a temporary VM within proxmox and attaches a CDROM that contains our autoinstall configs and a Packer SSH key
-      - Packer waits for the boot process to complete and then connects to the VM via SSH to run provioning scripts that install software and agents that should be baked on every VM
-      - Before Packer finishes, it detaches the CDROM disk, injects an Ansible SSH key, and removes the Packer SSH key - VMs are only accesible by Ansible after the build process is complete
-      - VM then gets turned into a template that then gets used by Terraform to spin up VMs 
+      - Builds a golden VM template with shared agents and software pre-baked
+      - Spins up a temp VM, provisions via SSH, converts to a reusable template
+      - Swaps Packer SSH key for Ansible's before finishing — only Ansible can access VMs after
+
 
   slides/15-terraform.html:
     title: "Terraform"
     speaker: "Liam Callahan"
     notes: |-
-      - Terraform init: initializes the Terraform working directory, downloads providers, and connects to the MinIO backend to pull the latest state file
-      - Terraform Destroy: only gets ran when explictly triggered, this destroys all infrastructure defined in the state file
-      - Terraform plan: compares the desired infrastructure defined in the .tf files with the current state in proxmox and generates an execution plan to reach the desired state
-      - Terraform apply: applies the execution plan generated by terraform plan, this is where the actual infrastructure changes happen in proxmox
-      - Terraform then exports a new state file and vm_info.json so Ansible knows what to configure
-      - Since Terraform destroys everything it knows about the data disks are handled separately using a null_resource (api call to proxmox without a wrapper) that detaches the data disk before destory and reattaches it on creation
+      - Init: pulls state from MinIO
+      - Plan: compares desired state against Proxmox
+      - Apply: creates or updates VMs
+      - Destroy: explicit only — tears down everything in the state file
+      - Data disks handled separately so they survive destroy/recreate cycles
+      - Outputs vm_info.json for Ansible
+
+
   slides/16-ansible.html:
     title: "Ansible"
     speaker: "Liam Callahan"
     notes: |-
-      - At this point the VMs are up and running, but they need to be configure to be actually useful
-      - Ansible configures these VMs by connecting to them via the ansible ssh key and runs playbooks that install software, configure settings, and run scripts that are specific to the VM
-      - First Ansible needs to generate it's inventory, by pulling the from the vm_info.json file it generates a dynamic inventory of all the VMs that are running that include their name, ip address, and role
-      - The first thing Ansible does is run a common playbook on all the VMs that does shared configuration such as enabling agents or creating a Linux User
-      - Ansible then runs playbooks on these VMs according to their specificied role, webdev would get the webdev playbook, security would get the security playbook, and so on
-      - The end result is that an entire environment, from bare proxmox to fully configured VMs, are automated with a single pipeline trigger
+      - Reads vm_info.json to build a dynamic inventory of all running VMs
+      - Runs a common playbook on every VM for shared setup (agents, users, etc.)
+      - Applies role-specific playbooks based on each VM's purpose
+      - One trigger: bare Proxmox → fully configured environment
 
   slides/17-what-s-still-needed.html:
     title: "What's Still Needed"
