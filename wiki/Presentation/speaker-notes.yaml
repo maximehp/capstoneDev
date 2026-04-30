@@ -36,7 +36,10 @@ slides:
   slides/06-nas-hardware.html:
     title: "NAS Hardware"
     speaker: "Eli Thompson"
-    notes: ""
+    notes: |-
+      - Thank Speaker for letting me speak
+      - from 5 NAS with 2 accessible, to 3 that weren't
+      - Overhaul: 3 NAS servers, main, replication, 
 
   slides/07-pbs-architecture.html:
     title: "PBS Architecture"
@@ -52,76 +55,70 @@ slides:
     title: "IaC / CI-CD"
     speaker: "Liam Callahan"
     notes: |-
-      - IaC = Infrastructure as Code — every VM, container, and service is defined in code
-      - CI/CD = automated pipeline that takes that code and builds, deploys, or destroys infrastructure
-      - Goal: destroy and recreate the entire environment with a single trigger
+      - IaC: entire infrastructure defined as code
+      - CI/CD: automated pipeline that builds, deploys, or destroys it
+      - Goal: single trigger to recreate the whole environment
 
   slides/10-forgejo-and-runners.html:
     title: "Forgejo & Runners"
     speaker: "Liam Callahan"
     notes: |-
-      - Forgejo is our self-hosted Git platform — code changes here trigger the pipeline
-      - Act Runners are self-hosted workers that execute the CI/CD jobs
-      - Secrets and variables are injected at runtime so credentials never live in the repo
-      - Realized mid-semester that multiple teams share this infrastructure — ChirpLabs is just one tenant
-      - All ChirpLabs secrets, variables, and NAS datasets are scoped separately so other projects aren't affected
-      - We didn't just build a project — we built a reproducible, isolated environment
+      - Forgejo: self-hosted Git platform, triggers the pipeline on push
+      - Act Runners: self-hosted workers that execute the jobs
+      - Secrets injected at runtime — never stored in the repo
+      - ChirpLabs scoped as one tenant; other teams share the infra without overlap
 
   slides/11-iac-full-pipeline.html:
     title: "IaC: Full Pipeline"
     speaker: "Liam Callahan"
     notes: |-
-      - Three distinct workflows: Packer, Terraform, and Ansible — each runs as its own job
-      - A fourth orchestration workflow chains all three into a single trigger
-      - End result: bare Proxmox cluster + ISO → fully configured, role-specific VMs
+      - Three workflows: Packer, Terraform, Ansible — each its own job
+      - One orchestration workflow chains all three with a single trigger
+      - Goes from bare Proxmox + ISO to fully configured VMs
 
   slides/12-three-way-data-split.html:
     title: "Three-way Data Split"
     speaker: "Liam Callahan"
     notes: |-
-      - Forgejo holds all configuration — the source every rebuild starts from
-      - Boot disk is ephemeral — destroyed and recreated on every pipeline run
-      - Data disk is completely separate — survives every rebuild, application data is never lost
-      - This design lets us nuke and reprovision freely without touching user or app data
+      - Forgejo: source of truth for all configuration
+      - Boot disk: ephemeral, wiped and rebuilt every run
+      - Data disk: persists across every rebuild — app data is never lost
 
   slides/13-minio.html:
     title: "MinIO"
     speaker: "Liam Callahan"
     notes: |-
-      - MinIO is self-hosted S3-compatible object storage — think AWS S3, but on our own hardware
-      - Stores Terraform state files and the vm_info.json inventory between pipeline jobs
-      - Forgejo has no native artifact storage, so MinIO is what bridges Terraform and Ansible as separate jobs
+      - Self-hosted S3-compatible storage (like AWS S3 on our own hardware)
+      - Stores Terraform state and vm_info.json between pipeline jobs
+      - Bridges Terraform and Ansible since Forgejo has no artifact storage
 
   slides/14-packer.html:
     title: "Packer"
     speaker: "Liam Callahan"
     notes: |-
-      - Packer creates a golden VM template — a base image with shared agents and software pre-baked
-      - Saves time: new VMs clone the template instead of running the full boot and provision process
-      - Spins up a temp VM in Proxmox, attaches an autoinstall CDROM, waits for boot, then connects via SSH to provision
-      - Before finishing: detaches the CDROM, injects the Ansible SSH key, removes the Packer key
-      - After build, only Ansible can access VMs — template is handed off to Terraform
+      - Builds a golden VM template with shared agents and software pre-baked
+      - Spins up a temp VM, provisions via SSH, converts to a reusable template
+      - Swaps Packer SSH key for Ansible's before finishing — only Ansible can access VMs after
 
   slides/15-terraform.html:
     title: "Terraform"
     speaker: "Liam Callahan"
     notes: |-
-      - Terraform init: pulls latest state file from MinIO backend
-      - Terraform plan: compares desired state in .tf files against what's currently in Proxmox
-      - Terraform apply: executes the plan — this is where VMs are actually created or destroyed
-      - Terraform destroy: only triggered explicitly, tears down everything in the state file
-      - Data disks are handled via a null_resource (raw Proxmox API call) — detaches before destroy, reattaches on create
-      - Outputs vm_info.json so Ansible knows what to configure
+      - Init: pulls state from MinIO
+      - Plan: compares desired state against Proxmox
+      - Apply: creates or updates VMs
+      - Destroy: explicit only — tears down everything in the state file
+      - Data disks handled separately so they survive destroy/recreate cycles
+      - Outputs vm_info.json for Ansible
 
   slides/16-ansible.html:
     title: "Ansible"
     speaker: "Liam Callahan"
     notes: |-
-      - VMs are up but unconfigured at this point — Ansible is what makes them useful
-      - Reads vm_info.json to build a dynamic inventory: VM names, IPs, and roles
-      - Runs a common playbook first on every VM — shared config like enabling agents and creating users
-      - Then runs role-specific playbooks: webdev VMs get the webdev playbook, security VMs get the security playbook, etc.
-      - End result: one pipeline trigger goes from bare Proxmox to a fully configured environment
+      - Reads vm_info.json to build a dynamic inventory of all running VMs
+      - Runs a common playbook on every VM for shared setup (agents, users, etc.)
+      - Applies role-specific playbooks based on each VM's purpose
+      - One trigger: bare Proxmox → fully configured environment
 
   slides/17-what-s-still-needed.html:
     title: "What's Still Needed"
