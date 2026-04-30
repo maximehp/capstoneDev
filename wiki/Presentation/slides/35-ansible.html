@@ -3,11 +3,7 @@
   <h2>Ansible</h2>
   <div class="ans-body">
 
-    <ul class="tight-list">
-      <li>Dynamic inventory — no static hosts file; Ansible targets the IPs Terraform wrote to <code>vm_info.json</code>.</li>
-      <li>Common role runs on every VM first; role-specific playbooks follow in the same pipeline job.</li>
-      <li>SSH key injected by Packer at image build — no password auth, no manual key exchange needed.</li>
-    </ul>
+    <p class="ans-lead">Reads dynamic inventory from MinIO, runs a common role on every VM, then fans out to role-specific playbooks &mdash; all over the SSH key Packer pre-injected at build time.</p>
 
     <div class="ans-fan">
 

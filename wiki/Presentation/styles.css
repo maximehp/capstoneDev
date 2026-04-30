@@ -3360,7 +3360,14 @@ body[data-theme="development"] {
 .ans-body {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 16px;
+}
+
+.ans-lead {
+  font-size: 0.68em;
+  color: rgba(255,255,255,0.72);
+  margin: 0;
+  line-height: 1.45;
 }
 
 /* 5-col layout: MinIO | h-gap | Runner | spine | roles */
