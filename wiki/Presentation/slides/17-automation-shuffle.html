@@ -1,14 +1,99 @@
 <section>
   <div class="slide-kicker">Security / Shuffle</div>
   <h2>Automation: Shuffle</h2>
-  <div class="flow-row automation">
-    <div class="flow-step">Wazuh Alert</div>
-    <div class="flow-step">Graylog Event</div>
-    <div class="flow-step">Shuffle Webhook</div>
-    <div class="flow-step">Notification / Response</div>
+  <p class="shfl-lead">Events from the SIEM pipeline trigger Shuffle webhooks, routing alerts through automated workflows to notifications, tickets, and response actions.</p>
+
+  <div class="shfl-diagram">
+
+    <!-- SIEM pipeline enclosure -->
+    <div class="shfl-pipeline-box">
+      <div class="shfl-pipeline-label">SIEM Pipeline</div>
+      <div class="shfl-pipeline-row">
+
+        <div class="shfl-pipe-node shfl-pipe-misp">
+          <span class="shfl-icon shfl-icon-eye" aria-hidden="true"></span>
+          <strong>MISP</strong>
+          <span>Threat intel</span>
+        </div>
+        <span class="shfl-pipe-arr" aria-hidden="true"></span>
+
+        <div class="shfl-pipe-node shfl-pipe-wazuh">
+          <span class="shfl-icon shfl-icon-shield" aria-hidden="true"></span>
+          <strong>Wazuh</strong>
+          <span>HIDS &middot; Alerts</span>
+        </div>
+        <span class="shfl-pipe-arr" aria-hidden="true"></span>
+
+        <div class="shfl-pipe-node shfl-pipe-beats">
+          <span class="shfl-icon shfl-icon-activity" aria-hidden="true"></span>
+          <strong>Beats</strong>
+          <span>Log shipper</span>
+        </div>
+        <span class="shfl-pipe-arr" aria-hidden="true"></span>
+
+        <div class="shfl-pipe-node shfl-pipe-graylog">
+          <span class="shfl-icon shfl-icon-monitor-g" aria-hidden="true"></span>
+          <strong>Graylog</strong>
+          <span>SIEM &middot; Correlate</span>
+        </div>
+        <span class="shfl-pipe-arr" aria-hidden="true"></span>
+
+        <div class="shfl-pipe-node shfl-pipe-datanode">
+          <span class="shfl-icon shfl-icon-database" aria-hidden="true"></span>
+          <strong>Datanode</strong>
+          <span>OpenSearch</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Webhook connector row -->
+    <div class="shfl-webhook-row">
+      <span class="shfl-arr-dn" aria-hidden="true"></span>
+      <span class="shfl-webhook-label">webhook triggers</span>
+      <span class="shfl-arr-dn" aria-hidden="true"></span>
+    </div>
+
+    <!-- Shuffle hub + response fan-out -->
+    <div class="shfl-lower-row">
+
+      <div class="shfl-hub">
+        <span class="shfl-icon shfl-icon-shuffle" aria-hidden="true"></span>
+        <strong>Shuffle</strong>
+        <span>SOAR &middot; Workflows &middot; Webhooks</span>
+        <div class="shfl-chips">
+          <span class="shfl-chip">App Integrations</span>
+          <span class="shfl-chip">Conditional Logic</span>
+          <span class="shfl-chip">API Actions</span>
+        </div>
+      </div>
+
+      <div class="shfl-out-arrows-col">
+        <span class="shfl-arr-r" aria-hidden="true"></span>
+        <span class="shfl-arr-r" aria-hidden="true"></span>
+        <span class="shfl-arr-r" aria-hidden="true"></span>
+      </div>
+
+      <div class="shfl-responses">
+        <div class="shfl-node shfl-node-action">
+          <span class="shfl-icon shfl-icon-bell" aria-hidden="true"></span>
+          <strong>Notification</strong>
+          <span>Email &middot; Slack</span>
+        </div>
+        <div class="shfl-node shfl-node-action">
+          <span class="shfl-icon shfl-icon-clipboard" aria-hidden="true"></span>
+          <strong>Case / Ticket</strong>
+          <span>Incident tracking</span>
+        </div>
+        <div class="shfl-node shfl-node-action">
+          <span class="shfl-icon shfl-icon-ban" aria-hidden="true"></span>
+          <strong>Block / Respond</strong>
+          <span>Automated response</span>
+        </div>
+      </div>
+
+    </div>
+
   </div>
-  <div class="placeholder-card">
-    <h3>Content placeholder for Chad</h3>
-    <p>Add the final Shuffle workflow details here: webhook trigger name, alert fields passed into the workflow, enrichment or branching steps, and the final notification or response destination.</p>
-  </div>
+  <div class="speaker">Speaker: Chad Poirier</div>
 </section>

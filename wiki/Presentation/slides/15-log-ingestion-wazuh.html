@@ -1,17 +1,135 @@
 <section>
   <div class="slide-kicker">Security / Wazuh</div>
   <h2>Log Ingestion: Wazuh</h2>
-  <div class="pipeline">
-    <span>Agents / Events</span>
-    <span>Wazuh Manager</span>
-    <span>Filebeat</span>
-    <span>Graylog</span>
-    <span>Shuffle Webhook</span>
+  <p class="wazuh-lead">Wazuh stack deployed on Amy via Docker Compose &mdash; agents ship events through the analysis pipeline to Graylog and Shuffle.</p>
+
+  <div class="wazuh-diagram">
+
+    <!-- Left: Endpoint Security Agent -->
+    <div class="wazuh-section wazuh-endpoint">
+      <div class="wazuh-sec-head">Endpoint Security Agent</div>
+      <div class="wazuh-agent-inner">
+
+        <div class="wazuh-sub wazuh-sub-modules">
+          <div class="wazuh-sub-head">
+            <span class="wazuh-icon wazuh-icon-shield" aria-hidden="true"></span>
+            Agent Modules
+          </div>
+          <div class="wazuh-tags">
+            <span class="wazuh-tag">Active Response</span>
+            <span class="wazuh-tag">Command Execution</span>
+            <span class="wazuh-tag">Config Assessment</span>
+            <span class="wazuh-tag">Container Security</span>
+            <span class="wazuh-tag">File Integrity</span>
+            <span class="wazuh-tag">Log Collector</span>
+            <span class="wazuh-tag">Malware Detection</span>
+            <span class="wazuh-tag">System Inventory</span>
+          </div>
+        </div>
+
+        <div class="wazuh-sub wazuh-sub-daemon">
+          <div class="wazuh-sub-head">
+            <span class="wazuh-icon wazuh-icon-daemon" aria-hidden="true"></span>
+            Agent Daemon
+          </div>
+          <div class="wazuh-tags">
+            <span class="wazuh-tag">Data Encryption</span>
+            <span class="wazuh-tag">Modules Management</span>
+            <span class="wazuh-tag">Remote Configuration</span>
+            <span class="wazuh-tag">Server Authentication</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Connector -->
+    <div class="wazuh-h-conn">
+      <span class="wazuh-arr-r" aria-hidden="true"></span>
+      <span class="wazuh-conn-lbl">events</span>
+    </div>
+
+    <!-- Right: Central Components -->
+    <div class="wazuh-section wazuh-central">
+      <div class="wazuh-sec-head">Central Components &mdash; Docker &middot; Amy VM</div>
+      <div class="wazuh-central-inner">
+
+        <!-- Wazuh Server -->
+        <div class="wazuh-sub wazuh-sub-server">
+          <div class="wazuh-sub-head">
+            <span class="wazuh-icon wazuh-icon-manager" aria-hidden="true"></span>
+            Wazuh Server
+          </div>
+          <div class="wazuh-server-body">
+            <div class="wazuh-server-col">
+              <div class="wazuh-col-label">Analysis Engine</div>
+              <div class="wazuh-tags">
+                <span class="wazuh-tag">Decoding &amp; Rule Matching</span>
+                <span class="wazuh-tag">Correlation &amp; Enrichment</span>
+                <span class="wazuh-tag">MISP Integration</span>
+              </div>
+            </div>
+            <div class="wazuh-server-col">
+              <div class="wazuh-col-label">Capabilities</div>
+              <div class="wazuh-tags">
+                <span class="wazuh-tag wazuh-tag-blue">Threat Intelligence</span>
+                <span class="wazuh-tag wazuh-tag-blue">Vulnerability Detection</span>
+                <span class="wazuh-tag wazuh-tag-blue">Regulatory Compliance</span>
+              </div>
+            </div>
+            <div class="wazuh-server-col">
+              <div class="wazuh-col-label">Outputs &rarr; Filebeat</div>
+              <div class="wazuh-tags">
+                <span class="wazuh-tag wazuh-tag-orange">Raw Data Events</span>
+                <span class="wazuh-tag wazuh-tag-orange">Security Alerts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard + Filebeat + Indexer -->
+        <div class="wazuh-bottom-trio">
+
+          <div class="wazuh-sub wazuh-sub-dashboard">
+            <div class="wazuh-sub-head">
+              <span class="wazuh-icon wazuh-icon-dashboard" aria-hidden="true"></span>
+              Wazuh Dashboard
+            </div>
+            <div class="wazuh-tags">
+              <span class="wazuh-tag">Query Language</span>
+              <span class="wazuh-tag">Visualizations</span>
+              <span class="wazuh-tag">Reports Engine</span>
+            </div>
+          </div>
+
+          <div class="wazuh-sub wazuh-sub-filebeat">
+            <div class="wazuh-sub-head">
+              <span class="wazuh-icon wazuh-icon-filebeat" aria-hidden="true"></span>
+              Filebeat
+            </div>
+            <div class="wazuh-tags">
+              <span class="wazuh-tag wazuh-tag-out">&rarr; Graylog</span>
+              <span class="wazuh-tag wazuh-tag-out">&rarr; Shuffle</span>
+              <span class="wazuh-tag wazuh-tag-out">&rarr; Indexer</span>
+            </div>
+          </div>
+
+          <div class="wazuh-sub wazuh-sub-indexer">
+            <div class="wazuh-sub-head">
+              <span class="wazuh-icon wazuh-icon-indexer" aria-hidden="true"></span>
+              Wazuh Indexer
+            </div>
+            <div class="wazuh-tags">
+              <span class="wazuh-tag">Search Engine</span>
+              <span class="wazuh-tag">Data Analytics</span>
+              <span class="wazuh-tag">Long-term Storage</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
   </div>
-  <ul class="tight-list">
-    <li>Installed Docker Compose on a VM hosted on Amy.</li>
-    <li>Deployed Wazuh Manager, Indexer, Dashboard, and Filebeat in containers.</li>
-    <li>Integrated Wazuh with MISP through ossec.conf changes and a mounted custom Python script.</li>
-    <li>Established the Filebeat pipeline into Graylog for normalized viewing and storage.</li>
-  </ul>
 </section>
