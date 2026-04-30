@@ -368,23 +368,18 @@ slides:
       Infrastructure gave us the compute and storage foundation
       Networking made that foundation reachable and segmented
       Security and monitoring made it easier to defend, observe, and improve
-      Web development gave users a path into the lab without needing to manage the platform by hand
       And none of that happens without the people behind the work
 
   slides/48-our-team.html:
     title: "Our Team"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      This slide is here because ChirpLabs was not one person's project
-      It took coordinators, speakers, infrastructure work, monitoring work, networking work, security work, and development work
-      It also took a lot of help from faculty, staff, panelists, and people who answered questions when the project got messy
-      So before we finish, we want to recognize everyone who helped bring this together
-      And with that, we are happy to take your questions
+      Thank you to our amazing team
+      This project truly could not have happened without these people
+      And with that all said
 
   slides/49-questions.html:
     title: "Questions?"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Thank you to the panel, faculty, and everyone who contributed to the project
-      We appreciate your time and feedback
-      We are happy to answer any questions
+      Does anyone have any questions?
