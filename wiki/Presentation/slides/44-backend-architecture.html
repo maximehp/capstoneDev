@@ -4,12 +4,6 @@
   <div class="split-layout">
     <div>
       <p class="lead compact">The web app and the Packer worker coordinate through Django models, so durable state stays in one place while long-running build files live on shared storage.</p>
-      <ul class="tight-list">
-        <li>Compose and deployment use PostgreSQL through <code>DATABASE_URL</code>; local development can fall back to SQLite.</li>
-        <li>Django stores AD-synced users, directory roles, saved ISO/software sources, templates, build jobs, and provisioned VMs.</li>
-        <li>The worker claims queued jobs with database transactions, updates stages and heartbeats, and records final results.</li>
-        <li>Filesystem paths, logs, staged ISOs, and archives are referenced by database rows instead of becoming the system of record.</li>
-      </ul>
     </div>
     <div class="browser-diagram">
       <div>Users + Directory Profiles</div>

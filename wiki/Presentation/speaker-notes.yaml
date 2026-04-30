@@ -276,7 +276,11 @@ slides:
     title: "PostgreSQL: The Source of Truth"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Explain PostgreSQL as the durable coordination layer for the Django web process and the Packer worker.
+      Compose and deployment use PostgreSQL;
+      Django stores AD-synced users, directory roles, saved ISO/software sources, templates, build jobs, and provisioned VMs.
+      The worker claims queued jobs with database transactions, updates stages and heartbeats, and records final results.
+      Filesystem paths, logs, staged ISOs, and archives are referenced by database rows instead of becoming the system of record.
+
 
   slides/45-api-flow-and-execution.html:
     title: "How Long Tasks Stay Manageable"
