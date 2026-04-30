@@ -1,36 +1,46 @@
 <section>
   <div class="slide-kicker">Infrastructure / NAS</div>
   <h2>PBS Architecture</h2>
-  <div class="pbs-diagram">
-    <div class="pbs-node proxmox-cluster">
-      <div class="pbs-node-head">Proxmox VE Cluster</div>
-      <div class="pbs-node-subhead">VMs & LXCs</div>
-      <ul class="pbs-list">
-        <li>Recurring backup tasks</li>
-        <li>Scheduled snapshots</li>
-      </ul>
+  <p class="pbs-lead">VMs and LXCs from the Proxmox cluster back up to ChirpPBS &mdash; a Proxmox Backup Server VM hosted directly on MomNAS that handles deduplication, compression, and retention.</p>
+
+  <div class="pbs-pipeline">
+
+    <div class="anim-step anim-step-trigger">
+      <div class="anim-step-content">
+        <strong>Proxmox Cluster</strong>
+        <span>VMs &amp; LXCs</span>
+        <span>Recurring backup tasks</span>
+      </div>
+      <div class="anim-step-emblem pbs-emblem-cluster"></div>
     </div>
 
-    <div class="pbs-flow">
-      <div class="pbs-flow-pill">Proxmox Backup</div>
-      <div class="pbs-flow-line"></div>
-      <div class="pbs-flow-notes">Incremental, deduplicated, compressed backups</div>
+    <div class="pbs-conn">
+      <span class="pbs-conn-lbl">Incremental · Deduped · Compressed</span>
+      <div class="pbs-conn-arrow"></div>
     </div>
 
-    <div class="pbs-node pbs-vm">
-      <div class="pbs-node-head">ChirpPBS VM</div>
-      <div class="pbs-node-subhead">Proxmox Backup Server</div>
-      <ul class="pbs-list">
-        <li>Hosted on MomNAS</li>
-        <li>Datastore with pruning</li>
-      </ul>
+    <div class="anim-step">
+      <div class="anim-step-content">
+        <strong>ChirpPBS</strong>
+        <span>Proxmox Backup Server VM</span>
+        <span>Prune &amp; retain snapshots</span>
+      </div>
+      <div class="anim-step-emblem pbs-emblem-pbs"></div>
     </div>
+
+    <div class="pbs-conn">
+      <span class="pbs-conn-lbl">Datastore writes</span>
+      <div class="pbs-conn-arrow"></div>
+    </div>
+
+    <div class="anim-step anim-step-gold">
+      <div class="anim-step-content">
+        <strong>MomNAS</strong>
+        <span>Backup datastore</span>
+        <span>Hosts ChirpPBS VM</span>
+      </div>
+      <div class="anim-step-emblem pbs-emblem-nas"></div>
+    </div>
+
   </div>
-
-  <ul class="two-column-list">
-    <li>Created a new Proxmox Backup Server datastore.</li>
-    <li>Created the ChirpPBS VM inside MomNAS.</li>
-    <li>Scheduled recurring backups for selected parts of the main Proxmox cluster.</li>
-    <li>Configured obsolete snapshots to be removed after aging out.</li>
-  </ul>
 </section>

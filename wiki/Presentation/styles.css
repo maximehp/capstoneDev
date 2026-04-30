@@ -1065,133 +1065,195 @@ body[data-theme="development"] {
   }
 }
 
-.pbs-diagram {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-  margin: 20px 0 20px;
-  max-width: 100%;
-  overflow: hidden;
+/* ── PBS Architecture Pipeline (slide 07) ────────────────────── */
+.pbs-lead {
+  font-size: 0.68em;
+  color: rgba(255,255,255,0.72);
+  margin: 0 0 0.6em;
+  line-height: 1.45;
 }
 
-.pbs-node {
-  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.1);
-  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.22);
-  border-radius: 20px;
-  padding: 16px;
-  min-width: 0;
-  max-width: 100%;
-  display: grid;
-  gap: 12px;
-  overflow: hidden;
-}
-
-.pbs-node-head {
-  color: var(--current-accent, var(--rose));
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.2;
-  overflow-wrap: break-word;
-}
-
-.pbs-node-subhead {
-  color: #ccecff;
-  font-size: 0.88rem;
-  font-weight: 700;
-  overflow-wrap: break-word;
-}
-
-.pbs-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-  color: #e6f6ff;
-  font-size: 1.2rem;
-  overflow-wrap: anywhere;
-  line-height: 1.4;
-  font-weight: 600;
-}
-
-.pbs-list li {
-  padding-left: 0;
-  overflow-wrap: break-word;
-}
-
-.pbs-flow {
-  display: grid;
-  gap: 14px;
-  justify-items: center;
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.pbs-flow-pill {
-  background: rgba(var(--current-accent-rgb, 255, 111, 125), 0.16);
-  border: 1px solid rgba(var(--current-accent-rgb, 255, 111, 125), 0.26);
-  border-radius: 999px;
-  color: var(--current-accent, var(--rose));
-  font-size: 0.95rem;
-  font-weight: 800;
-  padding: 14px 16px;
-  max-width: 160px;
-  overflow-wrap: break-word;
-}
-
-.pbs-flow-line {
+.pbs-pipeline {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 310px;
   width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, rgba(var(--current-accent-rgb, 255, 111, 125), 0), rgba(var(--current-accent-rgb, 255, 111, 125), 0.75), rgba(var(--current-accent-rgb, 255, 111, 125), 0));
-  border-radius: 999px;
-  position: relative;
-  min-width: 100px;
 }
 
-.pbs-flow-line::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translate(50%, -50%);
-  border: 6px solid transparent;
-  border-left-color: rgba(var(--current-accent-rgb, 255, 111, 125), 0.9);
+.pbs-pipeline > .anim-step {
+  flex: 1;
+  min-width: 0;
 }
 
-.pbs-flow-notes {
-  color: #d7edf8;
-  font-size: 0.95rem;
-  line-height: 1.35;
-  max-width: 160px;
-  overflow-wrap: break-word;
+.pbs-pipeline .anim-step-content {
+  padding: 26px 20px;
+  gap: 12px;
+}
+
+/* Larger text for PBS nodes — only 3 boxes so there's room */
+.pbs-pipeline .anim-step-content strong {
+  font-size: 0.54em;
+}
+.pbs-pipeline .anim-step-content span {
+  font-size: 0.37em;
+}
+
+/* Wider, more prominent icon strip */
+.pbs-pipeline .anim-step-emblem {
+  flex: 0 0 54px;
+  background-size: 58% 58%;
+}
+
+.pbs-conn {
+  flex: 0 0 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 6px;
+}
+
+.pbs-conn-lbl {
+  font-size: 0.28em;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(var(--accent-rgb), 0.9);
+  background: #0b1c30;
+  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  border-radius: 20px;
+  padding: 3px 10px;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.35;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-@media (max-width: 920px) {
-  .pbs-diagram {
-    grid-template-columns: 1fr;
-  }
+.pbs-conn-arrow {
+  width: 100%;
+  height: 2px;
+  position: relative;
+  background: linear-gradient(90deg,
+    rgba(var(--accent-rgb), 0.25),
+    rgba(var(--accent-rgb), 0.75) 50%,
+    rgba(var(--accent-rgb), 0.25));
 }
 
-@media (max-width: 720px) {
-  .pbs-node-head {
-    font-size: 0.95rem;
-  }
+.pbs-emblem-cluster {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Crect x='6' y='8' width='22' height='13' rx='2.5' stroke='white' stroke-width='3'/%3E%3Crect x='36' y='8' width='22' height='13' rx='2.5' stroke='white' stroke-width='3'/%3E%3Crect x='6' y='28' width='22' height='13' rx='2.5' stroke='white' stroke-width='3'/%3E%3Crect x='36' y='28' width='22' height='13' rx='2.5' stroke='white' stroke-width='3'/%3E%3Cline x1='17' y1='41' x2='17' y2='52' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='47' y1='41' x2='47' y2='52' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='8' y1='52' x2='56' y2='52' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.pbs-emblem-pbs {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Cpath d='M32 8L54 18v16c0 12-11 22-22 26C20 56 10 46 10 34V18Z' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3Cpolyline points='22 33 29 40 42 26' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.pbs-emblem-nas {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Crect x='10' y='12' width='44' height='40' rx='4' stroke='white' stroke-width='3'/%3E%3Crect x='16' y='20' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3Crect x='34' y='20' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3Crect x='16' y='32' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3Crect x='34' y='32' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
+}
 
-  .pbs-node-subhead,
-  .pbs-flow-notes {
-    font-size: 0.85rem;
-  }
 
-  .pbs-list {
-    font-size: 1.1rem;
-  }
+/* ── Replication Architecture ───────────────────────────────────────────────── */
+.rep-lead {
+  font-size: 0.68em;
+  color: rgba(255,255,255,0.72);
+  margin: 0 0 0.6em;
+  line-height: 1.45;
+}
 
-  .pbs-flow-pill {
-    padding: 12px 14px;
-  }
+.rep-pipeline {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 248px;
+  width: 100%;
+}
+
+.rep-pipeline > .anim-step {
+  flex: 1;
+  min-width: 0;
+}
+
+.rep-pipeline .anim-step-content {
+  padding: 16px 18px;
+  gap: 9px;
+}
+
+.rep-pipeline + .card-grid {
+  margin-top: 14px;
+}
+
+.rep-pipeline .anim-step-content strong {
+  font-size: 0.58em;
+}
+
+.rep-pipeline .anim-step-content span {
+  font-size: 0.38em;
+}
+
+.rep-pipeline .anim-step-content .rep-sub {
+  font-size: 0.32em;
+  color: rgba(255,255,255,0.45);
+  margin-top: 2px;
+}
+
+.rep-pipeline .anim-step-emblem {
+  flex: 0 0 60px;
+  background-size: 58% 58%;
+}
+
+.rep-conn {
+  flex: 0 0 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+}
+
+.rep-conn-lbl {
+  font-size: 0.28em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(var(--accent-rgb), 0.9);
+  background: #0b1c30;
+  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  border-radius: 20px;
+  padding: 3px 10px;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.35;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.rep-conn-meta {
+  font-size: 0.24em;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  line-height: 1.4;
+  font-weight: 500;
+  white-space: normal;
+}
+
+.rep-conn-arrow {
+  width: 100%;
+  height: 2px;
+  position: relative;
+  background: linear-gradient(90deg,
+    rgba(var(--accent-rgb), 0.25),
+    rgba(var(--accent-rgb), 0.75) 50%,
+    rgba(var(--accent-rgb), 0.25));
+}
+
+/* NAS chassis icon (source) */
+.rep-emblem-nas {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Crect x='10' y='12' width='44' height='40' rx='4' stroke='white' stroke-width='3'/%3E%3Crect x='16' y='20' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3Crect x='34' y='20' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3Crect x='16' y='32' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3Crect x='34' y='32' width='14' height='8' rx='1.5' stroke='white' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+/* NAS chassis + shield overlay (DR target) */
+.rep-emblem-target {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Crect x='8' y='8' width='38' height='34' rx='3.5' stroke='white' stroke-width='2.5'/%3E%3Crect x='13' y='15' width='11' height='6' rx='1.5' stroke='white' stroke-width='1.8'/%3E%3Crect x='27' y='15' width='11' height='6' rx='1.5' stroke='white' stroke-width='1.8'/%3E%3Crect x='13' y='25' width='11' height='6' rx='1.5' stroke='white' stroke-width='1.8'/%3E%3Crect x='27' y='25' width='11' height='6' rx='1.5' stroke='white' stroke-width='1.8'/%3E%3Cpath d='M38 42 L56 42' stroke='white' stroke-width='0' /%3E%3Cpath d='M42 38L56 44v10c0 5-7 10-14 12C35 64 28 59 28 54V44Z' stroke='white' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cpolyline points='36 51 40 55 49 46' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* Align split-layout columns to the top for the forgejo slide */
@@ -1545,13 +1607,13 @@ body[data-theme="development"] {
 /* Diagram sits at the right edge; text fills from left to the steps column */
 .iac-body {
   position: relative;
-  min-height: 425px;
+  min-height: 520px;
 }
 
 .iac-lead {
   display: block;
-  /* 340px = steps column width; 20px = cushion before Forgejo box */
-  width: calc(100% - 340px - 20px);
+  /* 400px = steps column width; 20px = cushion before Forgejo box */
+  width: calc(100% - 400px - 20px);
   padding-right: 0;
   color: #eaf5ff;
   font-size: 0.46em;
@@ -1566,11 +1628,15 @@ body[data-theme="development"] {
   right: 0;
   top: 0;
   display: grid;
-  grid-template-columns: 210px 56px 340px;
-  grid-template-rows: auto 28px auto 28px auto 28px auto 28px auto;
+  grid-template-columns: 240px 66px 400px;
+  grid-template-rows: 82px 32px 82px 32px 82px 32px 82px 32px 82px;
   row-gap: 0;
   column-gap: 0;
 }
+
+/* Larger text to fill the bigger step boxes */
+.iac-diagram-v .iac-step strong { font-size: 0.44em; }
+.iac-diagram-v .iac-step span   { font-size: 0.30em; }
 
 /* Step card uses flex row: text on left, emblem strip on right */
 .iac-diagram-v .iac-step {
@@ -1634,7 +1700,7 @@ body[data-theme="development"] {
 /* Vertical connector between consecutive pipeline steps */
 .iac-conn-v {
   position: relative;
-  height: 28px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1791,18 +1857,18 @@ body[data-theme="development"] {
 @keyframes iac-dot-h-minio {
   0%   { transform: translate(0px,  -50%); opacity: 0; }
   2%   { transform: translate(0px,  -50%); opacity: 1; }
-  18%  { transform: translate(56px, -50%); opacity: 1; }
-  20%  { transform: translate(56px, -50%); opacity: 0; }
+  18%  { transform: translate(66px, -50%); opacity: 1; }
+  20%  { transform: translate(66px, -50%); opacity: 0; }
   100% { transform: translate(0px,  -50%); opacity: 0; }
 }
 
-/* Right-to-left dot for the 56px MinIO connector column (Terraform → MinIO writes) */
+/* Right-to-left dot for the 66px MinIO connector column (Terraform → MinIO writes) */
 @keyframes iac-dot-h-minio-rev {
-  0%   { transform: translate(56px, -50%); opacity: 0; }
-  2%   { transform: translate(56px, -50%); opacity: 1; }
+  0%   { transform: translate(66px, -50%); opacity: 0; }
+  2%   { transform: translate(66px, -50%); opacity: 1; }
   18%  { transform: translate(0px,  -50%); opacity: 1; }
   20%  { transform: translate(0px,  -50%); opacity: 0; }
-  100% { transform: translate(56px, -50%); opacity: 0; }
+  100% { transform: translate(66px, -50%); opacity: 0; }
 }
 
 .iac-dot-minio     { animation-name: iac-dot-h-minio; }
@@ -2918,27 +2984,34 @@ body[data-theme="development"] {
 /* ── Packer Build Pipeline (slide 33) ──────────────────────── */
 /* Layout only — animation classes come from .anim-* primitives  */
 
-.pkr-body {
-  position: relative;
-  min-height: 440px;
-}
-
-.pkr-body .tight-list {
-  width: calc(100% - 490px - 24px);
+.pkr-lead {
+  font-size: 0.68em;
+  color: rgba(255,255,255,0.72);
+  margin: 0 0 0.5em;
+  line-height: 1.45;
 }
 
 .pkr-pipeline {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 470px;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 445px;
 }
 
-/* Step flex sizing (pipeline fills height, steps share it equally) */
 .pkr-pipeline .anim-step { flex: 1; }
+
+.pkr-pipeline .anim-step-content {
+  padding: 14px 20px;
+  gap: 8px;
+}
+
+.pkr-pipeline .anim-step-content strong {
+  font-size: 0.5em;
+}
+
+.pkr-pipeline .anim-step-content span {
+  font-size: 0.35em;
+}
 
 /* Emblem SVG icons */
 .pkr-emblem-cdrom {
@@ -2972,7 +3045,7 @@ body[data-theme="development"] {
 .tf-flow {
   display: grid;
   grid-template-columns: 1fr 44px 1fr 44px 1fr 44px 1fr 44px 1fr;
-  grid-template-rows: 110px 36px 110px;
+  grid-template-rows: 145px 42px 145px;
   align-items: stretch;
 }
 
@@ -3188,16 +3261,16 @@ body[data-theme="development"] {
 @keyframes tf-dot-v-up {
   0%    { opacity: 0; transform: translateY(0); }
   2%    { opacity: 1; transform: translateY(0); }
-  18%   { opacity: 1; transform: translateY(-36px); }
-  20%   { opacity: 0; transform: translateY(-36px); }
+  18%   { opacity: 1; transform: translateY(-42px); }
+  20%   { opacity: 0; transform: translateY(-42px); }
   100%  { opacity: 0; transform: translateY(0); }
 }
 
 @keyframes tf-dot-v-dn {
   0%    { opacity: 0; transform: translateY(0); }
   2%    { opacity: 1; transform: translateY(0); }
-  18%   { opacity: 1; transform: translateY(36px); }
-  20%   { opacity: 0; transform: translateY(36px); }
+  18%   { opacity: 1; transform: translateY(42px); }
+  20%   { opacity: 0; transform: translateY(42px); }
   100%  { opacity: 0; transform: translateY(0); }
 }
 
@@ -3212,6 +3285,23 @@ body[data-theme="development"] {
   font-weight: 700;
   color: #f5a623;
   letter-spacing: 0.02em;
+}
+.tf-lead {
+  font-size: 0.68em;
+  color: rgba(255,255,255,0.72);
+  margin: 0 0 0.55em;
+  line-height: 1.45;
+}
+/* higher specificity (0,2,0) beats .anim-step-content span (0,1,1) */
+.anim-step-content .tf-note {
+  font-size: 0.26em;
+  color: rgba(255,255,255,0.46);
+  margin-top: 3px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Apply step disk pills ────────────────────────────────────── */
@@ -4759,7 +4849,7 @@ body[data-theme="development"] {
 }
 
 .minio-actor strong {
-  font-size: 0.52rem;
+  font-size: 0.85rem;
   color: #eef8ff;
   letter-spacing: 0.02em;
 }

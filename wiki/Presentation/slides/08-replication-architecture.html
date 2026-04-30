@@ -1,31 +1,34 @@
 <section>
   <div class="slide-kicker">Infrastructure / NAS</div>
   <h2>Replication Architecture</h2>
-  <p class="lead compact">Replication gives the NAS layer recoverability without letting snapshots grow unchecked.</p>
+  <p class="rep-lead">Replication gives the NAS layer recoverability without letting snapshots grow unchecked.</p>
 
-  <div class="replication-diagram">
-    <div class="replication-node primary-nas">
-      <div class="replication-node-head">MainNAS (MomNAS)</div>
-      <div class="replication-node-subhead">TrueNAS — Primary NAS</div>
-      <ul class="replication-list">
-        <li><strong>Datasets:</strong> backups, media, vm-data, etc.</li>
-      </ul>
+  <div class="rep-pipeline">
+
+    <div class="anim-step anim-step-trigger">
+      <div class="anim-step-content">
+        <strong>MomNAS</strong>
+        <span>TrueNAS &mdash; Primary NAS</span>
+        <span class="rep-sub">Datasets: backups &middot; media &middot; vm-data</span>
+      </div>
+      <div class="anim-step-emblem rep-emblem-nas"></div>
     </div>
 
-    <div class="replication-flow">
-      <div class="replication-flow-pill">ZFS Replication over SSH</div>
-      <div class="replication-flow-line"></div>
-      <div class="replication-flow-notes">Snapshot-based, incremental, encrypted</div>
+    <div class="rep-conn">
+      <span class="rep-conn-lbl">ZFS Replication over SSH</span>
+      <span class="rep-conn-meta">Incremental &middot; Snapshot-based &middot; Encrypted</span>
+      <div class="rep-conn-arrow"></div>
     </div>
 
-    <div class="replication-node target-nas">
-      <div class="replication-node-head">Replicant (CalculonNAS)</div>
-      <div class="replication-node-subhead">TrueNAS — Replication Target</div>
-      <ul class="replication-list">
-        <li>Mirrors all primary datasets</li>
-        <li>Disaster recovery & failover ready</li>
-      </ul>
+    <div class="anim-step anim-step-gold">
+      <div class="anim-step-content">
+        <strong>CalculonNAS</strong>
+        <span>TrueNAS &mdash; Replication Target</span>
+        <span class="rep-sub">Mirrors all datasets &middot; DR &amp; failover ready</span>
+      </div>
+      <div class="anim-step-emblem rep-emblem-target"></div>
     </div>
+
   </div>
 
   <div class="card-grid two">

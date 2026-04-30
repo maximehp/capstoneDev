@@ -311,6 +311,57 @@ async function iacOnce(slide, signal) {
   await sleep(LOOP_PAUSE, signal);
 }
 
+// ── PBS Architecture Pipeline ─────────────────────────────────────────────────
+
+async function pbsOnce(slide, signal) {
+  const steps  = [...slide.querySelectorAll('.pbs-pipeline > .anim-step')];
+  const arrows = [...slide.querySelectorAll('.pbs-pipeline .pbs-conn-arrow')];
+  if (steps.length < 2) return;
+
+  unlitAll(slide);
+  lit(steps[0]);
+  await sleep(INIT_PAUSE, signal);
+
+  for (let i = 0; i < steps.length - 1; i++) {
+    const gold   = steps[i + 1].classList.contains('anim-step-gold');
+    const lineY  = arrows[i] ? pt(arrows[i], 'center').y : pt(steps[i], 'right').y;
+    const from   = { x: pt(steps[i],     'right').x, y: lineY };
+    const to     = { x: pt(steps[i + 1], 'left').x,  y: lineY };
+    const dot    = makeDot(from, gold);
+    await travel(dot, [from, to], signal);
+    dot.remove();
+    lit(steps[i + 1], gold);
+    await sleep(PAUSE, signal);
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
+// ── Replication Architecture ──────────────────────────────────────────────────
+async function repOnce(slide, signal) {
+  const steps  = [...slide.querySelectorAll('.rep-pipeline > .anim-step')];
+  const arrows = [...slide.querySelectorAll('.rep-pipeline .rep-conn-arrow')];
+  if (steps.length < 2) return;
+
+  unlitAll(slide);
+  lit(steps[0]);
+  await sleep(INIT_PAUSE, signal);
+
+  for (let i = 0; i < steps.length - 1; i++) {
+    const gold  = steps[i + 1].classList.contains('anim-step-gold');
+    const lineY = arrows[i] ? pt(arrows[i], 'center').y : pt(steps[i], 'right').y;
+    const from  = { x: pt(steps[i],     'right').x, y: lineY };
+    const to    = { x: pt(steps[i + 1], 'left').x,  y: lineY };
+    const dot   = makeDot(from, gold);
+    await travel(dot, [from, to], signal);
+    dot.remove();
+    lit(steps[i + 1], gold);
+    await sleep(PAUSE, signal);
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
 // ── MinIO Pipeline ────────────────────────────────────────────────────────────
 
 async function minioOnce(slide, signal) {
@@ -440,6 +491,8 @@ async function runLoop(fn, slide) {
 
 function handleSlide(slide) {
   if (!slide)                                { stopAnimation();                     return; }
+  if (slide.querySelector('.pbs-pipeline')) { runLoop(pbsOnce,       slide);        return; }
+  if (slide.querySelector('.rep-pipeline')) { runLoop(repOnce,       slide);        return; }
   if (slide.querySelector('.pkr-pipeline')) { runLoop(packerOnce,    slide);        return; }
   if (slide.querySelector('.tf-flow'))      { runLoop(terraformOnce, slide);        return; }
   if (slide.querySelector('.ans-fan'))      { runLoop(ansibleOnce,   slide);        return; }
