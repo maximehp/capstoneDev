@@ -1,17 +1,6 @@
 <section>
   <div class="slide-kicker">Development / Backend + API</div>
-  <h2>How Long Tasks Stay Manageable</h2>
-
-  <p class="api-flow-lead">JSON endpoints keep browser actions short while slow VM and template operations move through tracked backend work.</p>
-
-  <div class="api-endpoint-surface" aria-label="Application API endpoint surface">
-    <span>Login</span>
-    <span>ISO checks</span>
-    <span>Software checks</span>
-    <span>Template creation</span>
-    <span>Build status</span>
-    <span>VM starts</span>
-  </div>
+  <h2>Backend API and Worker Execution</h2>
 
   <div class="api-workflow" aria-label="Frontend request to Proxmox action workflow">
     <div class="anim-step anim-step-trigger api-step-request" style="--anim-delay:0s;--anim-duration:8s">
@@ -22,9 +11,7 @@
       <div class="anim-step-emblem api-emblem-api"></div>
     </div>
 
-    <div class="api-hconn api-hconn-1">
-      <span class="tf-hdot" style="--anim-delay:1s;--anim-duration:8s"></span>
-    </div>
+    <div class="api-hconn api-hconn-1" aria-hidden="true"></div>
 
     <div class="anim-step api-step-queue" style="--anim-delay:1.8s;--anim-duration:8s">
       <div class="anim-step-content">
@@ -34,9 +21,7 @@
       <div class="anim-step-emblem api-emblem-db"></div>
     </div>
 
-    <div class="api-hconn api-hconn-2">
-      <span class="tf-hdot" style="--anim-delay:2.8s;--anim-duration:8s"></span>
-    </div>
+    <div class="api-hconn api-hconn-2" aria-hidden="true"></div>
 
     <div class="anim-step api-step-worker" style="--anim-delay:3.6s;--anim-duration:8s">
       <div class="anim-step-content">
@@ -46,9 +31,7 @@
       <div class="anim-step-emblem api-emblem-worker"></div>
     </div>
 
-    <div class="api-hconn api-hconn-3">
-      <span class="tf-hdot tf-hdot-gold" style="--anim-delay:4.6s;--anim-duration:8s"></span>
-    </div>
+    <div class="api-hconn api-hconn-3" aria-hidden="true"></div>
 
     <div class="anim-step anim-step-gold api-step-proxmox" style="--anim-delay:5.4s;--anim-duration:8s">
       <div class="anim-step-content">

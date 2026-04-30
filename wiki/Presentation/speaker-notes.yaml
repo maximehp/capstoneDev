@@ -302,7 +302,7 @@ slides:
 
 
   slides/45-api-flow-and-execution.html:
-    title: "How Long Tasks Stay Manageable"
+    title: "Backend API and Worker Execution"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
       - JSON endpoints cover login, ISO/software checks, template creation, build status, and VM starts.
