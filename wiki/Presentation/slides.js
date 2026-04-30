@@ -7,58 +7,59 @@ const slideFiles = [
   "slides/06-nas-hardware.html",
   "slides/07-pbs-architecture.html",
   "slides/08-replication-architecture.html",
-  "slides/28-iac-ci-cd.html",
-  "slides/29-forgejo-and-runners.html",
-  "slides/30-iac-full-pipeline.html",
-  "slides/31-three-way-data-split.html",
-  "slides/32-minio.html",
-  "slides/33-packer.html",
-  "slides/34-terraform.html",
-  "slides/35-ansible.html",
-  "slides/36-what-s-still-needed.html",
-  "slides/09-networking.html",
-  "slides/09-networking-overview.html",
-  "slides/10-subnetting.html",
-  "slides/11-connectivity.html",
-  "slides/12-proxmox-sdn-setup.html",
-  "slides/12-networking-troubleshooting.html",
-  "slides/12-networking-recommendations.html",
-  "slides/13-security.html",
-  "slides/14-siem-overview.html",
-  "slides/15-log-ingestion-wazuh.html",
-  "slides/16-log-analysis-graylog.html",
-  "slides/17-automation-shuffle.html",
-  "slides/18-intelligence-enrichment-misp.html",
-  "slides/19-virtual-firewall-with-opnsense.html",
-  "slides/20-vulnerability-scanning-with-kali-linux.html",
-  "slides/20-security-whats-still-needed.html",
-  "slides/21-monitoring.html",
-  "slides/21-monitoring-stack.html",
-  "slides/22-nagios-and-agents.html",
-  "slides/23-prometheus.html",
-  "slides/25-grafana-and-data-sources.html",
-  "slides/27-potential-future-improvements.html",
-  "slides/37-web-development.html",
-  "slides/37-development-summary.html",
-  "slides/38-frontend-architecture.html",
-  "slides/39-user-flow-and-interaction.html",
-  "slides/40-backend-architecture.html",
-  "slides/41-api-flow-and-execution.html",
-  "slides/42-development-whats-still-needed.html",
-  "slides/43-conclusion.html",
-  "slides/43-from-shared-hardware-to-rebuildable-services.html",
-  "slides/44-questions.html"
+  "slides/09-iac-ci-cd.html",
+  "slides/10-forgejo-and-runners.html",
+  "slides/11-iac-full-pipeline.html",
+  "slides/12-three-way-data-split.html",
+  "slides/13-minio.html",
+  "slides/14-packer.html",
+  "slides/15-terraform.html",
+  "slides/16-ansible.html",
+  "slides/17-what-s-still-needed.html",
+  "slides/18-networking.html",
+  "slides/19-networking-overview.html",
+  "slides/20-subnetting.html",
+  "slides/21-connectivity.html",
+  "slides/22-proxmox-sdn-setup.html",
+  "slides/23-networking-troubleshooting.html",
+  "slides/24-networking-recommendations.html",
+  "slides/25-security.html",
+  "slides/26-siem-overview.html",
+  "slides/27-log-ingestion-wazuh.html",
+  "slides/28-log-analysis-graylog.html",
+  "slides/29-automation-shuffle.html",
+  "slides/30-intelligence-enrichment-misp.html",
+  "slides/31-virtual-firewall-with-opnsense.html",
+  "slides/32-vulnerability-scanning-with-kali-linux.html",
+  "slides/33-security-whats-still-needed.html",
+  "slides/34-monitoring.html",
+  "slides/35-monitoring-stack.html",
+  "slides/36-nagios-and-agents.html",
+  "slides/37-prometheus.html",
+  "slides/38-exporters-and-connections.html",
+  "slides/39-grafana-and-data-sources.html",
+  "slides/40-dashboards-metrics-and-alerts.html",
+  "slides/41-potential-future-improvements.html",
+  "slides/42-web-development.html",
+  "slides/43-development-summary.html",
+  "slides/44-frontend-architecture.html",
+  "slides/45-user-flow-and-interaction.html",
+  "slides/46-backend-architecture.html",
+  "slides/47-api-flow-and-execution.html",
+  "slides/48-development-whats-still-needed.html",
+  "slides/49-conclusion.html",
+  "slides/50-from-shared-hardware-to-rebuildable-services.html",
+  "slides/51-questions.html"
 ];
 
 function themeForSlide(file) {
   const slideNumber = Number(file.match(/slides\/(\d+)-/)?.[1]);
 
-  if (slideNumber >= 4 && slideNumber <= 8) return "infrastructure";
-  if (slideNumber >= 9 && slideNumber <= 12) return "networking";
-  if (slideNumber >= 13 && slideNumber <= 20) return "security";
-  if (slideNumber >= 21 && slideNumber <= 27) return "monitoring";
-  if (slideNumber >= 28 && slideNumber <= 36) return "infrastructure";
-  if (slideNumber >= 37 && slideNumber <= 42) return "development";
+  if (slideNumber >= 4 && slideNumber <= 17) return "infrastructure";
+  if (slideNumber >= 18 && slideNumber <= 24) return "networking";
+  if (slideNumber >= 25 && slideNumber <= 33) return "security";
+  if (slideNumber >= 34 && slideNumber <= 41) return "monitoring";
+  if (slideNumber >= 42 && slideNumber <= 48) return "development";
 
   return "blue";
 }
