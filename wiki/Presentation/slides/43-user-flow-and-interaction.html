@@ -1,17 +1,44 @@
 <section>
   <div class="slide-kicker">Development / Frontend + UI</div>
   <h2>The Main User Journey</h2>
-  <div class="user-flow">
-    <span>AD Login</span>
-    <span>Home</span>
-    <span>Template Wizard</span>
-    <span>Build Progress</span>
-    <span>Start VM</span>
+  <div class="journey-chart" aria-label="Login to home to creator to creation progress, with settings branching from home">
+    <figure class="journey-step journey-login">
+      <div class="journey-image">
+        <img src="assets/Login.png" alt="Login screen" />
+      </div>
+      <figcaption>Login</figcaption>
+    </figure>
+    <div class="journey-arrow journey-arrow-login-home" aria-hidden="true"></div>
+
+    <figure class="journey-step journey-home">
+      <div class="journey-image">
+        <img src="assets/Home.png" alt="Home screen" />
+      </div>
+      <figcaption>Home</figcaption>
+    </figure>
+    <div class="journey-arrow journey-arrow-home-creator" aria-hidden="true"></div>
+    <div class="journey-arrow journey-arrow-home-settings" aria-hidden="true"></div>
+
+    <figure class="journey-step journey-creator">
+      <div class="journey-image">
+        <img src="assets/Creator.png" alt="Template creator screen" />
+      </div>
+      <figcaption>Creator</figcaption>
+    </figure>
+    <div class="journey-arrow journey-arrow-creator-creation" aria-hidden="true"></div>
+
+    <figure class="journey-step journey-creation">
+      <div class="journey-image">
+        <img src="assets/Progress.png" alt="Creation progress screen" />
+      </div>
+      <figcaption>Creation</figcaption>
+    </figure>
+
+    <figure class="journey-step journey-settings">
+      <div class="journey-image">
+        <img src="assets/Settings.png" alt="Settings screen" />
+      </div>
+      <figcaption>Settings</figcaption>
+    </figure>
   </div>
-  <ul class="tight-list">
-    <li>Users sign in with their school account before reaching the app.</li>
-    <li>The home page starts the New VM workflow and lists available completed templates.</li>
-    <li>The template wizard breaks a complex build into smaller choices: OS, ISO, software, hardware, network, and review.</li>
-    <li>When a build starts, the page keeps the user updated instead of freezing on a long request.</li>
-  </ul>
 </section>
