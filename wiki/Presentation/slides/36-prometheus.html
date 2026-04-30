@@ -1,31 +1,46 @@
 <section>
   <div class="slide-kicker">Monitoring / Prometheus</div>
   <h2>Prometheus</h2>
-  <div class="card-grid two">
-    <article class="info-card">
-      <h3>Why Prometheus</h3>
-      <p>Open-source time-series metrics collection; chosen for its native integration with Nagios and Grafana.</p>
-    </article>
-    <article class="info-card">
-      <h3>Deployment</h3>
-      <p>Runs in Docker Compose on a dedicated Docker VM. Web UI exposed on port 9090; targets scraped every 5 seconds.</p>
-    </article>
+  <p class="mon-lead">Exporters on each target expose metrics that Prometheus scrapes every 5 seconds from Docker Compose, then feeds into Grafana for PromQL-powered dashboards.</p>
+
+  <div class="mon-pipeline">
+
+    <div class="anim-step anim-step-trigger">
+      <div class="anim-step-content">
+        <strong>Exporters</strong>
+        <span>Node &middot; Nagios &middot; Graylog</span>
+        <span>Metrics on :9100+</span>
+      </div>
+      <div class="anim-step-emblem mon-emblem-exporter"></div>
+    </div>
+
+    <div class="mon-conn" aria-hidden="true">
+      <div class="mon-conn-line"></div>
+    </div>
+
+    <div class="anim-step">
+      <div class="anim-step-content">
+        <strong>Prometheus</strong>
+        <span>Docker Compose on dedicated VM</span>
+        <span>Web UI on port 9090</span>
+      </div>
+      <div class="anim-step-emblem mon-emblem-prom"></div>
+    </div>
+
+    <div class="mon-conn" aria-hidden="true">
+      <div class="mon-conn-line"></div>
+    </div>
+
+    <div class="anim-step anim-step-gold">
+      <div class="anim-step-content">
+        <strong>Grafana</strong>
+        <span>PromQL dashboards</span>
+        <span>Queries written directly</span>
+      </div>
+      <div class="anim-step-emblem mon-emblem-grafana"></div>
+    </div>
+
   </div>
-  <div class="prom-flow">
-    <div class="pf-node pf-node-exp">
-      <strong>Exporters</strong>
-      <span>:9100 &middot; Nagios &middot; Graylog</span>
-    </div>
-    <div class="pf-conn" aria-hidden="true"></div>
-    <div class="pf-node pf-node-prom">
-      <strong>Prometheus</strong>
-      <span>Scrapes every 5 s</span>
-    </div>
-    <div class="pf-conn" aria-hidden="true"></div>
-    <div class="pf-node pf-node-graf">
-      <strong>Grafana</strong>
-      <span>PromQL Dashboards</span>
-    </div>
-  </div>
+
   <div class="speaker">Speaker: Julius Lillard</div>
 </section>

@@ -3,28 +3,41 @@
   <h2>Monitoring Stack</h2>
   <p class="mon-lead">Nagios polls host and service health &rarr; Prometheus collects time-series metrics &rarr; Grafana visualizes and alerts.</p>
 
-  <div class="mon-stack-diagram">
+  <div class="mon-pipeline">
 
-    <div class="mon-node mon-node-nagios">
-      <span class="mon-icon mon-icon-nagios" aria-hidden="true"></span>
-      <strong>Nagios</strong>
-      <span>Host &amp; Service Checks</span>
+    <div class="anim-step anim-step-trigger">
+      <div class="anim-step-content">
+        <strong>Nagios</strong>
+        <span>Host &amp; service checks</span>
+        <span>Active polling</span>
+      </div>
+      <div class="anim-step-emblem mon-emblem-nagios"></div>
     </div>
 
-    <div class="mon-conn-h" aria-hidden="true"></div>
-
-    <div class="mon-node mon-node-prom">
-      <span class="mon-icon mon-icon-prom" aria-hidden="true"></span>
-      <strong>Prometheus</strong>
-      <span>Metrics &amp; Time Series</span>
+    <div class="mon-conn" aria-hidden="true">
+      <div class="mon-conn-line"></div>
     </div>
 
-    <div class="mon-conn-h" aria-hidden="true"></div>
+    <div class="anim-step">
+      <div class="anim-step-content">
+        <strong>Prometheus</strong>
+        <span>Time-series metrics</span>
+        <span>Scrapes every 5 s</span>
+      </div>
+      <div class="anim-step-emblem mon-emblem-prom"></div>
+    </div>
 
-    <div class="mon-node mon-node-grafana">
-      <span class="mon-icon mon-icon-grafana" aria-hidden="true"></span>
-      <strong>Grafana</strong>
-      <span>Dashboards &amp; Alerts</span>
+    <div class="mon-conn" aria-hidden="true">
+      <div class="mon-conn-line"></div>
+    </div>
+
+    <div class="anim-step anim-step-gold">
+      <div class="anim-step-content">
+        <strong>Grafana</strong>
+        <span>Dashboards &amp; alerts</span>
+        <span>PromQL queries</span>
+      </div>
+      <div class="anim-step-emblem mon-emblem-grafana"></div>
     </div>
 
   </div>
