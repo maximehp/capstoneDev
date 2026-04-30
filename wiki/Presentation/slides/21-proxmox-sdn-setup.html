@@ -1,23 +1,62 @@
 <section>
   <div class="slide-kicker">Networking / SDN</div>
   <h2>Proxmox Setup and Configuration</h2>
-  <div class="split-layout sdn-layout">
-    <div>
-      <p class="lead compact">Proxmox networking was extended with Open vSwitch bonds and bridges so VMs could land in the correct subnet group.</p>
-      <ul class="tight-list">
-        <li>Selected bond modes based on the role of each network path.</li>
-        <li>Entered static IP addresses for each virtual machine.</li>
-        <li>Used VLAN tags on VMs for proper subnet connectivity.</li>
-      </ul>
-    </div>
-    <div class="sdn-bond-grid">
-      <div>
+  <p class="lead compact">Proxmox networking was extended with Open vSwitch bonds and bridges so VMs could land in the correct subnet group.</p>
+
+  <div class="sdn-topology" aria-label="Proxmox SDN topology from physical links through OVS bonds and bridges to VM addressing">
+    <div class="sdn-profile">
+      <div class="sdn-profile-header">
         <strong>Enterprise Connectivity</strong>
-        <span>OVS bond using LACP <code>balance-slb</code> with an OVS bridge.</span>
+        <span>LACP <code>balance-slb</code></span>
       </div>
-      <div>
+      <div class="sdn-path">
+        <div class="sdn-node">
+          <span class="sdn-node-icon">NIC</span>
+          <strong>Physical Links</strong>
+        </div>
+        <div class="sdn-path-line" aria-hidden="true"></div>
+        <div class="sdn-node">
+          <span class="sdn-node-icon">BOND</span>
+          <strong>OVS Bond</strong>
+        </div>
+        <div class="sdn-path-line" aria-hidden="true"></div>
+        <div class="sdn-node">
+          <span class="sdn-node-icon">BR</span>
+          <strong>OVS Bridge</strong>
+        </div>
+        <div class="sdn-path-line sdn-path-line-gold" aria-hidden="true"></div>
+        <div class="sdn-node sdn-node-vm">
+          <span class="sdn-node-icon">VM</span>
+          <strong>Static IP + VLAN Tag</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="sdn-profile">
+      <div class="sdn-profile-header">
         <strong>Student Lab Network</strong>
-        <span>OVS bond using <code>active-backup</code> with an OVS bridge.</span>
+        <span><code>active-backup</code></span>
+      </div>
+      <div class="sdn-path">
+        <div class="sdn-node">
+          <span class="sdn-node-icon">NIC</span>
+          <strong>Physical Links</strong>
+        </div>
+        <div class="sdn-path-line" aria-hidden="true"></div>
+        <div class="sdn-node">
+          <span class="sdn-node-icon">BOND</span>
+          <strong>OVS Bond</strong>
+        </div>
+        <div class="sdn-path-line" aria-hidden="true"></div>
+        <div class="sdn-node">
+          <span class="sdn-node-icon">BR</span>
+          <strong>OVS Bridge</strong>
+        </div>
+        <div class="sdn-path-line sdn-path-line-gold" aria-hidden="true"></div>
+        <div class="sdn-node sdn-node-vm">
+          <span class="sdn-node-icon">VM</span>
+          <strong>Static IP + VLAN Tag</strong>
+        </div>
       </div>
     </div>
   </div>

@@ -1,21 +1,45 @@
 <section>
   <div class="slide-kicker">Networking / Subnetting</div>
   <h2>Subnetting</h2>
-  <div class="compare-grid">
-    <div class="compare-card before">
+
+  <div class="subnet-evolution" aria-label="Subnet expansion from the original design to the updated design">
+    <div class="subnet-card subnet-card-before">
+      <div class="subnet-emblem subnet-emblem-original"></div>
       <h3>Original Design</h3>
       <span class="big-code">/24</span>
       <p>Smaller overall address space with six original VLAN groups.</p>
+      <span class="tws-badge tws-badge-ephemeral">Constrained</span>
     </div>
-    <div class="compare-card after">
+
+    <div class="subnet-arrow">
+      <div class="tws-arrow-track">
+        <div class="tws-arrow-shaft"></div>
+        <div class="tws-arrow-head"></div>
+      </div>
+      <span class="tws-arrow-label">expanded</span>
+    </div>
+
+    <div class="subnet-card subnet-card-after">
+      <div class="subnet-emblem subnet-emblem-expanded"></div>
       <h3>Updated Design</h3>
       <span class="big-code">/21</span>
       <p>Larger IP range with seven working VLAN groups for more effective segmentation.</p>
+      <span class="tws-badge tws-badge-persistent">VM-ready</span>
     </div>
   </div>
-  <ul class="tight-list">
-    <li>Improved the original subnet design so the lab has room to scale.</li>
-    <li>Updated switch configurations to match the new subnet and VLAN layout.</li>
-    <li>Expanded switchport trunks to allow additional VLANs for future network growth.</li>
-  </ul>
+
+  <div class="subnet-ops-strip" aria-label="Switch and trunk updates that made the subnet change usable">
+    <div>
+      <strong>Scale Room</strong>
+      <span>Addressing plan has room for more VM and lab growth.</span>
+    </div>
+    <div>
+      <strong>Switch Alignment</strong>
+      <span>Physical switch configs match the new subnet and VLAN layout.</span>
+    </div>
+    <div>
+      <strong>Trunk Capacity</strong>
+      <span>Switchport trunks allow the additional VLANs needed later.</span>
+    </div>
+  </div>
 </section>

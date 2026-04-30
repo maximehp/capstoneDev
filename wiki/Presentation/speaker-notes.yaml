@@ -304,7 +304,11 @@ slides:
   slides/45-api-flow-and-execution.html:
     title: "How Long Tasks Stay Manageable"
     speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    notes: |-
+      - JSON endpoints cover login, ISO/software checks, template creation, build status, and VM starts.
+      - Template creation validates the request, saves a queued job, and returns quickly.
+      - The worker claims jobs later, stages ISOs, generates Packer files, and updates progress.
+      - VM provisioning validates the template, asks Proxmox to clone/configure/start it, and records the result.
 
   slides/46-development-whats-still-needed.html:
     title: "What's Still Needed"
