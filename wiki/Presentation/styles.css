@@ -795,6 +795,76 @@ body[data-theme="development"] {
   margin: 0;
 }
 
+/* Horizontal rack layout modifier */
+.rack-diagram-h {
+  grid-template-columns: 1fr 2.4fr 1fr;
+}
+
+/* Column wrapper for stacking two rack-sections vertically */
+.rack-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 3-column grid for compute hosts */
+.compute-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.compute-last {
+  grid-column: 1 / 4;
+}
+
+/* Small annotation line at the bottom of a rack-section */
+.rack-note {
+  font-size: 0.25em;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+
+/* 2-column grid — controllers, dual switches */
+.rack-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+/* 3-column grid — TrueNAS trio */
+.rack-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+/* 7-column grid — one cell per compute host */
+.compute-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+/* Bottom row: narrow Build/Dev left, wider TrueNAS right */
+.rack-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 2.6fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* One-liner lead text for infrastructure slide */
+.infra-lead {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.62);
+  margin: 0 0 0.55rem;
+  letter-spacing: 0.01em;
+}
+
 .replication-diagram {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);

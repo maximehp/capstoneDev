@@ -1,38 +1,56 @@
 <section>
   <div class="slide-kicker">Infrastructure / Systems Overview</div>
   <h2>Base Infrastructure</h2>
-  <div class="split-layout">
-    <div>
-      <ul class="tight-list">
-        <li>Inherited a rack environment at the start of the semester.</li>
-        <li>Core networking provided by two Layer 2 switches named Bessie.</li>
-        <li>Proxmox cluster used Amy and Farnsworth as controllers alongside seven compute hosts: Fry, Leela, Bender, Hermes, Zoidberg, Scruffy, and Nibbler.</li>
-        <li>Kif operated separately as a dedicated build and development node.</li>
-        <li>Three TrueNAS systems - HypnoToad, Calculon, and Mom - provided pipeline storage.</li>
-        <li>VMID ranges were assigned per group to prevent provisioning conflicts.</li>
-      </ul>
+  <p class="infra-lead">Inherited rack: dual L2 switching, Proxmox cluster with two controllers and seven compute hosts, Kif as a dedicated build node, and three TrueNAS systems — VMIDs partitioned per group.</p>
+
+  <div class="rack-diagram">
+
+    <!-- Row 1: Network -->
+    <div class="rack-section network">
+      <div class="rack-section-head">Network</div>
+      <div class="rack-2col">
+        <div class="rack-unit">Bessie</div>
+        <div class="rack-unit">Bessie</div>
+      </div>
+      <div class="rack-note">Layer 2 Switches</div>
     </div>
 
-    <div class="rack-diagram">
-      <div class="rack-section network">
-        <div class="rack-section-head">Network</div>
-        <div class="rack-unit">Bessie L2 Switches</div>
+    <!-- Row 2: Proxmox cluster -->
+    <div class="rack-section proxmox">
+      <div class="rack-section-head">Proxmox Cluster</div>
+      <div class="rack-2col">
+        <div class="rack-unit accent">Amy &mdash; Controller</div>
+        <div class="rack-unit accent">Farnsworth &mdash; Controller</div>
       </div>
-
-      <div class="rack-section sandbox">
-        <div class="rack-section-head">Sandbox Cluster</div>
-        <div class="rack-unit build-node">Kif & Zapp</div>
+      <div class="compute-grid-7">
+        <div class="rack-unit cluster-item accent">Fry</div>
+        <div class="rack-unit cluster-item accent">Leela</div>
+        <div class="rack-unit cluster-item accent">Bender</div>
+        <div class="rack-unit cluster-item accent">Hermes</div>
+        <div class="rack-unit cluster-item accent">Zoidberg</div>
+        <div class="rack-unit cluster-item accent">Scruffy</div>
+        <div class="rack-unit cluster-item accent">Nibbler</div>
       </div>
+      <div class="rack-note">VMIDs partitioned per group</div>
+    </div>
 
-      <div class="rack-section proxmox">
-        <div class="rack-section-head">Proxmox Cluster</div>
-        <div class="rack-unit cluster-item accent">Amy / Farnsworth Controllers</div>
-        <div class="rack-unit cluster-item accent">7 Compute Hosts</div>
+    <!-- Row 3: Build/Dev + TrueNAS -->
+    <div class="rack-bottom-row">
+      <div class="rack-section dedicated">
+        <div class="rack-section-head">Build / Dev</div>
+        <div class="rack-unit">Kif & Zapp</div>
+        <div class="rack-note">Dedicated node</div>
       </div>
-
       <div class="rack-section storage">
-        <div class="rack-section-head">Storage</div>
-        <div class="rack-unit storage">3 TrueNAS Units</div>
+        <div class="rack-section-head">TrueNAS Storage</div>
+        <div class="rack-3col">
+          <div class="rack-unit storage">HypnoToad</div>
+          <div class="rack-unit storage">Calculon</div>
+          <div class="rack-unit storage">Mom</div>
+        </div>
+        <div class="rack-note">Pipeline storage</div>
       </div>
+    </div>
+
   </div>
 </section>
