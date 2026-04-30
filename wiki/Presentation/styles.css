@@ -2053,6 +2053,77 @@ body[data-theme="development"] {
 
 /* ── End Shared Animation Primitives ────────────────────────────────────── */
 
+/* ── Frontend Pathway Diagram ───────────────────────────────────────────── */
+
+.frontend-flow-body {
+  position: relative;
+  min-height: 520px;
+}
+
+.frontend-flow-lead {
+  display: block;
+  width: calc(100% - 430px - 56px);
+  margin: 0;
+  color: #eaf5ff;
+  font-size: 0.46em;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.frontend-pathway {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: grid;
+  grid-template-columns: 430px;
+  grid-template-rows: 82px 32px 82px 32px 82px 32px 82px 32px 82px;
+  row-gap: 0;
+  column-gap: 0;
+}
+
+.frontend-pathway .anim-step-content strong {
+  font-size: 0.42em;
+}
+
+.frontend-pathway .anim-step-content span {
+  font-size: 0.29em;
+}
+
+.frontend-pathway .anim-step-emblem {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 0.28em;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.frontend-pathway .anim-step-emblem::before {
+  line-height: 1;
+}
+
+.frontend-emblem-django::before {
+  content: "D";
+}
+
+.frontend-emblem-js::before {
+  content: "JS";
+}
+
+.frontend-emblem-fetch::before {
+  content: "</>";
+}
+
+.frontend-emblem-swap::before {
+  content: "#";
+}
+
+.frontend-emblem-theme::before {
+  content: "A";
+}
+
+/* ── End Frontend Pathway Diagram ───────────────────────────────────────── */
+
 .card-grid {
   display: grid;
   gap: 18px;
@@ -2187,6 +2258,9 @@ body[data-theme="development"] {
   object-fit: cover;
   object-position: top center;
   border-radius: 6px;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
 }
 
 .journey-step figcaption {
@@ -3811,7 +3885,7 @@ body[data-theme="development"] {
 .iac-minio,
 .ans-minio-card,
 .misp-node {
-  transition: box-shadow 0.25s ease-out, border-color 0.25s ease-out;
+  transition: box-shadow 0.45s ease-in-out, border-color 0.45s ease-in-out;
 }
 
 /* Cyan glow — matches iac-step-pulse peak at 4% */
