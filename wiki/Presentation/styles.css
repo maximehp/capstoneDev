@@ -2524,6 +2524,123 @@ body[data-theme="development"] {
   line-height: 1.34;
 }
 
+.frontend-js-flow {
+  margin-top: 44px;
+  margin-bottom: 18px;
+}
+
+.frontend-js-flow .anim-step-content strong {
+  font-size: 0.36em;
+}
+
+.frontend-js-flow .anim-step-content span {
+  font-size: 0.255em;
+}
+
+.frontend-flow-step .anim-step-emblem {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 0.28em;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.frontend-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.frontend-detail-grid div {
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.025));
+}
+
+.frontend-detail-grid strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.32em;
+  margin-bottom: 6px;
+}
+
+.frontend-detail-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.27em;
+  line-height: 1.34;
+}
+
+.sdn-js-flow {
+  margin-top: 32px;
+  margin-bottom: 18px;
+}
+
+.sdn-js-flow .anim-step-content strong {
+  font-size: 0.36em;
+}
+
+.sdn-js-flow .anim-step-content span {
+  font-size: 0.255em;
+}
+
+.sdn-emblem-nic,
+.sdn-emblem-bond,
+.sdn-emblem-bridge,
+.sdn-emblem-vm {
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 0.24em;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.sdn-emblem-nic::before {
+  content: "NIC";
+}
+
+.sdn-emblem-bond::before {
+  content: "BOND";
+}
+
+.sdn-emblem-bridge::before {
+  content: "BR";
+}
+
+.sdn-emblem-vm::before {
+  content: "VM";
+}
+
+.sdn-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sdn-mode-grid div {
+  border: 1px solid var(--accent-line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.025));
+}
+
+.sdn-mode-grid strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.32em;
+  margin-bottom: 6px;
+}
+
+.sdn-mode-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.27em;
+  line-height: 1.34;
+}
+
 .journey-chart {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr) 54px minmax(0, 1fr) 54px minmax(0, 1fr);

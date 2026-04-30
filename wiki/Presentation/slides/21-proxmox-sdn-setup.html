@@ -3,61 +3,54 @@
   <h2>Proxmox Setup and Configuration</h2>
   <p class="lead compact">Proxmox networking was extended with Open vSwitch bonds and bridges so VMs could land in the correct subnet group.</p>
 
-  <div class="sdn-topology" aria-label="Proxmox SDN topology from physical links through OVS bonds and bridges to VM addressing">
-    <div class="sdn-profile">
-      <div class="sdn-profile-header">
-        <strong>Enterprise Connectivity</strong>
-        <span>LACP <code>balance-slb</code></span>
+  <div class="api-workflow sdn-js-flow" aria-label="Proxmox SDN flow from physical links through OVS bonds and bridges to VM addressing">
+    <div class="anim-step anim-step-trigger sdn-flow-step" style="--anim-delay:0s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>Physical Links</strong>
+        <span>Network paths from the Proxmox hosts</span>
       </div>
-      <div class="sdn-path">
-        <div class="sdn-node">
-          <span class="sdn-node-icon">NIC</span>
-          <strong>Physical Links</strong>
-        </div>
-        <div class="sdn-path-line" aria-hidden="true"></div>
-        <div class="sdn-node">
-          <span class="sdn-node-icon">BOND</span>
-          <strong>OVS Bond</strong>
-        </div>
-        <div class="sdn-path-line" aria-hidden="true"></div>
-        <div class="sdn-node">
-          <span class="sdn-node-icon">BR</span>
-          <strong>OVS Bridge</strong>
-        </div>
-        <div class="sdn-path-line sdn-path-line-gold" aria-hidden="true"></div>
-        <div class="sdn-node sdn-node-vm">
-          <span class="sdn-node-icon">VM</span>
-          <strong>Static IP + VLAN Tag</strong>
-        </div>
-      </div>
+      <div class="anim-step-emblem sdn-emblem-nic"></div>
     </div>
 
-    <div class="sdn-profile">
-      <div class="sdn-profile-header">
-        <strong>Student Lab Network</strong>
-        <span><code>active-backup</code></span>
+    <div class="api-hconn api-hconn-1" aria-hidden="true"></div>
+
+    <div class="anim-step sdn-flow-step" style="--anim-delay:1.8s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>OVS Bond</strong>
+        <span>Mode selected for each network role</span>
       </div>
-      <div class="sdn-path">
-        <div class="sdn-node">
-          <span class="sdn-node-icon">NIC</span>
-          <strong>Physical Links</strong>
-        </div>
-        <div class="sdn-path-line" aria-hidden="true"></div>
-        <div class="sdn-node">
-          <span class="sdn-node-icon">BOND</span>
-          <strong>OVS Bond</strong>
-        </div>
-        <div class="sdn-path-line" aria-hidden="true"></div>
-        <div class="sdn-node">
-          <span class="sdn-node-icon">BR</span>
-          <strong>OVS Bridge</strong>
-        </div>
-        <div class="sdn-path-line sdn-path-line-gold" aria-hidden="true"></div>
-        <div class="sdn-node sdn-node-vm">
-          <span class="sdn-node-icon">VM</span>
-          <strong>Static IP + VLAN Tag</strong>
-        </div>
+      <div class="anim-step-emblem sdn-emblem-bond"></div>
+    </div>
+
+    <div class="api-hconn api-hconn-2" aria-hidden="true"></div>
+
+    <div class="anim-step sdn-flow-step" style="--anim-delay:3.6s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>OVS Bridge</strong>
+        <span>Connects VM interfaces to the correct fabric</span>
       </div>
+      <div class="anim-step-emblem sdn-emblem-bridge"></div>
+    </div>
+
+    <div class="api-hconn api-hconn-3" aria-hidden="true"></div>
+
+    <div class="anim-step anim-step-gold sdn-flow-step" style="--anim-delay:5.4s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>VM Placement</strong>
+        <span>Static IP address and VLAN tag land the VM in the right subnet</span>
+      </div>
+      <div class="anim-step-emblem sdn-emblem-vm"></div>
+    </div>
+  </div>
+
+  <div class="sdn-mode-grid" aria-label="OVS bond modes used for the network roles">
+    <div>
+      <strong>Enterprise Connectivity</strong>
+      <span>LACP <code>balance-slb</code> with an OVS bridge.</span>
+    </div>
+    <div>
+      <strong>Student Lab Network</strong>
+      <span><code>active-backup</code> with an OVS bridge.</span>
     </div>
   </div>
 </section>
