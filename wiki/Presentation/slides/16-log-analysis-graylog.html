@@ -1,24 +1,84 @@
 <section>
   <div class="slide-kicker">Security / Graylog</div>
   <h2>Log Analysis: Graylog</h2>
-  <div class="card-grid three">
-    <article class="info-card">
-      <h3>Ingest</h3>
-      <p>Created a Beats input for Wazuh logs, plus a custom stream and index set.</p>
-    </article>
-    <article class="info-card">
-      <h3>Normalize</h3>
-      <p>Built Graylog pipelines and rules to parse log data into recognizable, searchable fields.</p>
-    </article>
-    <article class="info-card">
-      <h3>Detect</h3>
-      <p>Enabled brute force and aggressive brute force event definitions with alert conditions.</p>
-    </article>
-  </div>
-  <div class="mini-dashboard">
-    <div>Security Overview</div>
-    <div>Failed Logins</div>
-    <div>Threat Severity</div>
-    <div>Datanode Raw Log Storage</div>
+  <p class="gl-lead">Log sources feed inputs through pipelines and streams &mdash; indexed in OpenSearch, visualized in dashboards, and monitored via event-driven alerts.</p>
+
+  <div class="gl-diagram">
+
+    <!-- Col 1: Source input types -->
+    <div class="gl-sources" style="grid-column:1; grid-row:1">
+      <div class="gl-src-chip gl-src-beats">Filebeat / Beats</div>
+      <div class="gl-src-chip gl-src-syslog">Syslog / UDP</div>
+      <div class="gl-src-chip gl-src-gelf">GELF / Apps</div>
+    </div>
+
+    <!-- Col 2: Fan-in connector -->
+    <div class="gl-fan-col" style="grid-column:2; grid-row:1" aria-hidden="true"></div>
+
+    <!-- Row 1: Main data flow (cols 3–11) -->
+    <div class="gl-node gl-node-input" style="grid-column:3; grid-row:1">
+      <span class="gl-icon gl-icon-in" aria-hidden="true"></span>
+      <strong>Inputs</strong>
+      <span>Receive &amp; Buffer</span>
+    </div>
+
+    <div class="gl-arr-col" style="grid-column:4; grid-row:1" aria-hidden="true"></div>
+
+    <div class="gl-node gl-node-pipe" style="grid-column:5; grid-row:1">
+      <span class="gl-icon gl-icon-pipe" aria-hidden="true"></span>
+      <strong>Pipelines</strong>
+      <span>Transform &middot; Filter</span>
+    </div>
+
+    <div class="gl-arr-col" style="grid-column:6; grid-row:1" aria-hidden="true"></div>
+
+    <div class="gl-node gl-node-stream" style="grid-column:7; grid-row:1">
+      <span class="gl-icon gl-icon-stream" aria-hidden="true"></span>
+      <strong>Streams</strong>
+      <span>Rules &middot; Routing</span>
+    </div>
+
+    <div class="gl-arr-col" style="grid-column:8; grid-row:1" aria-hidden="true"></div>
+
+    <div class="gl-node gl-node-index" style="grid-column:9; grid-row:1">
+      <span class="gl-icon gl-icon-index" aria-hidden="true"></span>
+      <strong>Index Sets</strong>
+      <span>OpenSearch &middot; Retention</span>
+    </div>
+
+    <div class="gl-arr-col" style="grid-column:10; grid-row:1" aria-hidden="true"></div>
+
+    <div class="gl-node gl-node-dash" style="grid-column:11; grid-row:1">
+      <span class="gl-icon gl-icon-dash" aria-hidden="true"></span>
+      <strong>Dashboards</strong>
+      <span>Search &middot; Charts</span>
+    </div>
+
+    <!-- Row 2: Vertical connector Streams → Event Defs -->
+    <div class="gl-v-conn" style="grid-column:7; grid-row:2" aria-hidden="true"></div>
+
+    <!-- Row 3: Alert branch — Event Defs → Alerts → Notifications -->
+    <div class="gl-node gl-node-events" style="grid-column:7; grid-row:3">
+      <span class="gl-icon gl-icon-events" aria-hidden="true"></span>
+      <strong>Event Defs</strong>
+      <span>Conditions &middot; Queries</span>
+    </div>
+
+    <div class="gl-arr-col gl-arr-orange" style="grid-column:8; grid-row:3" aria-hidden="true"></div>
+
+    <div class="gl-node gl-node-alert" style="grid-column:9; grid-row:3">
+      <span class="gl-icon gl-icon-alert" aria-hidden="true"></span>
+      <strong>Alerts</strong>
+      <span>Triggered Events</span>
+    </div>
+
+    <div class="gl-arr-col gl-arr-orange" style="grid-column:10; grid-row:3" aria-hidden="true"></div>
+
+    <div class="gl-node gl-node-notif" style="grid-column:11; grid-row:3">
+      <span class="gl-icon gl-icon-notif" aria-hidden="true"></span>
+      <strong>Notifications</strong>
+      <span>Slack &middot; Email &middot; Webhook</span>
+    </div>
+
   </div>
 </section>

@@ -33,11 +33,10 @@ const slideFiles = [
   "slides/20-vulnerability-scanning-with-kali-linux.html",
   "slides/20-security-whats-still-needed.html",
   "slides/21-monitoring.html",
+  "slides/21-monitoring-stack.html",
   "slides/22-nagios-and-agents.html",
   "slides/23-prometheus.html",
-  "slides/24-exporters-and-connections.html",
   "slides/25-grafana-and-data-sources.html",
-  "slides/26-dashboards-metrics-and-alerts.html",
   "slides/27-potential-future-improvements.html",
   "slides/37-web-development.html",
   "slides/37-development-summary.html",
@@ -86,6 +85,23 @@ async function loadSpeakerNotes() {
   }
 }
 
+function notesToHtml(text) {
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+  for (const line of lines) {
+    if (/^- /.test(line)) {
+      if (!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${line.slice(2)}</li>`;
+    } else {
+      if (inList) { html += '</ul>'; inList = false; }
+      if (line.trim()) html += `<p>${line}</p>`;
+    }
+  }
+  if (inList) html += '</ul>';
+  return html;
+}
+
 function applySpeakerNotes(root, notesBySlide) {
   const sections = root.querySelectorAll("section");
 
@@ -111,7 +127,7 @@ function applySpeakerNotes(root, notesBySlide) {
         notes.className = "notes";
         section.appendChild(notes);
       }
-      notes.textContent = noteConfig.notes.trim();
+      notes.innerHTML = notesToHtml(noteConfig.notes.trim());
     }
   });
 }

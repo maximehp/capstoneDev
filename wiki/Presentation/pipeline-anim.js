@@ -311,6 +311,102 @@ async function iacOnce(slide, signal) {
   await sleep(LOOP_PAUSE, signal);
 }
 
+// ── MinIO Pipeline ────────────────────────────────────────────────────────────
+
+async function minioOnce(slide, signal) {
+  const tfActor   = slide.querySelector('.minio-actor-tf');
+  const store     = slide.querySelector('.minio-store-diagram');
+  const ansActor  = slide.querySelector('.minio-actor-ans');
+  const conns     = [...slide.querySelectorAll('.minio-conn')];
+  const leftConn  = conns[0];
+  const rightConn = conns[1];
+
+  if (!tfActor || !store || !ansActor || !leftConn || !rightConn) return;
+
+  unlitAll(slide);
+  lit(tfActor);
+  await sleep(INIT_PAUSE, signal);
+
+  const tfRightX    = pt(tfActor, 'right').x;
+  const storeLeftX  = pt(store,   'left').x;
+  const storeRightX = pt(store,   'right').x;
+  const ansLeftX    = pt(ansActor,'left').x;
+
+  // Two dots — one per rail, each travelling along its own line's Y
+  const leftRails = [...leftConn.querySelectorAll('.minio-conn-rail')];
+
+  for (let i = 0; i < leftRails.length; i++) {
+    const railY = pt(leftRails[i], 'center').y;
+    const from  = { x: tfRightX,   y: railY };
+    const to    = { x: storeLeftX, y: railY };
+    const dot   = makeDot(from);
+    await travel(dot, [from, to], signal);
+    dot.remove();
+    if (i < leftRails.length - 1) await sleep(PAUSE * 0.5, signal);
+  }
+
+  lit(store);
+  await sleep(PAUSE, signal);
+
+  // Gold dot along the right rail (vm_info.json read)
+  const rightRail = rightConn.querySelector('.minio-conn-rail');
+  const rRailY    = pt(rightRail, 'center').y;
+  const rfrom     = { x: storeRightX, y: rRailY };
+  const rto       = { x: ansLeftX,    y: rRailY };
+  const rdot      = makeDot(rfrom, true);
+  await travel(rdot, [rfrom, rto], signal);
+  rdot.remove();
+  lit(ansActor, true);
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
+// ── Monitoring Stack ──────────────────────────────────────────────────────────
+
+async function monStackOnce(slide, signal) {
+  const nodes = [...slide.querySelectorAll('.mon-stack-diagram .mon-node')];
+  if (nodes.length < 2) return;
+
+  unlitAll(slide);
+  lit(nodes[0]);
+  await sleep(INIT_PAUSE, signal);
+
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const from = pt(nodes[i],     'right');
+    const to   = pt(nodes[i + 1], 'left');
+    const dot  = makeDot(from);
+    await travel(dot, [from, to], signal);
+    dot.remove();
+    lit(nodes[i + 1]);
+    await sleep(PAUSE, signal);
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
+// ── Prometheus Flow ───────────────────────────────────────────────────────────
+
+async function promFlowOnce(slide, signal) {
+  const nodes = [...slide.querySelectorAll('.pf-node')];
+  if (nodes.length < 2) return;
+
+  unlitAll(slide);
+  lit(nodes[0]);
+  await sleep(INIT_PAUSE, signal);
+
+  for (let i = 0; i < nodes.length - 1; i++) {
+    const from = pt(nodes[i],     'right');
+    const to   = pt(nodes[i + 1], 'left');
+    const dot  = makeDot(from);
+    await travel(dot, [from, to], signal);
+    dot.remove();
+    lit(nodes[i + 1]);
+    await sleep(PAUSE, signal);
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
 // ── Slide handler ─────────────────────────────────────────────────────────────
 
 let ctrl = null;
@@ -348,6 +444,9 @@ function handleSlide(slide) {
   if (slide.querySelector('.tf-flow'))      { runLoop(terraformOnce, slide);        return; }
   if (slide.querySelector('.ans-fan'))      { runLoop(ansibleOnce,   slide);        return; }
   if (slide.querySelector('.iac-diagram-v')){ runLoop(iacOnce,       slide);        return; }
+  if (slide.querySelector('.minio-diagram'))      { runLoop(minioOnce,     slide); return; }
+  if (slide.querySelector('.mon-stack-diagram')) { runLoop(monStackOnce,  slide); return; }
+  if (slide.querySelector('.prom-flow'))         { runLoop(promFlowOnce,  slide); return; }
   stopAnimation();
 }
 

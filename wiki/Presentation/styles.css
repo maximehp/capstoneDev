@@ -1618,7 +1618,7 @@ body[data-theme="development"] {
 }
 
 .iac-emblem-terraform {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect x='8' y='8' width='44' height='17' rx='3' fill='white'/%3E%3Crect x='8' y='30' width='44' height='17' rx='3' fill='white' opacity='.65'/%3E%3Crect x='8' y='52' width='22' height='6' rx='2' fill='white' opacity='.35'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E");
 }
 
 .iac-emblem-ansible {
@@ -2763,6 +2763,7 @@ body[data-theme="development"] {
   border: 1px solid rgba(var(--accent-rgb), 0.18);
   border-radius: 12px;
   padding: 16px 18px;
+  transition: box-shadow 0.25s ease-out, border-color 0.25s ease-out;
 }
 
 .minio-store-header {
@@ -3388,7 +3389,7 @@ body[data-theme="development"] {
 
 /* ── SVG emblems ─────────────────────────────────────────────── */
 .ans-emblem-ansible {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='10' width='48' height='44' rx='4' fill='none' stroke='white' stroke-width='3'/%3E%3Cline x1='8' y1='20' x2='56' y2='20' stroke='white' stroke-width='2' opacity='0.5'/%3E%3Cpolygon points='22,28 22,46 44,37' fill='white'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='11' fill='none' stroke='white' stroke-width='4'/%3E%3Ccircle cx='30' cy='30' r='5' fill='white'/%3E%3Crect x='27' y='5' width='6' height='12' rx='3' fill='white'/%3E%3Crect x='27' y='43' width='6' height='12' rx='3' fill='white'/%3E%3Crect x='5' y='27' width='12' height='6' rx='3' fill='white'/%3E%3Crect x='43' y='27' width='12' height='6' rx='3' fill='white'/%3E%3C/svg%3E");
 }
 .ans-emblem-common {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='8' fill='none' stroke='white' stroke-width='3.5'/%3E%3Cpath d='M32 8v10M32 46v10M8 32h10M46 32h10M16.7 16.7l7 7M40.3 40.3l7 7M16.7 47.3l7-7M40.3 23.7l7-7' stroke='white' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -4716,5 +4717,487 @@ body[data-theme="development"] {
 /* Database — Indexer */
 .wazuh-icon-indexer {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300c8c8' stroke-width='2'%3E%3Cellipse cx='12' cy='5' rx='9' ry='3'/%3E%3Cpath d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'/%3E%3Cpath d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'/%3E%3C/svg%3E");
+}
+
+/* ── MinIO full-width pipeline diagram (slide 32) ───────────────────────── */
+
+.minio-lead {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 0.55rem;
+  letter-spacing: 0.01em;
+}
+
+/* 5-col grid: actor | conn | store | conn | actor */
+.minio-diagram {
+  display: grid;
+  grid-template-columns: 1fr 0.85fr 2.2fr 0.85fr 1fr;
+  gap: 0 14px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ── Actor cards ── */
+
+.minio-actor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-align: center;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(8, 18, 34, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.06);
+  padding: 18px 14px;
+  align-self: stretch;
+  transition: box-shadow 0.25s ease-out, border-color 0.25s ease-out;
+}
+
+.minio-actor strong {
+  font-size: 0.52rem;
+  color: #eef8ff;
+  letter-spacing: 0.02em;
+}
+
+.minio-actor > span {
+  font-size: 0.4rem;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.04em;
+}
+
+/* Terraform — purple */
+.minio-actor-tf {
+  border-color: rgba(123, 104, 238, 0.4);
+  background: rgba(50, 32, 140, 0.22);
+}
+
+/* Ansible — red */
+.minio-actor-ans {
+  border-color: rgba(215, 60, 60, 0.4);
+  background: rgba(110, 24, 24, 0.2);
+}
+
+/* Actor icons */
+.minio-actor-icon {
+  display: block;
+  width: 36px; height: 36px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Layers — Terraform */
+.minio-icon-tf {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b68ee' stroke-width='2'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E");
+}
+
+/* Circle + radials — Ansible (matches iac-emblem-ansible) */
+.minio-icon-ans {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='11' fill='none' stroke='%23e05555' stroke-width='4'/%3E%3Ccircle cx='30' cy='30' r='5' fill='%23e05555'/%3E%3Crect x='27' y='5' width='6' height='12' rx='3' fill='%23e05555'/%3E%3Crect x='27' y='43' width='6' height='12' rx='3' fill='%23e05555'/%3E%3Crect x='5' y='27' width='12' height='6' rx='3' fill='%23e05555'/%3E%3Crect x='43' y='27' width='12' height='6' rx='3' fill='%23e05555'/%3E%3C/svg%3E");
+}
+
+/* ── Connectors: label-above horizontal rail ── */
+
+.minio-conn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  align-self: stretch;
+  padding: 4px 0;
+  min-width: 0;
+}
+
+.minio-conn-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* Use .minio-diagram prefix to beat .reveal code specificity */
+.minio-diagram .minio-conn-lbl {
+  font-size: 0.28em;
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(180, 220, 250, 0.78);
+  background: rgba(116, 200, 245, 0.08);
+  border: 1px solid rgba(116, 200, 245, 0.2);
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.minio-diagram .minio-conn-lbl-green {
+  color: rgba(76, 218, 122, 0.88);
+  background: rgba(76, 218, 122, 0.08);
+  border-color: rgba(76, 218, 122, 0.22);
+}
+
+/* Horizontal rail: plain line only */
+.minio-conn-rail {
+  width: 100%;
+  height: 1.5px;
+  background: rgba(116, 200, 245, 0.38);
+}
+
+.minio-conn-rail-green {
+  background: rgba(76, 218, 122, 0.38);
+}
+
+/* ── Center store upgrades ── */
+
+/* Add blur + shadow to the existing store diagram when in the new layout */
+.minio-center {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+/* TrueNAS hosting badge — pushed to the right in the header */
+.minio-host-badge {
+  margin-left: auto;
+  font-size: 0.29em;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ── Graylog Architecture Diagram (slide 16) ────────────────────────────────── */
+
+.gl-lead {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 0.65rem;
+  letter-spacing: 0.01em;
+}
+
+/* 11-col × 3-row grid: sources|fan|node|arr|node|arr|node|arr|node|arr|node */
+.gl-diagram {
+  display: grid;
+  grid-template-columns: min-content 28px 1fr 26px 1fr 26px 1fr 26px 1fr 26px 1fr;
+  grid-template-rows: auto 26px auto;
+  align-items: center;
+  width: 100%;
+}
+
+/* ── Shared node ── */
+.gl-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24em;
+  padding: 0.55em 0.6em;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  background: linear-gradient(145deg,
+    rgba(var(--accent-rgb), 0.09) 0%,
+    rgba(0, 0, 0, 0.1) 100%);
+  text-align: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.25s ease-out;
+}
+
+.gl-node strong {
+  font-size: 0.56rem;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.gl-node span {
+  font-size: 0.44rem;
+  color: rgba(255, 255, 255, 0.44);
+}
+
+/* ── Node colour variants ── */
+.gl-node-input {
+  border-color: rgba(76, 218, 122, 0.4);
+  background: linear-gradient(145deg, rgba(76, 218, 122, 0.11) 0%, rgba(0,0,0,0.1) 100%);
+}
+.gl-node-pipe {
+  border-color: rgba(160, 176, 210, 0.3);
+  background: linear-gradient(145deg, rgba(160, 176, 210, 0.08) 0%, rgba(0,0,0,0.1) 100%);
+}
+.gl-node-stream {
+  border-color: rgba(110, 122, 255, 0.55);
+  background: linear-gradient(145deg, rgba(110, 122, 255, 0.16) 0%, rgba(0,0,0,0.12) 100%);
+  box-shadow: 0 0 20px rgba(110, 122, 255, 0.18), 0 2px 12px rgba(0,0,0,0.25);
+}
+.gl-node-index {
+  border-color: rgba(100, 140, 255, 0.38);
+  background: linear-gradient(145deg, rgba(100, 140, 255, 0.11) 0%, rgba(0,0,0,0.1) 100%);
+}
+.gl-node-dash {
+  border-color: rgba(255, 122, 160, 0.38);
+  background: linear-gradient(145deg, rgba(255, 122, 160, 0.11) 0%, rgba(0,0,0,0.1) 100%);
+}
+.gl-node-alert {
+  border-color: rgba(255, 170, 64, 0.4);
+  background: linear-gradient(145deg, rgba(255, 170, 64, 0.12) 0%, rgba(0,0,0,0.1) 100%);
+}
+.gl-node-notif {
+  border-color: rgba(255, 136, 68, 0.38);
+  background: linear-gradient(145deg, rgba(255, 136, 68, 0.1) 0%, rgba(0,0,0,0.1) 100%);
+}
+.gl-node-events {
+  border-color: rgba(255, 170, 64, 0.38);
+  background: linear-gradient(145deg, rgba(255, 170, 64, 0.09) 0%, rgba(0,0,0,0.1) 100%);
+}
+
+/* ── Source chips (col 1) ── */
+.gl-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32em;
+  justify-content: center;
+  align-self: center;
+}
+.gl-src-chip {
+  font-size: 0.44rem;
+  padding: 0.28em 0.5em;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.05);
+  text-align: center;
+  white-space: nowrap;
+}
+.gl-src-beats  { border-color: rgba(76, 218, 122, 0.4);   color: rgba(110, 235, 150, 0.9); }
+.gl-src-syslog { border-color: rgba(100, 180, 255, 0.38); color: rgba(140, 200, 255, 0.9); }
+.gl-src-gelf   { border-color: rgba(175, 135, 255, 0.38); color: rgba(190, 155, 255, 0.9); }
+
+/* ── Fan-in connector (col 2) ── */
+.gl-fan-col {
+  align-self: stretch;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 28 60' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 C14 10 14 30 28 30' stroke='%234cda7a' stroke-opacity='0.38' stroke-width='1' fill='none'/%3E%3Cpath d='M0 30 L24 30' stroke='%234cda7a' stroke-opacity='0.38' stroke-width='1' fill='none'/%3E%3Cpath d='M0 50 C14 50 14 30 28 30' stroke='%234cda7a' stroke-opacity='0.38' stroke-width='1' fill='none'/%3E%3Cpolygon points='22 27.5 28 30 22 32.5' fill='%234cda7a' fill-opacity='0.5'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+}
+
+/* ── Icons ── */
+.gl-icon {
+  display: block;
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  background: no-repeat center / contain;
+  margin-bottom: 1px;
+}
+
+.gl-icon-in {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 2v10M6 8l4 4 4-4' fill='none' stroke='%234cda7a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3 14v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2' fill='none' stroke='%234cda7a' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.gl-icon-pipe {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 5h14l-5 6v5l-4-2v-3L3 5z' fill='none' stroke='%23a0b0d0' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.gl-icon-stream {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='3' fill='none' stroke='%236e7aff' stroke-width='1.6'/%3E%3Cpath d='M2 10h5M13 10h5M10 3v4M10 13v4' fill='none' stroke='%236e7aff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.gl-icon-index {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='10' cy='6' rx='7' ry='2.5' fill='none' stroke='%238899ff' stroke-width='1.5'/%3E%3Cpath d='M3 6v8c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6' fill='none' stroke='%238899ff' stroke-width='1.5'/%3E%3Cpath d='M3 10c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5' fill='none' stroke='%238899ff' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+.gl-icon-dash {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='3' y='12' width='3' height='5' fill='%23ff7aa0'/%3E%3Crect x='8' y='8' width='3' height='9' fill='%23ff7aa0'/%3E%3Crect x='13' y='5' width='3' height='12' fill='%23ff7aa0' opacity='0.8'/%3E%3Cline x1='2' y1='17' x2='18' y2='17' stroke='%23ff7aa0' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+.gl-icon-alert {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 3a5 5 0 0 1 5 5v3l1.5 2H3.5L5 11V8a5 5 0 0 1 5-5z' fill='none' stroke='%23ffaa40' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M8 15a2 2 0 0 0 4 0' fill='none' stroke='%23ffaa40' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+.gl-icon-notif {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6l-3 3V5a1 1 0 0 1 1-1z' fill='none' stroke='%23ff8844' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.gl-icon-events {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='3' y='2' width='10' height='13' rx='1.5' fill='none' stroke='%23ffaa40' stroke-width='1.4'/%3E%3Cline x1='5.5' y1='6' x2='10.5' y2='6' stroke='%23ffaa40' stroke-width='1.1' stroke-linecap='round'/%3E%3Cline x1='5.5' y1='9' x2='9' y2='9' stroke='%23ffaa40' stroke-width='1.1' stroke-linecap='round'/%3E%3Ccircle cx='14' cy='14' r='3.5' fill='none' stroke='%23ffaa40' stroke-width='1.4'/%3E%3Cline x1='16.5' y1='16.5' x2='18.5' y2='18.5' stroke='%23ffaa40' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* ── Horizontal connector: line + arrowhead ── */
+.gl-arr-col {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+.gl-arr-col::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(var(--accent-rgb), 0.28);
+}
+.gl-arr-col::after {
+  content: '';
+  width: 0; height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid rgba(var(--accent-rgb), 0.48);
+}
+.gl-arr-orange::before { background: rgba(255, 170, 64, 0.35); }
+.gl-arr-orange::after  { border-left-color: rgba(255, 170, 64, 0.55); }
+
+/* ── Vertical connector: line + arrowhead pointing down ── */
+.gl-v-conn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+.gl-v-conn::before {
+  content: '';
+  flex: 1;
+  width: 1px;
+  background: rgba(255, 170, 64, 0.35);
+}
+.gl-v-conn::after {
+  content: '';
+  width: 0; height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid rgba(255, 170, 64, 0.55);
+}
+
+/* ── Monitoring Stack (slide 21-monitoring-stack) ────────────────────────── */
+
+.mon-lead {
+  font-size: 0.72em;
+  opacity: 0.82;
+  margin: 0 0 1.1em;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.mon-stack-diagram {
+  display: grid;
+  grid-template-columns: 1fr 64px 1fr 64px 1fr;
+  align-items: center;
+  gap: 0;
+  margin: 0 auto 1.1em;
+  max-width: 820px;
+}
+
+.mon-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28em;
+  padding: 0.85em 0.6em;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(6px);
+  font-size: 0.7em;
+  text-align: center;
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.mon-node strong { font-size: 1.1em; }
+.mon-node span   { font-size: 0.84em; opacity: 0.68; }
+
+.mon-icon {
+  display: block;
+  width: 38px;
+  height: 38px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-bottom: 0.15em;
+}
+
+.mon-icon-nagios {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234caf50' stroke-width='2'%3E%3Cpath d='M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7z'/%3E%3Cpolyline points='9 12 11 14 15 10'/%3E%3C/svg%3E");
+}
+.mon-icon-prom {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6b00' stroke-width='2'%3E%3Cpath d='M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z'/%3E%3Ccircle cx='12' cy='16' r='2' fill='%23ff6b00' opacity='0.5'/%3E%3C/svg%3E");
+}
+.mon-icon-grafana {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f46800' stroke-width='2'%3E%3Crect x='3' y='12' width='4' height='9'/%3E%3Crect x='10' y='7' width='4' height='14'/%3E%3Crect x='17' y='4' width='4' height='17'/%3E%3Cline x1='1' y1='22' x2='23' y2='22'/%3E%3C/svg%3E");
+}
+
+.mon-node-nagios { border-color: rgba(76,175,80,0.3); background: rgba(76,175,80,0.07); }
+.mon-node-nagios.lit { box-shadow: 0 0 18px 4px rgba(76,175,80,0.55); border-color: rgba(76,175,80,0.65); }
+
+.mon-node-prom { border-color: rgba(255,107,0,0.3); background: rgba(255,107,0,0.07); }
+.mon-node-prom.lit { box-shadow: 0 0 18px 4px rgba(255,107,0,0.55); border-color: rgba(255,107,0,0.65); }
+
+.mon-node-grafana { border-color: rgba(244,104,0,0.3); background: rgba(244,104,0,0.07); }
+.mon-node-grafana.lit { box-shadow: 0 0 18px 4px rgba(244,104,0,0.55); border-color: rgba(244,104,0,0.65); }
+
+.mon-conn-h {
+  position: relative;
+  height: 2px;
+  background: rgba(255,255,255,0.18);
+  align-self: center;
+}
+.mon-conn-h::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: rgba(255,255,255,0.35);
+}
+
+/* ── Prometheus Flow strip (slide 23-prometheus) ─────────────────────────── */
+
+.prom-flow {
+  display: grid;
+  grid-template-columns: 1fr 44px 1fr 44px 1fr;
+  align-items: center;
+  gap: 0;
+  margin: 0.7em auto 0;
+  padding: 0.3em 0.6em;
+  max-width: 620px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.pf-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12em;
+  padding: 0.45em 0.4em;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(4px);
+  font-size: 0.46em;
+  text-align: center;
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.pf-node strong { font-size: 1.15em; display: block; letter-spacing: 0.01em; }
+.pf-node span   { font-size: 0.82em; opacity: 0.6; }
+
+.pf-node-exp { border-color: rgba(100,180,100,0.28); background: rgba(100,180,100,0.07); }
+.pf-node-exp.lit { box-shadow: 0 0 13px 3px rgba(100,200,100,0.5); border-color: rgba(100,200,100,0.6); }
+
+.pf-node-prom { border-color: rgba(255,107,0,0.28); background: rgba(255,107,0,0.07); }
+.pf-node-prom.lit { box-shadow: 0 0 13px 3px rgba(255,107,0,0.5); border-color: rgba(255,107,0,0.6); }
+
+.pf-node-graf { border-color: rgba(244,104,0,0.28); background: rgba(244,104,0,0.07); }
+.pf-node-graf.lit { box-shadow: 0 0 13px 3px rgba(244,104,0,0.5); border-color: rgba(244,104,0,0.6); }
+
+.pf-conn {
+  position: relative;
+  height: 2px;
+  background: rgba(255,255,255,0.16);
+  align-self: center;
+}
+.pf-conn::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-left-color: rgba(255,255,255,0.3);
 }
 

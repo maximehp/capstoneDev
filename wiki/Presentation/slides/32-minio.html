@@ -1,25 +1,40 @@
 <section>
   <div class="slide-kicker">Infrastructure - IaC / Pipeline</div>
   <h2>MinIO</h2>
-  <div class="split-layout minio-split">
-    <ul class="tight-list">
-      <li>MinIO is a self-hosted S3-compatible object store running on TrueNAS.</li>
-      <li>Stores Terraform state files as the remote backend.</li>
-      <li>Stores <code>vm_info.json</code> for Ansible to consume after provisioning.</li>
-      <li>Decouples Terraform and Ansible so they do not need to run in the same job.</li>
-    </ul>
-    <div class="minio-store-diagram">
+  <p class="minio-lead">Self-hosted S3-compatible object store on TrueNAS — decouples Terraform state storage from Ansible inventory handoff so neither tool needs to share a pipeline job.</p>
 
-      <!-- MinIO server identity -->
+  <div class="minio-diagram">
+
+    <!-- Left: Terraform actor -->
+    <div class="minio-actor minio-actor-tf">
+      <span class="minio-actor-icon minio-icon-tf" aria-hidden="true"></span>
+      <strong>Terraform</strong>
+      <span>IaC provisioner</span>
+    </div>
+
+    <!-- Terraform → MinIO connector -->
+    <div class="minio-conn">
+      <div class="minio-conn-item">
+        <span class="minio-conn-lbl">terraform.tfstate</span>
+        <div class="minio-conn-rail"></div>
+      </div>
+      <div class="minio-conn-item">
+        <span class="minio-conn-lbl">vm_info.json</span>
+        <div class="minio-conn-rail"></div>
+      </div>
+    </div>
+
+    <!-- Center: MinIO store -->
+    <div class="minio-store-diagram minio-center">
       <div class="minio-store-header">
         <div class="minio-store-emblem"></div>
         <div class="minio-store-title">
           <span class="minio-store-name">MinIO</span>
           <span class="minio-store-badge">S3-Compatible</span>
         </div>
+        <span class="minio-host-badge">on TrueNAS</span>
       </div>
 
-      <!-- Bucket containing pipeline objects -->
       <div class="minio-bucket-card">
         <div class="minio-bucket-hdr">
           <div class="minio-bucket-emblem"></div>
@@ -30,13 +45,13 @@
           <div class="minio-obj">
             <div class="minio-obj-icon minio-obj-icon-file"></div>
             <code>terraform.tfstate</code>
-            <span class="minio-obj-tag">State</span>
+            <span class="minio-obj-tag">Remote State</span>
           </div>
 
           <div class="minio-obj">
             <div class="minio-obj-icon minio-obj-icon-file"></div>
             <code>vm_info.json</code>
-            <span class="minio-obj-tag minio-obj-tag-green">Inventory</span>
+            <span class="minio-obj-tag minio-obj-tag-green">VM Inventory</span>
           </div>
 
           <div class="minio-obj minio-obj-muted">
@@ -47,7 +62,22 @@
 
         </div>
       </div>
-
     </div>
+
+    <!-- MinIO → Ansible connector -->
+    <div class="minio-conn">
+      <div class="minio-conn-item">
+        <span class="minio-conn-lbl minio-conn-lbl-green">vm_info.json</span>
+        <div class="minio-conn-rail minio-conn-rail-green"></div>
+      </div>
+    </div>
+
+    <!-- Right: Ansible actor -->
+    <div class="minio-actor minio-actor-ans">
+      <span class="minio-actor-icon minio-icon-ans" aria-hidden="true"></span>
+      <strong>Ansible</strong>
+      <span>Config management</span>
+    </div>
+
   </div>
 </section>

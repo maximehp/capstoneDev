@@ -4,17 +4,28 @@
   <div class="card-grid two">
     <article class="info-card">
       <h3>Why Prometheus</h3>
-      <p>Open-source metrics collection with strong integration options for Nagios Core and Grafana.</p>
+      <p>Open-source time-series metrics collection; chosen for its native integration with Nagios and Grafana.</p>
     </article>
     <article class="info-card">
-      <h3>How it runs</h3>
-      <p>Deployed through Docker Compose on a Docker VM, exposing the Prometheus Web UI on port 9090.</p>
+      <h3>Deployment</h3>
+      <p>Runs in Docker Compose on a dedicated Docker VM. Web UI exposed on port 9090; targets scraped every 5 seconds.</p>
     </article>
   </div>
-  <div class="pipeline metrics-pipeline">
-    <span>Exporters</span>
-    <span>Prometheus scrape</span>
-    <span>Time-series metrics</span>
-    <span>Grafana dashboards</span>
+  <div class="prom-flow">
+    <div class="pf-node pf-node-exp">
+      <strong>Exporters</strong>
+      <span>:9100 &middot; Nagios &middot; Graylog</span>
+    </div>
+    <div class="pf-conn" aria-hidden="true"></div>
+    <div class="pf-node pf-node-prom">
+      <strong>Prometheus</strong>
+      <span>Scrapes every 5 s</span>
+    </div>
+    <div class="pf-conn" aria-hidden="true"></div>
+    <div class="pf-node pf-node-graf">
+      <strong>Grafana</strong>
+      <span>PromQL Dashboards</span>
+    </div>
   </div>
+  <div class="speaker">Speaker: Julius Lillard</div>
 </section>

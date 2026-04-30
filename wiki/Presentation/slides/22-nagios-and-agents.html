@@ -1,18 +1,19 @@
 <section>
   <div class="slide-kicker">Monitoring / Nagios</div>
-  <h2>Nagios & Agents</h2>
+  <h2>Nagios &amp; Agents</h2>
   <div class="split-layout">
-    <div>
-      <ul class="tight-list">
-        <li>Nagios Core was selected for open-source monitoring and plugin compatibility.</li>
-        <li>Installed on an Ubuntu VM with 2 cores, 8 GB RAM, and 32 GB storage.</li>
-        <li>NCPA agents were installed on nodes to allow metrics to be pulled passively.</li>
-        <li>Nagios Exporter was planned as the bridge into the broader metrics stack.</li>
-      </ul>
-    </div>
+    <ul class="tight-list">
+      <li>Chosen for open-source flexibility and plugin compatibility with Prometheus and Grafana.</li>
+      <li>Installed on Ubuntu VM &mdash; 2 cores, 8 GB RAM, 32 GB storage.</li>
+      <li>NCPA (Nagios Cross-Platform Agent) deployed on each node to passively pull metrics back to Nagios Core.</li>
+      <li>Config files updated to register NCPA active check commands and add each node to the dashboard.</li>
+      <li>Nagios Exporter installed on the Nagios VM; systemd service links config and bridges metrics into Prometheus.</li>
+      <li>Still needed: rotate default credentials on Nagios and NCPA services across nodes.</li>
+    </ul>
     <div class="agent-map">
       <div>Nagios Core</div>
       <span>NCPA</span><span>NCPA</span><span>NCPA</span><span>NCPA</span>
     </div>
   </div>
+  <div class="speaker">Speaker: Phillip Brooks</div>
 </section>

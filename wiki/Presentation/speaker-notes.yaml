@@ -130,32 +130,49 @@ slides:
     title: "Security"
     speaker: "Chad Becker"
     notes: |-
-      Transition into detection, enrichment, firewalling, and scanning.
+      - Thank you Romeo, hello gentlemen, I want to thank you all for your time today
+      - I had the privilege of being the leader of the Security Group
+      - Our goals consisted of implementing a SIEM stack, installing the OPNsense firewall at the edge of the network, and performing basic vulnerability scans on all physical hardware hosts
 
   slides/14-siem-overview.html:
     title: "SIEM Overview"
     speaker: "Chad Becker"
-    notes: ""
+    notes: |-
+      - We implemented a comprehensive logging solution known as a SIEM
+      - Our SIEM stack mainly focuses on detection and does not contain many automated response elements commonly found in a SIEM stack due to a lack of time
+      - Solutions are implemented for Log Ingestion, Log Analysis Intelligence Enrichment, Backend Storage, Automation, and basic visualization
 
   slides/15-log-ingestion-wazuh.html:
     title: "Log Ingestion: Wazuh"
     speaker: "Chad Becker"
-    notes: ""
+    notes: |-
+      - Log ingestion on manager from Wazuh agents that will be installed on every template
+      - Assigns each log a vulnerability ranking between 0-15
+      - Sends logs to Graylog via a Filebeat Pipeline
 
   slides/16-log-analysis-graylog.html:
     title: "Log Analysis: Graylog"
     speaker: "Chad Becker"
-    notes: ""
+    notes: |-
+      - Graylog ingests and analyzes Wazuh logs through the creation of a Graylog Pipelinecustom stream/index set, and pipeline rules
+      - These rules pull specific information such as usernames and source IP addresses to create normalized fields for easier searching and basic visualization within Graylog
+      - Due to a lack of time we were unable to integrate Graylog with the desired visualization solution Grafana. Basic dashboards were created to visualize events and fields such as security events overview,  failed authentication attempts, and Wazuh vulnerability rankings
+      - Brute force detection (both normal and aggressive) was enabled as a security event
 
   slides/17-automation-shuffle.html:
     title: "Automation: Shuffle"
     speaker: "Chad Becker"
-    notes: ""
+    notes: |-
+      - Establishes workflows between triggers and contact services such as email
+      - Generates automated responses to Wazuh alerts and Graylog events via a webhook trigger
 
   slides/18-intelligence-enrichment-misp.html:
     title: "Intelligence Enrichment: MISP"
     speaker: "Baylen Small"
-    notes: ""
+    notes: |-
+      - Edit the custom python integration script by making changes to the hook URL, MISP API key, group, and rule ID  located in the ossec.conf block.
+      - The custom MISP Python file is volume mounted on Wazuh manager docker container into the ossec/integrations directory by editing docker-compose.yml. Mounting the Python Script enables version control on the docker host.
+      - MISP threat intelligence information is sent to Wazuh. When Wazuh ingests logs from the Wazuh agents, the logs are compared against MISP threat intelligence. Any matches generate a threat notification.
 
   slides/19-virtual-firewall-with-opnsense.html:
     title: "Virtual Firewall with OPNsense"
@@ -165,7 +182,10 @@ slides:
   slides/20-vulnerability-scanning-with-kali-linux.html:
     title: "Vulnerability Scanning with Kali Linux"
     speaker: "Chad Becker"
-    notes: ""
+    notes: |-
+      - Used Kali Linux
+      - Scanned all physical hosts on the .80 subnet
+      - Generated basic vulnerability reports and recommended mitigation steps
 
   slides/20-security-whats-still-needed.html:
     title: "What's Still Needed"

@@ -1,17 +1,21 @@
 <section>
   <div class="slide-kicker">Monitoring / Grafana</div>
-  <h2>Grafana & Data Sources</h2>
+  <h2>Grafana: Dashboards &amp; Alerts</h2>
   <div class="split-layout">
     <ul class="tight-list">
-      <li>Grafana visualizes raw data from exporters and data sources.</li>
-      <li>Installed on Ubuntu Server 24.04.3 on a VM located on Amy.</li>
-      <li>Accessible at <code>http://172.27.85.4:3000</code> when the service is running.</li>
-      <li>Prometheus acts as the primary metrics source; OpenSearch was considered as an indexed data source option.</li>
+      <li>Open-source visualization platform &mdash; turns raw metrics into dashboards, charts, and graphs.</li>
+      <li>Installed on Ubuntu Server 24.04.3 on Amy; accessible at <code>http://172.27.85.4:3000</code>.</li>
+      <li>Prometheus is the primary data source; OpenSearch provides indexed log data from Graylog.</li>
+      <li>Dashboards built with PromQL &mdash; metrics written in query code directly due to builder limitations.</li>
+      <li>Alerts trigger when metrics cross thresholds; availability alerts include a reboot delay to reduce noise.</li>
+      <li>Alert notifications route to Slack.</li>
     </ul>
-    <div class="command-card">
-      <code>systemctl start grafana-server</code>
-      <code>systemctl status grafana-server</code>
-      <code>systemctl restart grafana-server</code>
+    <div class="dashboard-mock">
+      <div class="chart tall"></div>
+      <div class="chart"></div>
+      <div class="chart orange"></div>
+      <div class="chart green"></div>
     </div>
   </div>
+  <div class="speaker">Speaker: Julius Lillard</div>
 </section>
