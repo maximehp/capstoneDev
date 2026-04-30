@@ -39,25 +39,32 @@ slides:
     notes: |-
       - Thank Speaker for letting me speak
       - from 5 NAS with 2 accessible, to 3 that weren't
-      - Overhaul: 3 NAS servers, main, replication, 
+      - Overhaul: 3 NAS servers, main, replication, sandbox
+      - upgrade hd, and ram to suit needs
 
   slides/07-pbs-architecture.html:
     title: "PBS Architecture"
     speaker: "Eli Thompson"
-    notes: ""
+    notes: |-
+      - PBS: another external data protection system
+      - Explain what PBS does: snapshots, replication, and backup
+      - How protected, direct passthrough and Mom dataset
 
   slides/08-replication-architecture.html:
     title: "Replication Architecture"
     speaker: "Eli Thompson"
-    notes: ""
+    notes: |-
+      - Replication: lost... replication. snapshot of all important datasets
+      - Connection of SSH for replication NAS
+      - This way redundacny disaster recovery : two layers
 
   slides/09-iac-ci-cd.html:
     title: "IaC / CI-CD"
     speaker: "Liam Callahan"
     notes: |-
-      - IaC: entire infrastructure defined as code
-      - CI/CD: automated pipeline that builds, deploys, or destroys it
-      - Goal: single trigger to recreate the whole environment
+      - IaC = Infrastructure as Code — every VM, container, and service is defined in code
+      - CI/CD = automated pipeline that takes that code and builds, deploys, or destroys infrastructure
+      - Goal: destroy and recreate the entire environment with a single trigger
 
   slides/10-forgejo-and-runners.html:
     title: "Forgejo & Runners"
@@ -68,6 +75,7 @@ slides:
       - Secrets injected at runtime — never stored in the repo
       - ChirpLabs scoped as one tenant; other teams share the infra without overlap
 
+
   slides/11-iac-full-pipeline.html:
     title: "IaC: Full Pipeline"
     speaker: "Liam Callahan"
@@ -76,6 +84,8 @@ slides:
       - One orchestration workflow chains all three with a single trigger
       - Goes from bare Proxmox + ISO to fully configured VMs
 
+
+
   slides/12-three-way-data-split.html:
     title: "Three-way Data Split"
     speaker: "Liam Callahan"
@@ -83,6 +93,8 @@ slides:
       - Forgejo: source of truth for all configuration
       - Boot disk: ephemeral, wiped and rebuilt every run
       - Data disk: persists across every rebuild — app data is never lost
+
+
 
   slides/13-minio.html:
     title: "MinIO"
@@ -100,6 +112,7 @@ slides:
       - Spins up a temp VM, provisions via SSH, converts to a reusable template
       - Swaps Packer SSH key for Ansible's before finishing — only Ansible can access VMs after
 
+
   slides/15-terraform.html:
     title: "Terraform"
     speaker: "Liam Callahan"
@@ -110,6 +123,7 @@ slides:
       - Destroy: explicit only — tears down everything in the state file
       - Data disks handled separately so they survive destroy/recreate cycles
       - Outputs vm_info.json for Ansible
+
 
   slides/16-ansible.html:
     title: "Ansible"
