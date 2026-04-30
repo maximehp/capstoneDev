@@ -317,7 +317,7 @@ slides:
       We used vanilla JavaScript to improve the experience without adding a full frontend framework.
       Partial navigation lets the page fetch only the main content area and swap it into place.
       That keeps themes, modals, and page state feeling smoother than a full reload.
-      Next, I will walk through the main user journey in the interface.
+      Now, an app can feel great, but it also needs to look great
 
   slides/43-user-flow-and-interaction.html:
     title: "The Main User Journey"
@@ -327,7 +327,7 @@ slides:
       From there, they can open the creator flow, choose settings, and move into the build progress view.
       Settings stays close by for account information, theme preference, and access status.
       The important part is that the workflow is guided instead of asking users to know Proxmox concepts first.
-      Next, I will explain where the app stores the durable state behind that workflow.
+      There is, however, more to it than the look
 
   slides/44-backend-architecture.html:
     title: "PostgreSQL: The Source of Truth"
