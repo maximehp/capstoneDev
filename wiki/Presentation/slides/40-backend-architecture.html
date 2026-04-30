@@ -1,17 +1,22 @@
 <section>
-  <div class="slide-kicker">Development / Backend + System</div>
-  <h2>What Happens Behind the Scenes</h2>
-  <div class="backend-map">
-    <div class="backend-node web">Django Web</div>
-    <div class="backend-node db">PostgreSQL</div>
-    <div class="backend-node worker">Packer Worker</div>
-    <div class="backend-node fs">Shared Filesystem</div>
-    <div class="backend-node ext">AD / Proxmox / NAS</div>
+  <div class="slide-kicker">Development / PostgreSQL</div>
+  <h2>PostgreSQL: The Source of Truth</h2>
+  <div class="split-layout">
+    <div>
+      <p class="lead compact">The web app and the Packer worker coordinate through Django models, so durable state stays in one place while long-running build files live on shared storage.</p>
+      <ul class="tight-list">
+        <li>Compose and deployment use PostgreSQL through <code>DATABASE_URL</code>; local development can fall back to SQLite.</li>
+        <li>Django stores AD-synced users, directory roles, saved ISO/software sources, templates, build jobs, and provisioned VMs.</li>
+        <li>The worker claims queued jobs with database transactions, updates stages and heartbeats, and records final results.</li>
+        <li>Filesystem paths, logs, staged ISOs, and archives are referenced by database rows instead of becoming the system of record.</li>
+      </ul>
+    </div>
+    <div class="browser-diagram">
+      <div>Users + Directory Profiles</div>
+      <div>Template Definitions</div>
+      <div>Template Build Jobs</div>
+      <div>Provisioned VMs</div>
+      <div>Saved Source History</div>
+    </div>
   </div>
-  <ul class="two-column-list">
-    <li>Django handles login, pages, forms, API requests, and validation.</li>
-    <li>The database remembers users, templates, build jobs, and provisioned VMs.</li>
-    <li>The Packer worker handles long template builds outside the web request.</li>
-    <li>The shared filesystem keeps generated build files, logs, staged ISOs, and job results.</li>
-  </ul>
 </section>
