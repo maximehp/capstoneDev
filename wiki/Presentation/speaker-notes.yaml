@@ -231,9 +231,10 @@ slides:
     notes: ""
 
   slides/40-backend-architecture.html:
-    title: "What Happens Behind the Scenes"
-    speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    title: "PostgreSQL: The Source of Truth"
+    speaker: "Eli Thompson"
+    notes: |-
+      Explain PostgreSQL as the durable coordination layer for the Django web process and the Packer worker.
 
   slides/41-api-flow-and-execution.html:
     title: "How Long Tasks Stay Manageable"
