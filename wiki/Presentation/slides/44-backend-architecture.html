@@ -1,16 +1,59 @@
 <section>
   <div class="slide-kicker">Development / PostgreSQL</div>
   <h2>PostgreSQL: The Source of Truth</h2>
-  <div class="split-layout">
-    <div>
-      <p class="lead compact">The web app and the Packer worker coordinate through Django models, so durable state stays in one place while long-running build files live on shared storage.</p>
+
+  <p class="pg-lead">The web app and the Packer worker coordinate through Django models, so durable state stays in one place while long-running build files live on shared storage.</p>
+
+  <div class="pg-architecture" aria-label="Django and worker coordination through PostgreSQL and shared storage">
+    <div class="pg-runtime-stack">
+      <div class="pg-runtime-card">
+        <div class="pg-runtime-icon">DJ</div>
+        <strong>Django Web App</strong>
+        <span>Users, requests, template configuration</span>
+      </div>
+      <div class="pg-runtime-card">
+        <div class="pg-runtime-icon">WK</div>
+        <strong>Packer Worker</strong>
+        <span>Job claims, stages, heartbeats, results</span>
+      </div>
     </div>
-    <div class="browser-diagram">
-      <div>Users + Directory Profiles</div>
-      <div>Template Definitions</div>
-      <div>Template Build Jobs</div>
-      <div>Provisioned VMs</div>
-      <div>Saved Source History</div>
+
+    <div class="pg-arrow">
+      <div class="tws-arrow-track">
+        <div class="tws-arrow-shaft"></div>
+        <div class="tws-arrow-head"></div>
+      </div>
+      <span class="tws-arrow-label">state</span>
     </div>
+
+    <div class="pg-db-core">
+      <div class="pg-db-label">PostgreSQL</div>
+      <div class="pg-db-icon"></div>
+      <h3>Durable State</h3>
+      <p>Database rows describe users, templates, jobs, VMs, and source history.</p>
+      <span class="tws-badge tws-badge-persistent">Source of Truth</span>
+    </div>
+
+    <div class="pg-arrow">
+      <div class="tws-arrow-track">
+        <div class="tws-arrow-shaft"></div>
+        <div class="tws-arrow-head"></div>
+      </div>
+      <span class="tws-arrow-label">models</span>
+    </div>
+
+    <div class="pg-model-grid">
+      <div><strong>Users</strong><span>Directory profiles</span></div>
+      <div><strong>Templates</strong><span>Definitions</span></div>
+      <div><strong>Builds</strong><span>Queued jobs</span></div>
+      <div><strong>VMs</strong><span>Provisioned records</span></div>
+      <div><strong>Sources</strong><span>Saved ISO/software history</span></div>
+    </div>
+  </div>
+
+  <div class="pg-storage-lane" aria-label="Shared storage artifacts referenced from PostgreSQL">
+    <span>Shared storage</span>
+    <strong>Build workspaces, logs, staged ISOs, and archives</strong>
+    <em>Referenced by database rows instead of becoming the system of record</em>
   </div>
 </section>

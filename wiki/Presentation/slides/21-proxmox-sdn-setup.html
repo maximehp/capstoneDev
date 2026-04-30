@@ -1,24 +1,56 @@
 <section>
   <div class="slide-kicker">Networking / SDN</div>
   <h2>Proxmox Setup and Configuration</h2>
-  <div class="split-layout sdn-layout">
-    <div>
-      <p class="lead compact">Proxmox networking was extended with Open vSwitch bonds and bridges so VMs could land in the correct subnet group.</p>
-      <ul class="tight-list">
-        <li>Selected bond modes based on the role of each network path.</li>
-        <li>Entered static IP addresses for each virtual machine.</li>
-        <li>Used VLAN tags on VMs for proper subnet connectivity.</li>
-      </ul>
+  <p class="lead compact">Proxmox networking was extended with Open vSwitch bonds and bridges so VMs could land in the correct subnet group.</p>
+
+  <div class="api-workflow sdn-js-flow" aria-label="Proxmox SDN flow from physical links through OVS bonds and bridges to VM addressing">
+    <div class="anim-step anim-step-trigger sdn-flow-step" style="--anim-delay:0s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>Physical Links</strong>
+        <span>Network paths from the Proxmox hosts</span>
+      </div>
+      <div class="anim-step-emblem sdn-emblem-nic"></div>
     </div>
-    <div class="sdn-bond-grid">
-      <div>
-        <strong>Enterprise Connectivity</strong>
-        <span>OVS bond using LACP <code>balance-slb</code> with an OVS bridge.</span>
+
+    <div class="api-hconn api-hconn-1" aria-hidden="true"></div>
+
+    <div class="anim-step sdn-flow-step" style="--anim-delay:1.8s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>OVS Bond</strong>
+        <span>Mode selected for each network role</span>
       </div>
-      <div>
-        <strong>Student Lab Network</strong>
-        <span>OVS bond using <code>active-backup</code> with an OVS bridge.</span>
+      <div class="anim-step-emblem sdn-emblem-bond"></div>
+    </div>
+
+    <div class="api-hconn api-hconn-2" aria-hidden="true"></div>
+
+    <div class="anim-step sdn-flow-step" style="--anim-delay:3.6s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>OVS Bridge</strong>
+        <span>Connects VM interfaces to the correct fabric</span>
       </div>
+      <div class="anim-step-emblem sdn-emblem-bridge"></div>
+    </div>
+
+    <div class="api-hconn api-hconn-3" aria-hidden="true"></div>
+
+    <div class="anim-step anim-step-gold sdn-flow-step" style="--anim-delay:5.4s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>VM Placement</strong>
+        <span>Static IP address and VLAN tag land the VM in the right subnet</span>
+      </div>
+      <div class="anim-step-emblem sdn-emblem-vm"></div>
+    </div>
+  </div>
+
+  <div class="sdn-mode-grid" aria-label="OVS bond modes used for the network roles">
+    <div>
+      <strong>Enterprise Connectivity</strong>
+      <span>LACP <code>balance-slb</code> with an OVS bridge.</span>
+    </div>
+    <div>
+      <strong>Student Lab Network</strong>
+      <span><code>active-backup</code> with an OVS bridge.</span>
     </div>
   </div>
 </section>

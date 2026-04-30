@@ -144,23 +144,40 @@ slides:
     title: "Networking"
     speaker: "Romeo Casiano"
     notes: |-
-      Transition into addressing, segmentation, and connectivity.
+      Now we are moving into the networking side of the project.
+      Networking was the last major group connecting the platform together.
+      Our work focused on the subnet redesign, Proxmox SDN, VLAN separation, and resolving connectivity issues.
+      First, I will cover the expanded segmentation work.
 
   slides/19-networking-overview.html:
     title: "Networking Overview"
     speaker: "Romeo Casiano"
     notes: |-
-      Preview the networking section: subnet expansion, VLAN segmentation, Proxmox SDN, troubleshooting, and future hardening.
+      We started with a smaller network design that did not leave enough clean room for growth.
+      The lab moved from a /24 network with six /28 subnets and many unassigned IP addresses to a full /21 network.
+      That gave us seven VLANs, with each VLAN having a full /24 subnet to work with.
+      We also worked through the Proxmox SDN side so VMs could land in the correct subnet with the correct VLAN separation.
+      Next, Drew will go deeper into the subnetting changes.
 
   slides/20-subnetting.html:
     title: "Subnetting"
     speaker: "Drew Barkdull"
-    notes: ""
+    notes: |-
+      The original design was a /24 network split into six /28 subnets.
+      We updated that into a /21 network with seven VLANs, and each VLAN now has a full /24 subnet available.
+      We also updated switch and Proxmox configurations to match the new subnet layout.
+      That included updating trunks, etherchannels, and VLAN separation so the addressing plan worked across the physical and virtual network.
+      Next, Romeo will explain the Proxmox setup and SDN configuration.
 
   slides/21-proxmox-sdn-setup.html:
     title: "Proxmox Setup and Configuration"
     speaker: "Romeo Casiano"
-    notes: ""
+    notes: |-
+      In Proxmox, the enterprise bridge uses LACP balance-slb for the bond configuration.
+      The student lab bridge uses an active-backup bond with an OVS bridge.
+      Linux bonds and bridges are built into Linux networking and are simpler to configure.
+      OVS bonds and bridges add more advanced network features, especially VLAN control for VM placement.
+      Next is the troubleshooting work we ran into while making the design stable.
 
   slides/22-networking-troubleshooting.html:
     title: "Networking Troubleshooting"
@@ -170,7 +187,11 @@ slides:
   slides/23-networking-recommendations.html:
     title: "What's Still Needed"
     speaker: "Romeo Casiano"
-    notes: ""
+    notes: |-
+      The next networking improvement is firewalling between the Proxmox bridges.
+      That would give us better control over traffic moving between the enterprise side and the student lab side.
+      We also need clearer security policies for what traffic should be allowed, blocked, and monitored.
+      After networking, Chad will walk through the security side of the project.
 
   slides/24-security.html:
     title: "Security"
@@ -273,43 +294,71 @@ slides:
     title: "Web Development"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Transition into the Django app and user-facing workflow.
+      Now we are moving into the web development side of ChirpLabs.
+      This is the part of the project that turns the infrastructure into something students and faculty can actually use.
+      Our focus was the Django app, the login flow, the template builder, and the VM workflow.
+      First, I will summarize what the web app built for users.
 
   slides/41-development-summary.html:
     title: "What Web Development Built"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Summarize the app in user-facing terms before going into the frontend and backend pieces.
+      The web app gives ChirpLabs one central place to start from.
+      Users sign in with Active Directory instead of managing a separate account.
+      Faculty can create templates, watch the build progress, and then users can start VMs from completed templates.
+      The goal was to keep people out of Proxmox unless they actually need to administer the platform.
+      Next, I will show how the frontend keeps that experience feeling fast.
 
   slides/42-frontend-architecture.html:
     title: "How the Website Feels Fast"
     speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    notes: |-
+      The frontend is still server-rendered Django at the foundation.
+      We used vanilla JavaScript to improve the experience without adding a full frontend framework.
+      Partial navigation lets the page fetch only the main content area and swap it into place.
+      That keeps themes, modals, and page state feeling smoother than a full reload.
+      Now, an app can feel great, but it also needs to look great
 
   slides/43-user-flow-and-interaction.html:
     title: "The Main User Journey"
     speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    notes: |-
+      The main flow starts with login and then lands the user on the home page.
+      From there, they can open the creator flow, choose settings, and move into the build progress view.
+      Settings stays close by for account information, theme preference, and access status.
+      The important part is that the workflow is guided instead of asking users to know Proxmox concepts first.
+      There is, however, more to it than the look
 
   slides/44-backend-architecture.html:
     title: "PostgreSQL: The Source of Truth"
     speaker: "Maxime Hendryx-Parker"
     notes: |-
-      Compose and deployment use PostgreSQL;
-      Django stores AD-synced users, directory roles, saved ISO/software sources, templates, build jobs, and provisioned VMs.
-      The worker claims queued jobs with database transactions, updates stages and heartbeats, and records final results.
-      Filesystem paths, logs, staged ISOs, and archives are referenced by database rows instead of becoming the system of record.
+      PostgreSQL is the source of truth for the deployed app.
+      Django stores AD-synced users, directory roles, saved ISO and software sources, templates, build jobs, and provisioned VMs.
+      The Packer worker coordinates through the same database by claiming queued jobs, updating stages, and writing results.
+      Shared storage still holds build files, logs, staged ISOs, and archives, but the database records what those files mean.
+      Next, I will show how the API and worker turn a user request into real Proxmox work.
 
 
   slides/45-api-flow-and-execution.html:
-    title: "How Long Tasks Stay Manageable"
+    title: "Backend API and Worker Execution"
     speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    notes: |-
+      The backend exposes JSON endpoints for login, ISO and software checks, template creation, build status, and VM starts.
+      Template creation validates the request, saves the job, and returns quickly so the browser is not stuck waiting on Packer.
+      The worker later claims that job, stages the ISO, generates the Packer files, runs the build, and reports progress.
+      VM provisioning validates the selected template, asks Proxmox to clone, configure, and start the VM, and records the result.
+      Next, I will cover what still needs to be finished on the web development side.
 
   slides/46-development-whats-still-needed.html:
     title: "What's Still Needed"
     speaker: "Maxime Hendryx-Parker"
-    notes: ""
+    notes: |-
+      The next major step is the full class lab workflow.
+      That includes class join codes, template assignments, lab timers, and better VM history for users.
+      We also still need browser-based access delivery through Apache, Guacamole, and guacd.
+      On the operations side, the app needs CI/CD, stronger audit logging, analytics, and more live browser testing.
+      Now I will bring the whole project back together with the conclusion.
 
   slides/47-conclusion.html:
     title: "Conclusion"

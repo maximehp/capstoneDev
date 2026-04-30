@@ -432,6 +432,33 @@ async function frontendOnce(slide, signal) {
   await sleep(LOOP_PAUSE, signal);
 }
 
+// ── API Flow ─────────────────────────────────────────────────────────────────
+
+async function apiOnce(slide, signal) {
+  const flow = slide.querySelector('.api-workflow');
+  if (!flow) return;
+
+  const steps = [...flow.querySelectorAll('.anim-step')];
+  const conns = [...flow.querySelectorAll('.api-hconn')];
+  if (steps.length < 2) return;
+
+  unlitAll(slide);
+  lit(steps[0]);
+  await sleep(INIT_PAUSE, signal);
+
+  for (let i = 0; i < steps.length - 1; i++) {
+    const gold = steps[i + 1].classList.contains('anim-step-gold');
+    const lineY = conns[i] ? pt(conns[i], 'center').y : pt(steps[i], 'right').y;
+    const from = { x: pt(steps[i], 'right').x, y: lineY };
+    const to = { x: pt(steps[i + 1], 'left').x, y: lineY };
+    const dot = makeDot(from, gold);
+    await travelToward(dot, [from, to], signal, steps[i + 1], gold);
+    await sleep(PAUSE, signal);
+  }
+
+  await sleep(LOOP_PAUSE, signal);
+}
+
 // ── PBS Architecture Pipeline ─────────────────────────────────────────────────
 
 async function pbsOnce(slide, signal) {
@@ -597,6 +624,7 @@ function handleSlide(slide) {
   if (slide.querySelector('.ans-fan'))      { runLoop(ansibleOnce,   slide);        return; }
   if (slide.querySelector('.iac-diagram-v')){ runLoop(iacOnce,       slide);        return; }
   if (slide.querySelector('.frontend-pathway')) { runLoop(frontendOnce, slide);      return; }
+  if (slide.querySelector('.api-workflow'))      { runLoop(apiOnce,      slide); return; }
   if (slide.querySelector('.minio-diagram'))      { runLoop(minioOnce,     slide); return; }
   if (slide.querySelector('.mon-pipeline'))      { runLoop(monPipelineOnce, slide); return; }
   stopAnimation();

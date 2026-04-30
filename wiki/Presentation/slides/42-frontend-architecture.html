@@ -1,65 +1,55 @@
 <section>
   <div class="slide-kicker">Development / Frontend + UI</div>
   <h2>How the Website Feels Fast</h2>
-  <div class="frontend-flow-body">
-    <p class="frontend-flow-lead">The app keeps Django as the dependable server-rendered foundation, then layers vanilla JavaScript on top so navigation, modals, live updates, and theme changes feel smooth without adopting a frontend framework.</p>
 
-    <div class="frontend-pathway" aria-label="Django render, JavaScript enhancement, partial navigation, content swap, and theme continuity pathway">
-      <div class="anim-step anim-step-trigger" style="grid-column:1;grid-row:1;--anim-delay:0s">
-        <div class="anim-step-content">
-          <strong>Django pages</strong>
-          <span>Real server-rendered pages stay as the foundation</span>
-        </div>
-        <div class="anim-step-emblem frontend-emblem-django"></div>
+  <div class="api-workflow frontend-js-flow" aria-label="Server-rendered pages enhanced by JavaScript partial navigation">
+    <div class="anim-step anim-step-trigger frontend-flow-step" style="--anim-delay:0s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>Django Pages</strong>
+        <span>Server-rendered views stay as the dependable foundation</span>
       </div>
+      <div class="anim-step-emblem frontend-emblem-django"></div>
+    </div>
 
-      <div class="anim-conn-v" style="grid-column:1;grid-row:2">
-        <span class="anim-dot" style="--anim-delay:0s"></span>
-      </div>
+    <div class="api-hconn api-hconn-1" aria-hidden="true"></div>
 
-      <div class="anim-step" style="grid-column:1;grid-row:3;--anim-delay:0.8s">
-        <div class="anim-step-content">
-          <strong>Vanilla JS</strong>
-          <span>Enhances navigation, modals, and live updates</span>
-        </div>
-        <div class="anim-step-emblem frontend-emblem-js"></div>
+    <div class="anim-step frontend-flow-step" style="--anim-delay:1.8s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>Vanilla JS</strong>
+        <span>Enhances navigation, modals, and live updates</span>
       </div>
+      <div class="anim-step-emblem frontend-emblem-js"></div>
+    </div>
 
-      <div class="anim-conn-v" style="grid-column:1;grid-row:4">
-        <span class="anim-dot" style="--anim-delay:1.1s"></span>
-      </div>
+    <div class="api-hconn api-hconn-2" aria-hidden="true"></div>
 
-      <div class="anim-step" style="grid-column:1;grid-row:5;--anim-delay:1.9s">
-        <div class="anim-step-content">
-          <strong>Partial fetch</strong>
-          <span>Navigation requests only the main page fragment</span>
-        </div>
-        <div class="anim-step-emblem frontend-emblem-fetch"></div>
+    <div class="anim-step frontend-flow-step" style="--anim-delay:3.6s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>Partial Fetch</strong>
+        <span>Navigation asks for only the main page fragment</span>
       </div>
+      <div class="anim-step-emblem frontend-emblem-fetch"></div>
+    </div>
 
-      <div class="anim-conn-v" style="grid-column:1;grid-row:6">
-        <span class="anim-dot" style="--anim-delay:2.2s"></span>
-      </div>
+    <div class="api-hconn api-hconn-3" aria-hidden="true"></div>
 
-      <div class="anim-step" style="grid-column:1;grid-row:7;--anim-delay:3.0s">
-        <div class="anim-step-content">
-          <strong>Content swap</strong>
-          <span>The browser replaces the page body without a full reload</span>
-        </div>
-        <div class="anim-step-emblem frontend-emblem-swap"></div>
+    <div class="anim-step anim-step-gold frontend-flow-step" style="--anim-delay:5.4s;--anim-duration:8s">
+      <div class="anim-step-content">
+        <strong>Content Swap</strong>
+        <span>The body updates without a full browser reload</span>
       </div>
+      <div class="anim-step-emblem frontend-emblem-swap"></div>
+    </div>
+  </div>
 
-      <div class="anim-conn-v" style="grid-column:1;grid-row:8">
-        <span class="anim-dot" style="--anim-delay:3.2s"></span>
-      </div>
-
-      <div class="anim-step" style="grid-column:1;grid-row:9;--anim-delay:4.1s">
-        <div class="anim-step-content">
-          <strong>Scripts + theme</strong>
-          <span>Page scripts restart while light, dark, or system theme persists</span>
-        </div>
-        <div class="anim-step-emblem frontend-emblem-theme"></div>
-      </div>
+  <div class="frontend-detail-grid">
+    <div>
+      <strong>Framework-free interface</strong>
+      <span>Django remains the server-rendered base while small JavaScript modules add interaction.</span>
+    </div>
+    <div>
+      <strong>State continuity</strong>
+      <span>Page scripts restart after swaps while light, dark, or system theme persists.</span>
     </div>
   </div>
 </section>
