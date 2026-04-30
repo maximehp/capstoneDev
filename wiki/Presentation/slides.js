@@ -519,32 +519,11 @@ async function connectRevealNotesServer() {
   notesServerPost();
 }
 
-function restartArchitectureSlide(slide = deck.getCurrentSlide()) {
-  if (!slide?.classList?.contains("architecture-slide")) {
-    return;
-  }
-
-  slide.classList.remove("architecture-animating");
-
-  slide.querySelectorAll(".architecture-connector svg").forEach((svg) => {
-    if (typeof svg.setCurrentTime === "function") {
-      svg.setCurrentTime(0);
-    }
-  });
-
-  void slide.offsetWidth;
-  slide.classList.add("architecture-animating");
-}
-
 deck.on("ready", () => {
   updateSpeakerOverlay();
-  restartArchitectureSlide();
   connectRevealNotesServer();
 });
-deck.on("slidechanged", (event) => {
-  updateSpeakerOverlay();
-  restartArchitectureSlide(event.currentSlide);
-});
+deck.on("slidechanged", updateSpeakerOverlay);
 deck.on("resize", resizeVantaBackground);
 updateSpeakerOverlay();
 requestAnimationFrame(() => {
