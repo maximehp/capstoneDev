@@ -8,7 +8,7 @@
     <div class="iac-diagram-v">
 
       <!-- MinIO anchored bottom-left, rows 7–9 -->
-      <div class="iac-minio" style="grid-column:1;grid-row:7/10;--iac-delay:3.6s">
+      <div class="iac-minio" style="grid-column:1;grid-row:7/10;--iac-delay:4.1s">
         <div class="iac-minio-header">MinIO</div>
         <div class="iac-minio-files">
           <div class="iac-minio-file">
@@ -31,7 +31,7 @@
       <!-- MinIO → Ansible read connector -->
       <div class="iac-conn-h iac-conn-h-read" style="grid-column:2;grid-row:9">
         <span class="iac-label">reads</span>
-        <span class="iac-dot iac-dot-minio" style="--iac-delay:4.1s"></span>
+        <span class="iac-dot iac-dot-minio" style="--iac-delay:4.3s"></span>
       </div>
 
       <div class="iac-step iac-step-trigger" style="grid-column:3;grid-row:1;--iac-delay:0s">
@@ -43,10 +43,10 @@
       </div>
 
       <div class="iac-conn-v" style="grid-column:3;grid-row:2">
-        <span class="iac-dot-v iac-dot-step" style="--iac-delay:0.5s"></span>
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:0s"></span>
       </div>
 
-      <div class="iac-step" style="grid-column:3;grid-row:3;--iac-delay:0.9s">
+      <div class="iac-step" style="grid-column:3;grid-row:3;--iac-delay:0.8s">
         <div class="iac-step-content">
           <strong>Act Runner</strong>
           <span>Executes the CI/CD workflow job</span>
@@ -55,10 +55,10 @@
       </div>
 
       <div class="iac-conn-v" style="grid-column:3;grid-row:4">
-        <span class="iac-dot-v iac-dot-step" style="--iac-delay:1.4s"></span>
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:1.1s"></span>
       </div>
 
-      <div class="iac-step" style="grid-column:3;grid-row:5;--iac-delay:1.8s">
+      <div class="iac-step" style="grid-column:3;grid-row:5;--iac-delay:1.9s">
         <div class="iac-step-content">
           <strong>Packer</strong>
           <span>Builds the golden VM template</span>
@@ -67,10 +67,10 @@
       </div>
 
       <div class="iac-conn-v" style="grid-column:3;grid-row:6">
-        <span class="iac-dot-v iac-dot-step" style="--iac-delay:2.3s"></span>
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:2.2s"></span>
       </div>
 
-      <div class="iac-step" style="grid-column:3;grid-row:7;--iac-delay:2.7s">
+      <div class="iac-step" style="grid-column:3;grid-row:7;--iac-delay:3.0s">
         <div class="iac-step-content">
           <strong>Terraform</strong>
           <span>Clones template and provisions VMs</span>
@@ -79,10 +79,10 @@
       </div>
 
       <div class="iac-conn-v" style="grid-column:3;grid-row:8">
-        <span class="iac-dot-v iac-dot-step" style="--iac-delay:3.9s"></span>
+        <span class="iac-dot-v iac-dot-step" style="--iac-delay:3.2s"></span>
       </div>
 
-      <div class="iac-step" style="grid-column:3;grid-row:9;--iac-delay:4.5s">
+      <div class="iac-step" style="grid-column:3;grid-row:9;--iac-delay:4.1s">
         <div class="iac-step-content">
           <strong>Ansible</strong>
           <span>Applies configuration and roles</span>

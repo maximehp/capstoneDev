@@ -1,15 +1,65 @@
 <section>
   <div class="slide-kicker">Security / OPNsense</div>
   <h2>Virtual Firewall with OPNsense</h2>
-  <div class="firewall-layout">
-    <div class="zone">LAN<br /><small>Web GUI and admin access</small></div>
-    <div class="firewall">OPNsense VM</div>
-    <div class="zone">Isolated VM Networks<br /><small>Traffic directed by access level</small></div>
+  <p class="fw-lead">An OPNsense VM — deployed from ISO — acts as router and firewall, enforcing isolation between VM segments and exposing the web GUI only to LAN.</p>
+
+  <div class="fw-diagram">
+
+    <!-- Row 1: WAN ↔ OPNsense → LAN -->
+    <div class="fw-node fw-wan">
+      <span class="fw-icon fw-icon-globe" aria-hidden="true"></span>
+      <strong>WAN</strong>
+      <span>External traffic</span>
+    </div>
+
+    <div class="fw-hconn fw-hconn-left">
+      <span class="fw-arr fw-arr-l"></span>
+      <span class="fw-arr fw-arr-r"></span>
+    </div>
+
+    <div class="fw-node fw-opnsense">
+      <span class="fw-icon fw-icon-shield-fw" aria-hidden="true"></span>
+      <strong>OPNsense VM</strong>
+      <span>Firewall · Router</span>
+    </div>
+
+    <div class="fw-hconn fw-hconn-right">
+      <span class="fw-arr fw-arr-r"></span>
+      <span class="fw-conn-label">web GUI</span>
+    </div>
+
+    <div class="fw-node fw-lan">
+      <span class="fw-icon fw-icon-monitor-fw" aria-hidden="true"></span>
+      <strong>LAN</strong>
+      <span>Admin access</span>
+    </div>
+
+    <!-- Row 2: vertical connector from OPNsense down to VM band -->
+    <div class="fw-vconn">
+      <span class="fw-vconn-label">access-controlled</span>
+      <span class="fw-arr fw-arr-dn"></span>
+    </div>
+
+    <!-- Row 3: isolated VM segments -->
+    <div class="fw-vm-band">
+      <div class="fw-node fw-vm-node">
+        <span class="fw-icon fw-icon-server" aria-hidden="true"></span>
+        <strong>VM Segment 1</strong>
+        <span>Isolated</span>
+      </div>
+      <span class="fw-iso-sep">×</span>
+      <div class="fw-node fw-vm-node">
+        <span class="fw-icon fw-icon-server" aria-hidden="true"></span>
+        <strong>VM Segment 2</strong>
+        <span>Isolated</span>
+      </div>
+      <span class="fw-iso-sep">×</span>
+      <div class="fw-node fw-vm-node">
+        <span class="fw-icon fw-icon-server" aria-hidden="true"></span>
+        <strong>VM Segment 3</strong>
+        <span>Isolated</span>
+      </div>
+    </div>
+
   </div>
-  <ul class="two-column-list">
-    <li>Created a VM from the OPNsense ISO to serve as a firewall.</li>
-    <li>Made the web GUI accessible from LAN for detailed configuration.</li>
-    <li>Partitioned network traffic so VMs remain isolated from each other.</li>
-    <li>Used routing and access level decisions to control traffic flow.</li>
-  </ul>
 </section>
