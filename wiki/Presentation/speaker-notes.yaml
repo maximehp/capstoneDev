@@ -274,7 +274,7 @@ slides:
 
   slides/44-backend-architecture.html:
     title: "PostgreSQL: The Source of Truth"
-    speaker: "Eli Thompson"
+    speaker: "Maxime Hendryx-Parker"
     notes: |-
       Explain PostgreSQL as the durable coordination layer for the Django web process and the Packer worker.
 
