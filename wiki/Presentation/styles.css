@@ -2174,7 +2174,6 @@ body[data-theme="development"] {
   position: relative;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  padding: 4px;
   border: 2px solid rgba(var(--accent-rgb), 0.68);
   border-radius: 8px;
   background: rgba(var(--accent-rgb), 0.16);
@@ -2187,7 +2186,7 @@ body[data-theme="development"] {
   height: 100%;
   object-fit: cover;
   object-position: top center;
-  border-radius: 5px;
+  border-radius: 6px;
 }
 
 .journey-step figcaption {
