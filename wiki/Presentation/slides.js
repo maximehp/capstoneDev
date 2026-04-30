@@ -35,7 +35,6 @@ const slideFiles = [
   "slides/34-monitoring-stack.html",
   "slides/35-nagios-and-agents.html",
   "slides/36-prometheus.html",
-  "slides/37-exporters-and-connections.html",
   "slides/38-grafana-and-data-sources.html",
   "slides/39-potential-future-improvements.html",
   "slides/40-web-development.html",

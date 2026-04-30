@@ -235,11 +235,6 @@ slides:
     speaker: "Julius Lillard"
     notes: ""
 
-  slides/37-exporters-and-connections.html:
-    title: "Exporters & Connections"
-    speaker: "Julius Lillard"
-    notes: ""
-
   slides/38-grafana-and-data-sources.html:
     title: "Grafana & Data Sources"
     speaker: "Julius Lillard"
